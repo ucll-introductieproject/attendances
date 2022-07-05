@@ -118,10 +118,17 @@ def gui(fps, cfps):
             if countdown.ready:
                 countdown.reset()
                 camera.get_image(capture_surface)
+
+                converted = pygame.surfarray.array3d(capture_surface)
+                decoded = decode(converted)
+                if decoded:
+                    data = decoded[0]
+                    polygon = data.polygon
+                    red = (255, 0, 0)
+                    pygame.draw.polygon(capture_surface, red, [(p.y, p.x) for p in polygon], width=2)
+                    print(decoded)
                 if show_video:
                     surface.blit(capture_surface, (0, 0))
-                converted = pygame.surfarray.array3d(capture_surface)
-                print(decode(converted))
                 pygame.display.flip()
     finally:
         camera.stop()
