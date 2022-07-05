@@ -18,12 +18,12 @@ def video_capture(source):
         vc.release()
 
 
-
 @click.command()
 @click.option('--theme', help=f"One of {', '.join(chime.themes())}", default='big-sur')
 @click.option('--source', help='Index of video source', default=0, type=int)
 @click.option('--quiet', is_flag=True, help='No sound')
-def main(theme, source, quiet):
+@click.option('--delay', help='Milliseconds between polls', default=500, type=int)
+def main(theme, source, quiet, delay):
     def play_success_sound():
         if not quiet:
             chime.success()
@@ -37,7 +37,7 @@ def main(theme, source, quiet):
             if decoded:
                 print(decoded)
                 play_success_sound()
-            sleep(0.5)
+            sleep(delay / 1000)
 
 
 
