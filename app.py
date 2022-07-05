@@ -68,9 +68,27 @@ def tui(theme, source, quiet, wait, ignore):
     scan()
 
 
+class Countdown:
+    def __init__(self, duration):
+        self.__duration = duration
+        self.__time_left = duration
+
+    def tick(self, elapsed_seconds):
+        self.__time_left = max(0, self.__time_left - elapsed_seconds)
+
+    @property
+    def ready(self):
+        return self.__time_left == 0
+
+    def reset(self):
+        self.__time_left = self.__duration
+
+
 @click.command()
 @click.option('--fps', help='Target frame rate', default=60)
-def gui(fps):
+@click.option('--cfps', help='Capture frame rate', default=2)
+def gui(fps, cfps):
+    capture_fps = cfps
     pygame.init()
     pygame.camera.init()
     clock = pygame.time.Clock()
@@ -81,21 +99,25 @@ def gui(fps):
     capture_surface = pygame.Surface((capture_width, capture_height))
     camera = pygame.camera.Camera(pygame.camera.list_cameras()[0], (capture_width, capture_height), 'RGB')
     camera.start()
+    countdown = Countdown(1 / capture_fps)
     try:
         active = True
         while active:
-            clock.tick(fps)
+            elapsed_seconds = clock.tick(fps) / 1000
+            countdown.tick(elapsed_seconds)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     active = False
 
-            camera.get_image(capture_surface)
-            surface.blit(capture_surface, (0, 0))
-            pygame.display.flip()
+            if countdown.ready:
+                countdown.reset()
+                camera.get_image(capture_surface)
+                surface.blit(capture_surface, (0, 0))
+                pygame.display.flip()
     finally:
         camera.stop()
         pass
-
 
 
 cli.add_command(tui)
