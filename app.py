@@ -73,9 +73,11 @@ def gui():
     pygame.init()
     pygame.camera.init()
     info = pygame.display.Info()
-    width, height = info.current_w, info.current_h
-    surface = pygame.display.set_mode((640, 480))
-    camera = pygame.camera.Camera(pygame.camera.list_cameras()[0], (640, 480), 'RGB')
+    window_width, window_height = info.current_w, info.current_h
+    capture_width, capture_height = 640, 480
+    surface = pygame.display.set_mode((window_width, window_height))
+    capture_surface = pygame.Surface((capture_width, capture_height))
+    camera = pygame.camera.Camera(pygame.camera.list_cameras()[0], (capture_width, capture_height), 'RGB')
     camera.start()
     try:
         active = True
@@ -84,7 +86,8 @@ def gui():
                 if event.type == pygame.QUIT:
                     active = False
 
-            camera.get_image(surface)
+            camera.get_image(capture_surface)
+            surface.blit(capture_surface, (0, 0))
             pygame.display.flip()
     finally:
         camera.stop()
