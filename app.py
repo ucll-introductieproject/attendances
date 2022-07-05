@@ -85,7 +85,7 @@ class Countdown:
 
 
 @click.command()
-@click.option('--fps', help='Target frame rate', default=60)
+@click.option('--fps', help='Target frame rate', default=30)
 @click.option('--cfps', help='Capture frame rate', default=2)
 def gui(fps, cfps):
     capture_fps = cfps
@@ -93,6 +93,8 @@ def gui(fps, cfps):
     pygame.camera.init()
     clock = pygame.time.Clock()
     info = pygame.display.Info()
+    font = pygame.font.SysFont(None, 48)
+    show_video = False
     window_width, window_height = 640, 480 # info.current_w, info.current_h
     capture_width, capture_height = 640, 480
     surface = pygame.display.set_mode((window_width, window_height))
@@ -109,11 +111,15 @@ def gui(fps, cfps):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     active = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_v:
+                        show_video = not show_video
 
             if countdown.ready:
                 countdown.reset()
                 camera.get_image(capture_surface)
-                # surface.blit(capture_surface, (0, 0))
+                if show_video:
+                    surface.blit(capture_surface, (0, 0))
                 converted = pygame.surfarray.array3d(capture_surface)
                 print(decode(converted))
                 pygame.display.flip()
