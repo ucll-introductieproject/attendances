@@ -1,3 +1,4 @@
+from app import SETTINGS_PATH
 import cv2
 import pygame
 from pyzbar.pyzbar import decode
@@ -8,10 +9,9 @@ from absentees.capturer import Capturer
 from pathlib import Path
 
 
-def run():
-    settings = load_settings(Path.home().joinpath('absentees.config.json'))
-    fps = settings['frame_rate']
-    capture_fps = settings['capture_rate']
+def run(settings):
+    fps = settings['frame-rate']
+    capture_fps = settings['capture.rate']
     pygame.init()
     pygame.camera.init()
     clock = pygame.time.Clock()
@@ -21,7 +21,7 @@ def run():
     show_video = True
     highlight_color = (255, 0, 0)
     window_width, window_height = 640, 480 # info.current_w, info.current_h
-    capture_width, capture_height = 640, 480
+    capture_width, capture_height = settings['capture.width'], settings['capture.height']
     surface = pygame.display.set_mode((window_width, window_height))
     capture_surface = Cell(pygame.Surface((capture_width, capture_height)))
     capture_ndarray = capture_surface.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))

@@ -10,10 +10,15 @@ def now():
     return monotonic()
 
 
-def run(theme, source, quiet, wait, ignore):
+def run(settings, quiet):
+    capture_rate = settings['capture.rate']
+    capture_width = settings['capture.width']
+    capture_height = settings['capture.height']
+    ignore_repetition_duration = settings['qr.ignore-repetition-duration']
+
     def initialize():
         print('Initializing...')
-        chime.theme(theme)
+        chime.theme(settings['audio.theme'])
         pygame.init()
         pygame.camera.init()
 
@@ -25,7 +30,6 @@ def run(theme, source, quiet, wait, ignore):
         scanned = {}
 
         camera = Capturer.default_camera()
-        capture_width, capture_height = 640, 480
         capture_surface = Cell(pygame.Surface((capture_width, capture_height)))
         capture_ndarray = capture_surface.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
 
@@ -41,10 +45,10 @@ def run(theme, source, quiet, wait, ignore):
                         play_success_sound()
                     else:
                         delta = now() - scanned[data]
-                        if delta > ignore / 1000:
+                        if delta > ignore_repetition_duration / 1000:
                             print(f'Already scanned {data}')
 
-                sleep(wait / 1000)
+                sleep(1 / capture_rate)
 
     initialize()
     scan()

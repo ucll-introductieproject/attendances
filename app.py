@@ -1,12 +1,16 @@
 import cv2
-from pyzbar.pyzbar import decode
 from contextlib import contextmanager
 import click
-import chime
-from absentees.settings import load_settings
+import absentees.settings
 from pathlib import Path
 import json
 
+
+SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
+
+
+def load_settings():
+    return absentees.settings.load_settings(SETTINGS_PATH)
 
 
 @contextmanager
@@ -27,20 +31,16 @@ def cli():
 
 
 @click.command()
-@click.option('--theme', help=f"One of {', '.join(chime.themes())}", default='big-sur')
-@click.option('--source', help='Index of video source', default=0, type=int)
 @click.option('--quiet', is_flag=True, help='No sound')
-@click.option('--wait', help='Milliseconds between polls', default=500, type=int)
-@click.option('--ignore', help='Milliseconds during which to ignore repeat scans', default=1000, type=int)
-def tui(theme, source, quiet, wait, ignore):
+def tui(quiet):
    import absentees.tui as tui
-   tui.run(theme, source, quiet, wait, ignore)
+   tui.run(load_settings(), quiet)
 
 
 @click.command()
 def gui():
     import absentees.gui as gui
-    gui.run()
+    gui.run(load_settings())
 
 
 @click.group()
@@ -48,16 +48,22 @@ def config():
     pass
 
 
-@click.command()
-def show():
-    settings = load_settings(Path.home().joinpath('absentees.config.json'))
+@click.command('show')
+def config_show():
+    settings = load_settings()
     print(json.dumps(settings.data, indent=4, sort_keys=True))
+
+
+@click.command('delete')
+def config_delete():
+    SETTINGS_PATH.unlink()
 
 
 cli.add_command(tui)
 cli.add_command(gui)
 cli.add_command(config)
-config.add_command(show)
+config.add_command(config_show)
+config.add_command(config_delete)
 
 if __name__ == '__main__':
     cli()

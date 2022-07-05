@@ -5,8 +5,20 @@ import json
 
 
 DefaultSettings = {
-    'frame_rate': 30,
-    'capture_rate': 5,
+    'frame-rate': 30,
+    'capture-rate': 5,
+    'ignore': 1000,
+    'audio': {
+        'theme': 'big-sur',
+    },
+    'capture': {
+        'width': 640,
+        'height': 480,
+        'rate': 5
+    },
+    'qr': {
+        'ignore-repetition-duration': 1000,
+    }
 }
 
 
