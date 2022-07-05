@@ -93,7 +93,7 @@ def gui(fps, cfps):
     pygame.camera.init()
     clock = pygame.time.Clock()
     info = pygame.display.Info()
-    window_width, window_height = info.current_w, info.current_h
+    window_width, window_height = 640, 480 # info.current_w, info.current_h
     capture_width, capture_height = 640, 480
     surface = pygame.display.set_mode((window_width, window_height))
     capture_surface = pygame.Surface((capture_width, capture_height))
@@ -113,7 +113,9 @@ def gui(fps, cfps):
             if countdown.ready:
                 countdown.reset()
                 camera.get_image(capture_surface)
-                surface.blit(capture_surface, (0, 0))
+                # surface.blit(capture_surface, (0, 0))
+                converted = pygame.surfarray.array3d(capture_surface)
+                print(decode(converted))
                 pygame.display.flip()
     finally:
         camera.stop()
