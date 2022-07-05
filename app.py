@@ -69,8 +69,8 @@ def tui(theme, source, quiet, wait, ignore):
 
 
 @click.command()
-@click.option('--fps', help='Target frame rate', default=30)
-@click.option('--cfps', help='Capture frame rate', default=2)
+@click.option('--fps', help='Target frame rate', default=30, type=int)
+@click.option('--cfps', help='Capture frame rate', default=2, type=int)
 def gui(fps, cfps):
     capture_fps = cfps
     pygame.init()
