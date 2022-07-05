@@ -1,10 +1,13 @@
+import pygame
 import pygame.camera
 
+
+pygame.init()
+pygame.camera.init()
 
 class Capturer:
     def __init__(self, camera, target_surface):
         width, height = target_surface.value.get_size()
-        print(camera)
         self.__camera = pygame.camera.Camera(camera, (width, height), 'RGB')
         self.__target = target_surface
 
@@ -19,5 +22,9 @@ class Capturer:
         self.__camera.stop()
 
     @staticmethod
+    def cameras():
+        return pygame.camera.list_cameras()
+
+    @staticmethod
     def default_camera():
-        return pygame.camera.list_cameras()[0]
+        return Capturer.cameras[0]

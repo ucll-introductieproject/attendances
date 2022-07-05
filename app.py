@@ -59,9 +59,17 @@ def config_delete():
     SETTINGS_PATH.unlink()
 
 
+@click.command()
+def cameras():
+    from absentees.capturer import Capturer
+    for index, id in enumerate(Capturer.cameras()):
+        print(f'[{index}] {id}')
+
+
 cli.add_command(tui)
 cli.add_command(gui)
 cli.add_command(config)
+cli.add_command(cameras)
 config.add_command(config_show)
 config.add_command(config_delete)
 
