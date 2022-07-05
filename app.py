@@ -1,16 +1,12 @@
 import cv2
 from pyzbar.pyzbar import decode
 from contextlib import contextmanager
-from time import sleep, monotonic
 import click
 import chime
 from absentees.settings import load_settings
 from pathlib import Path
 import json
 
-
-def now():
-    return monotonic()
 
 
 @contextmanager
@@ -37,35 +33,8 @@ def cli():
 @click.option('--wait', help='Milliseconds between polls', default=500, type=int)
 @click.option('--ignore', help='Milliseconds during which to ignore repeat scans', default=1000, type=int)
 def tui(theme, source, quiet, wait, ignore):
-    def initialize():
-        print('Initializing...')
-        chime.theme(theme)
-
-    def play_success_sound():
-        if not quiet:
-            chime.success()
-
-    def scan():
-        scanned = {}
-
-        with video_capture(source) as read_frame:
-            print('Ready to scan QR codes!')
-            while True:
-                for decoded in decode(read_frame()):
-                    data = decoded.data.decode('utf-8')
-                    if data not in scanned:
-                        scanned[data] = now()
-                        print(data)
-                        play_success_sound()
-                    else:
-                        delta = now() - scanned[data]
-                        if delta > ignore / 1000:
-                            print(f'Already scanned {data}')
-
-                sleep(wait / 1000)
-
-    initialize()
-    scan()
+   import absentees.tui as tui
+   tui.run(theme, source, quiet, wait, ignore)
 
 
 @click.command()

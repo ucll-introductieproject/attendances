@@ -17,7 +17,7 @@ def run():
     clock = pygame.time.Clock()
     info = pygame.display.Info()
     font = pygame.font.SysFont(None, 48)
-    camera = pygame.camera.list_cameras()[0]
+    camera = Capturer.default_camera()
     show_video = True
     highlight_color = (255, 0, 0)
     window_width, window_height = 640, 480 # info.current_w, info.current_h
