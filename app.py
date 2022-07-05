@@ -9,6 +9,9 @@ import pygame
 import pygame.camera
 from absentees.countdown import Countdown
 from absentees.cells import Cell
+from absentees.settings import load_settings
+from pathlib import Path
+
 
 def now():
     return monotonic()
@@ -86,17 +89,11 @@ class Capturer:
         self.__camera.stop()
 
 
-
-
-
-
-
-
 @click.command()
-@click.option('--fps', help='Target frame rate', default=30, type=int)
-@click.option('--cfps', help='Capture frame rate', default=2, type=int)
-def gui(fps, cfps):
-    capture_fps = cfps
+def gui():
+    settings = load_settings(Path.home().joinpath('absentees.config.json'))
+    fps = settings['frame_rate']
+    capture_fps = settings['capture_rate']
     pygame.init()
     pygame.camera.init()
     clock = pygame.time.Clock()
