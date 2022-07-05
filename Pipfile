@@ -7,6 +7,8 @@ name = "pypi"
 pillow = "*"
 pyzbar = "*"
 opencv-python = "*"
+chime = "*"
+click = "*"
 
 [dev-packages]
 
