@@ -68,10 +68,12 @@ def tui(theme, source, quiet, wait, ignore):
     scan()
 
 
-@cli.command()
-def gui():
+@click.command()
+@click.option('--fps', help='Target frame rate', default=60)
+def gui(fps):
     pygame.init()
     pygame.camera.init()
+    clock = pygame.time.Clock()
     info = pygame.display.Info()
     window_width, window_height = info.current_w, info.current_h
     capture_width, capture_height = 640, 480
@@ -82,6 +84,7 @@ def gui():
     try:
         active = True
         while active:
+            clock.tick(fps)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     active = False
