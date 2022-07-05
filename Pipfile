@@ -9,6 +9,7 @@ pyzbar = "*"
 opencv-python = "*"
 chime = "*"
 click = "*"
+pygame = "*"
 
 [dev-packages]
 

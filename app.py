@@ -2,8 +2,11 @@ import cv2
 from pyzbar.pyzbar import decode
 from contextlib import contextmanager
 from time import sleep, monotonic
+import pygame
 import click
 import chime
+import pygame
+import pygame.camera
 
 
 def now():
@@ -22,13 +25,18 @@ def video_capture(source):
         vc.release()
 
 
+@click.group()
+def cli():
+    pass
+
+
 @click.command()
 @click.option('--theme', help=f"One of {', '.join(chime.themes())}", default='big-sur')
 @click.option('--source', help='Index of video source', default=0, type=int)
 @click.option('--quiet', is_flag=True, help='No sound')
 @click.option('--wait', help='Milliseconds between polls', default=500, type=int)
 @click.option('--ignore', help='Milliseconds during which to ignore repeat scans', default=1000, type=int)
-def main(theme, source, quiet, wait, ignore):
+def tui(theme, source, quiet, wait, ignore):
     def initialize():
         print('Initializing...')
         chime.theme(theme)
@@ -60,5 +68,32 @@ def main(theme, source, quiet, wait, ignore):
     scan()
 
 
+@cli.command()
+def gui():
+    pygame.init()
+    pygame.camera.init()
+    info = pygame.display.Info()
+    width, height = info.current_w, info.current_h
+    surface = pygame.display.set_mode((640, 480))
+    camera = pygame.camera.Camera(pygame.camera.list_cameras()[0], (640, 480), 'RGB')
+    camera.start()
+    try:
+        active = True
+        while active:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    active = False
+
+            camera.get_image(surface)
+            pygame.display.flip()
+    finally:
+        camera.stop()
+        pass
+
+
+
+cli.add_command(tui)
+cli.add_command(gui)
+
 if __name__ == '__main__':
-    main()
+    cli()
