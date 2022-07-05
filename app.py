@@ -11,6 +11,7 @@ from absentees.countdown import Countdown
 from absentees.cells import Cell
 from absentees.settings import load_settings
 from pathlib import Path
+import json
 
 
 def now():
@@ -148,8 +149,21 @@ def gui():
                 pygame.display.flip()
 
 
+@click.group()
+def config():
+    pass
+
+
+@click.command()
+def show():
+    settings = load_settings(Path.home().joinpath('absentees.config.json'))
+    print(json.dumps(settings.data, indent=4, sort_keys=True))
+
+
 cli.add_command(tui)
 cli.add_command(gui)
+cli.add_command(config)
+config.add_command(show)
 
 if __name__ == '__main__':
     cli()

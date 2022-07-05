@@ -19,6 +19,10 @@ class Settings:
         parts = key.split('.')
         return reduce(lambda current, part: current[part], parts, self.__data)
 
+    @property
+    def data(self):
+        return self.__data
+
 
 def load_settings(path):
     if not path.exists():
