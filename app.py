@@ -94,12 +94,14 @@ def gui(fps, cfps):
     clock = pygame.time.Clock()
     info = pygame.display.Info()
     font = pygame.font.SysFont(None, 48)
-    show_video = False
+    show_video = True
+    highlight_color = (255, 0, 0)
     window_width, window_height = 640, 480 # info.current_w, info.current_h
     capture_width, capture_height = 640, 480
     surface = pygame.display.set_mode((window_width, window_height))
     capture_surface = pygame.Surface((capture_width, capture_height))
     camera = pygame.camera.Camera(pygame.camera.list_cameras()[0], (capture_width, capture_height), 'RGB')
+    face_recognition = cv2.CascadeClassifier(f'{cv2.data.haarcascades}haarcascade_frontalface_default.xml')
     camera.start()
     countdown = Countdown(1 / capture_fps)
     try:
@@ -119,14 +121,25 @@ def gui(fps, cfps):
                 countdown.reset()
                 camera.get_image(capture_surface)
 
-                converted = pygame.surfarray.array3d(capture_surface)
-                decoded = decode(converted)
-                if decoded:
+                converted = pygame.surfarray.array3d(capture_surface).swapaxes(0, 1)
+
+
+                if decoded := decode(converted):
                     data = decoded[0]
                     polygon = data.polygon
-                    red = (255, 0, 0)
-                    pygame.draw.polygon(capture_surface, red, [(p.y, p.x) for p in polygon], width=2)
+                    pygame.draw.polygon(capture_surface, highlight_color, [(p.x, p.y) for p in polygon], width=2)
+
+                    gray = cv2.cvtColor(converted, cv2.COLOR_BGR2GRAY)
+                    faces = face_recognition.detectMultiScale(
+                            gray,
+                            scaleFactor=1.1,
+                            minNeighbors=5)
+                    for (x, y, w, h) in faces:
+                        rect = pygame.Rect(x, y, w, h)
+                        pygame.draw.rect(capture_surface, highlight_color, rect, width=2)
+
                     print(decoded)
+
                 if show_video:
                     surface.blit(capture_surface, (0, 0))
                 pygame.display.flip()
