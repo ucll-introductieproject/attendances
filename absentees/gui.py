@@ -125,7 +125,6 @@ def run(settings, sound_player):
             'capture_ndarray_cell': capture_ndarray_cell,
             'sound_player': sound_player,
             'qr_highlight_color': settings.color('qr.highlight-color'),
-            'successful_scan_background': settings.color('qr.success-background'),
             'font': font,
             'capture_rate': settings['qr.capture-rate'],
             'freeze_time': settings['qr.freeze-time'],
