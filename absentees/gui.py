@@ -1,12 +1,9 @@
-from app import SETTINGS_PATH
 import cv2
 import pygame
 from pyzbar.pyzbar import decode
 from absentees.countdown import Countdown
 from absentees.cells import Cell
-from absentees.settings import load_settings
 from absentees.capturer import Capturer
-from pathlib import Path
 
 
 def run(settings):
