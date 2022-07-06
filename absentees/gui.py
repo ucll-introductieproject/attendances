@@ -33,21 +33,28 @@ class Screen:
 
 
 class IdleScreen(Screen):
+    def __init__(self, screen_data):
+        super().__init__(screen_data)
+        self.__scan_countdown = Countdown(1 / self.capture_rate)
+
     def tick(self, elapsed_seconds):
-        pass
+        self.__scan_countdown.tick(elapsed_seconds)
 
     def render(self, surface):
         self.capture()
-        if results := self.qr_scanner.scan(self.capture_ndarray_cell.value):
-            result = results[0]
-            width = 2
-            pygame.draw.polygon(
-                self.capture_surface_cell.value,
-                color=self.qr_highlight_color,
-                points=result.polygon,
-                width=width)
-            self.sound_player.success()
-            self.switch_screen(CapturedScreen(self._screen_data, result.data))
+
+        if self.__scan_countdown.ready:
+            self.__scan_countdown.reset()
+            if results := self.qr_scanner.scan(self.capture_ndarray_cell.value):
+                result = results[0]
+                width = 2
+                pygame.draw.polygon(
+                    self.capture_surface_cell.value,
+                    color=self.qr_highlight_color,
+                    points=result.polygon,
+                    width=width)
+                self.sound_player.success()
+                self.switch_screen(CapturedScreen(self._screen_data, result.data))
 
         surface.fill((0, 0, 0))
         self._blit_centered(source=self.capture_surface_cell.value, target=surface)
