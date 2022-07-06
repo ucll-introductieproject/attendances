@@ -6,7 +6,6 @@ import json
 
 DefaultSettings = {
     'frame-rate': 30,
-    'capture-rate': 5,
     'ignore': 1000,
     'font-size': 64,
     'sound': {
@@ -32,7 +31,9 @@ DefaultSettings = {
             'r': 0,
             'g': 64,
             'b': 0,
-        }
+        },
+        'capture-rate': 5,
+        'freeze-time': 2,
     }
 }
 

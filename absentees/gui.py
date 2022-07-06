@@ -63,7 +63,7 @@ class IdleScreen(Screen):
 class CapturedScreen(Screen):
     def __init__(self, screen_data, data):
         super().__init__(screen_data)
-        self.__time_left = 2
+        self.__time_left = self.freeze_time
         self.__data = data
 
     def tick(self, elapsed_seconds):
@@ -71,8 +71,13 @@ class CapturedScreen(Screen):
         if self.__time_left == 0:
             self.switch_screen(IdleScreen(self._screen_data))
 
+    @property
+    def _background_color(self):
+        c = self.__time_left / self.freeze_time
+        return (0, round(255 * c), 0)
+
     def render(self, surface):
-        surface.fill(self.successful_scan_background)
+        surface.fill(self._background_color)
         self._blit_centered(source=self.capture_surface_cell.value, target=surface)
         self.__render_data(surface)
 
@@ -122,6 +127,8 @@ def run(settings, sound_player):
             'qr_highlight_color': settings.color('qr.highlight-color'),
             'successful_scan_background': settings.color('qr.success-background'),
             'font': font,
+            'capture_rate': settings['qr.capture-rate'],
+            'freeze_time': settings['qr.freeze-time'],
         }
 
         current_screen = IdleScreen(screen_data)
