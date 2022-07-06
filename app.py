@@ -36,9 +36,12 @@ cli.add_command(tui)
 
 
 @click.command()
-def gui():
+@click.pass_context
+def gui(ctx):
     import absentees.gui as gui
-    gui.run(load_settings())
+    settings = load_settings()
+    sound_player = SoundPlayer(settings['sound.theme'], quiet=ctx.obj['quiet'])
+    gui.run(settings, sound_player)
 
 cli.add_command(gui)
 

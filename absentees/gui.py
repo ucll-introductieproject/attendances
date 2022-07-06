@@ -18,7 +18,7 @@ def get_window_size(settings):
     return window_width, window_height
 
 
-def run(settings):
+def run(settings, sound_player):
     pygame.init()
     fps = settings['frame-rate']
     capture_fps = settings['capture.rate']
@@ -66,6 +66,7 @@ def run(settings):
                         pygame.draw.rect(capture_surface.value, highlight_color, rect, width=2)
 
                     print(data.data)
+                    sound_player.success()
 
                 if show_video:
                     surface.blit(capture_surface.value, (0, 0))
