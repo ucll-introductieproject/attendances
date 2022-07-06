@@ -6,20 +6,30 @@ from absentees.cells import Cell
 from absentees.capturer import Capturer
 
 
+def get_window_size(settings):
+    info = pygame.display.Info()
+    window_width, window_height = settings['window.width'], settings['window.height']
+    if window_width == 0:
+        window_width = info.current_w
+    if window_height == 0:
+        window_height = info.current_h
+    print(window_width, window_height)
+    return window_width, window_height
+
+
 def run(settings):
     fps = settings['frame-rate']
     capture_fps = settings['capture.rate']
     pygame.init()
     pygame.camera.init()
     clock = pygame.time.Clock()
-    info = pygame.display.Info()
     font = pygame.font.SysFont(None, 48)
     camera = Capturer.default_camera()
     show_video = True
     highlight_color = (255, 0, 0)
-    window_width, window_height = 640, 480 # info.current_w, info.current_h
+    window_size = get_window_size(settings)
     capture_width, capture_height = settings['capture.width'], settings['capture.height']
-    surface = pygame.display.set_mode((window_width, window_height))
+    surface = pygame.display.set_mode(window_size)
     capture_surface = Cell(pygame.Surface((capture_width, capture_height)))
     capture_ndarray = capture_surface.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
     capture_grayscale = capture_ndarray.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
