@@ -4,6 +4,7 @@ from pyzbar.pyzbar import decode
 from absentees.countdown import Countdown
 from absentees.cells import Cell
 from absentees.capturer import Capturer
+from absentees.face import FaceDetector
 
 
 def get_window_size(settings):
@@ -13,7 +14,6 @@ def get_window_size(settings):
         window_width = info.current_w
     if window_height == 0:
         window_height = info.current_h
-    print(window_width, window_height)
     return window_width, window_height
 
 
@@ -33,7 +33,7 @@ def run(settings):
     capture_surface = Cell(pygame.Surface((capture_width, capture_height)))
     capture_ndarray = capture_surface.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
     capture_grayscale = capture_ndarray.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
-    face_recognition = cv2.CascadeClassifier(f'{cv2.data.haarcascades}haarcascade_frontalface_default.xml')
+    face_detector = FaceDetector()
 
     countdown = Countdown(1 / capture_fps)
     with Capturer(camera, capture_surface) as capture:
@@ -58,10 +58,7 @@ def run(settings):
                     polygon = data.polygon
                     pygame.draw.polygon(capture_surface.value, highlight_color, [(p.x, p.y) for p in polygon], width=2)
 
-                    faces = face_recognition.detectMultiScale(
-                            capture_grayscale.value,
-                            scaleFactor=1.1,
-                            minNeighbors=5)
+                    faces = face_detector.detect(capture_grayscale.value)
                     for (x, y, w, h) in faces:
                         rect = pygame.Rect(x, y, w, h)
                         pygame.draw.rect(capture_surface.value, highlight_color, rect, width=2)
