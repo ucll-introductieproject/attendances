@@ -61,6 +61,13 @@ def config_show():
 config.add_command(config_show)
 
 
+@click.command('path')
+def config_path():
+    print(SETTINGS_PATH)
+
+config.add_command(config_path)
+
+
 @click.command('delete')
 def config_delete():
     SETTINGS_PATH.unlink()
