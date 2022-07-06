@@ -26,6 +26,11 @@ DefaultSettings = {
             'r': 255,
             'g': 0,
             'b': 0,
+        },
+        'success-background': {
+            'r': 0,
+            'g': 64,
+            'b': 0,
         }
     }
 }

@@ -56,7 +56,7 @@ class CapturedScreen(Screen):
             self.switch_screen(IdleScreen(self._screen_data))
 
     def render(self, surface):
-        surface.fill((0, 128, 0))
+        surface.fill(self.successful_scan_background)
         surface.blit(self.capture_surface_cell.value, (0, 0))
 
 
@@ -94,6 +94,7 @@ def run(settings, sound_player):
             'capture_ndarray_cell': capture_ndarray_cell,
             'sound_player': sound_player,
             'qr_highlight_color': settings.color('qr.highlight-color'),
+            'successful_scan_background': settings.color('qr.success-background'),
         }
 
         current_screen = IdleScreen(screen_data)
