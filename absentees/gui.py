@@ -1,5 +1,6 @@
-import cv2
 import pygame
+import logging
+import cv2
 from absentees.countdown import Countdown
 from absentees.cells import Cell
 from absentees.capturer import Capturer
@@ -18,10 +19,9 @@ def get_window_size(settings):
 
 
 def run(settings):
+    pygame.init()
     fps = settings['frame-rate']
     capture_fps = settings['capture.rate']
-    pygame.init()
-    pygame.camera.init()
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 48)
     camera = Capturer.default_camera()
@@ -29,6 +29,8 @@ def run(settings):
     highlight_color = (255, 0, 0)
     window_size = get_window_size(settings)
     capture_width, capture_height = settings['capture.width'], settings['capture.height']
+
+    logging.debug(f'Creating window with size {window_size[0]}x{window_size[1]}')
     surface = pygame.display.set_mode(window_size)
     capture_surface = Cell(pygame.Surface((capture_width, capture_height)))
     capture_ndarray = capture_surface.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))

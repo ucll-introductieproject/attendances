@@ -1,3 +1,4 @@
+import logging
 import click
 import absentees.settings
 from pathlib import Path
@@ -12,8 +13,10 @@ def load_settings():
 
 
 @click.group()
-def cli():
-    pass
+@click.option('-v', '--verbose', help='Verbose', is_flag=True)
+def cli(verbose):
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
 
 
 @click.command()
