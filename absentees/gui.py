@@ -24,6 +24,13 @@ class Screen:
         for key, value in screen_data.items():
             setattr(self, key, value)
 
+    def _blit_centered(self, source, target):
+        source_width, source_height = source.get_size()
+        target_width, target_height = target.get_size()
+        x = (target_width - source_width) / 2
+        y = (target_height - source_height) / 2
+        target.blit(source, (x, y))
+
 
 class IdleScreen(Screen):
     def tick(self, elapsed_seconds):
@@ -43,7 +50,7 @@ class IdleScreen(Screen):
             self.switch_screen(CapturedScreen(self._screen_data, result.data))
 
         surface.fill((0, 0, 0))
-        surface.blit(self.capture_surface_cell.value, (0, 0))
+        self._blit_centered(source=self.capture_surface_cell.value, target=surface)
 
 
 class CapturedScreen(Screen):
@@ -59,15 +66,16 @@ class CapturedScreen(Screen):
 
     def render(self, surface):
         surface.fill(self.successful_scan_background)
-        surface.blit(self.capture_surface_cell.value, (0, 0))
+        self._blit_centered(source=self.capture_surface_cell.value, target=surface)
         self.__render_data(surface)
 
     def __render_data(self, surface):
         text_surface = self.font.render(self.__data, True, (255, 255, 255))
+        capture_width, capture_height = self.capture_surface_cell.value.get_size()
         surface_width, surface_height = surface.get_size()
         text_width, text_height = text_surface.get_size()
         x = (surface_width - text_width) / 2
-        y = (surface_height - text_height) / 2
+        y = (3 * surface_height + capture_height) / 4 - text_height / 2
         surface.blit(text_surface, (x, y))
 
 
