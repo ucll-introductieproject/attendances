@@ -32,23 +32,25 @@ class IdleScreen(Screen):
     def render(self, surface):
         self.capture()
         if results := self.qr_scanner.scan(self.capture_ndarray_cell.value):
+            result = results[0]
             width = 2
             pygame.draw.polygon(
                 self.capture_surface_cell.value,
                 color=self.qr_highlight_color,
-                points=results[0].polygon,
+                points=result.polygon,
                 width=width)
             self.sound_player.success()
-            self.switch_screen(CapturedScreen(self._screen_data))
+            self.switch_screen(CapturedScreen(self._screen_data, result.data))
 
         surface.fill((0, 0, 0))
         surface.blit(self.capture_surface_cell.value, (0, 0))
 
 
 class CapturedScreen(Screen):
-    def __init__(self, screen_data):
+    def __init__(self, screen_data, data):
         super().__init__(screen_data)
         self.__time_left = 2
+        self.__data = data
 
     def tick(self, elapsed_seconds):
         self.__time_left = max(0, self.__time_left - elapsed_seconds)
@@ -58,6 +60,15 @@ class CapturedScreen(Screen):
     def render(self, surface):
         surface.fill(self.successful_scan_background)
         surface.blit(self.capture_surface_cell.value, (0, 0))
+        self.__render_data(surface)
+
+    def __render_data(self, surface):
+        text_surface = self.font.render(self.__data, True, (255, 255, 255))
+        surface_width, surface_height = surface.get_size()
+        text_width, text_height = text_surface.get_size()
+        x = (surface_width - text_width) / 2
+        y = (surface_height - text_height) / 2
+        surface.blit(text_surface, (x, y))
 
 
 def run(settings, sound_player):
@@ -69,7 +80,7 @@ def run(settings, sound_player):
     fps = settings['frame-rate']
     capture_fps = settings['capture.rate']
     clock = pygame.time.Clock()
-    font = pygame.font.SysFont(None, 48)
+    font = pygame.font.SysFont(None, settings['font-size'])
     camera = Capturer.default_camera()
     show_video = True
     window_size = get_window_size(settings)
@@ -95,6 +106,7 @@ def run(settings, sound_player):
             'sound_player': sound_player,
             'qr_highlight_color': settings.color('qr.highlight-color'),
             'successful_scan_background': settings.color('qr.success-background'),
+            'font': font,
         }
 
         current_screen = IdleScreen(screen_data)

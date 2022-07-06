@@ -8,6 +8,7 @@ DefaultSettings = {
     'frame-rate': 30,
     'capture-rate': 5,
     'ignore': 1000,
+    'font-size': 64,
     'sound': {
         'theme': 'big-sur',
     },
