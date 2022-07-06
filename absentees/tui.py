@@ -10,7 +10,7 @@ def now():
     return monotonic()
 
 
-def run(settings, quiet):
+def run(settings, sound_player):
     capture_rate = settings['capture.rate']
     capture_width = settings['capture.width']
     capture_height = settings['capture.height']
@@ -18,13 +18,9 @@ def run(settings, quiet):
 
     def initialize():
         print('Initializing...')
-        chime.theme(settings['audio.theme'])
+        chime.theme(settings['sound.theme'])
         pygame.init()
         pygame.camera.init()
-
-    def play_success_sound():
-        if not quiet:
-            chime.success()
 
     def scan():
         scanned = {}
@@ -42,7 +38,7 @@ def run(settings, quiet):
                     if data not in scanned:
                         scanned[data] = now()
                         print(data)
-                        play_success_sound()
+                        sound_player.success()
                     else:
                         delta = now() - scanned[data]
                         if delta > ignore_repetition_duration / 1000:

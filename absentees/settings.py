@@ -8,7 +8,7 @@ DefaultSettings = {
     'frame-rate': 30,
     'capture-rate': 5,
     'ignore': 1000,
-    'audio': {
+    'sound': {
         'theme': 'big-sur',
     },
     'window': {

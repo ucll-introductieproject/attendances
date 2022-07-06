@@ -1,4 +1,5 @@
 import logging
+from absentees.sound import SoundPlayer
 import click
 import absentees.settings
 from pathlib import Path
@@ -14,16 +15,22 @@ def load_settings():
 
 @click.group()
 @click.option('-v', '--verbose', help='Verbose', is_flag=True)
-def cli(verbose):
+@click.option('-q', '--quiet', help='Quiet', is_flag=True)
+@click.pass_context
+def cli(ctx, verbose, quiet):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
+    ctx.ensure_object(dict)
+    ctx.obj['quiet'] = quiet
 
 
 @click.command()
-@click.option('--quiet', is_flag=True, help='No sound')
-def tui(quiet):
+@click.pass_context
+def tui(ctx):
    import absentees.tui as tui
-   tui.run(load_settings(), quiet)
+   settings = load_settings()
+   sound_player = SoundPlayer(settings['sound.theme'], quiet=ctx.obj['quiet'])
+   tui.run(settings, sound_player)
 
 cli.add_command(tui)
 
