@@ -40,6 +40,12 @@ class Settings:
         parts = key.split('.')
         return reduce(lambda current, part: current[part], parts, self.__data)
 
+    def color(self, key):
+        r = self[key]['r']
+        g = self[key]['g']
+        b = self[key]['b']
+        return (r, g, b)
+
     @property
     def data(self):
         return self.__data

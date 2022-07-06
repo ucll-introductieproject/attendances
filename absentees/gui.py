@@ -72,7 +72,6 @@ def run(settings, sound_player):
     font = pygame.font.SysFont(None, 48)
     camera = Capturer.default_camera()
     show_video = True
-    highlight_color = (255, 0, 0)
     window_size = get_window_size(settings)
     capture_width, capture_height = settings['capture.width'], settings['capture.height']
     current_screen = None
@@ -94,7 +93,7 @@ def run(settings, sound_player):
             'capture_surface_cell': capture_surface_cell,
             'capture_ndarray_cell': capture_ndarray_cell,
             'sound_player': sound_player,
-            'qr_highlight_color': (settings['qr.highlight-color.r'], settings['qr.highlight-color.g'], settings['qr.highlight-color.b']),
+            'qr_highlight_color': settings.color('qr.highlight-color'),
         }
 
         current_screen = IdleScreen(screen_data)
