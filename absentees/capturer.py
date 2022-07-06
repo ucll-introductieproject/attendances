@@ -27,4 +27,4 @@ class Capturer:
 
     @staticmethod
     def default_camera():
-        return Capturer.cameras[0]
+        return Capturer.cameras()[0]
