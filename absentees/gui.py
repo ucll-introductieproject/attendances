@@ -32,11 +32,10 @@ class IdleScreen(Screen):
     def render(self, surface):
         self.capture()
         if results := self.qr_scanner.scan(self.capture_ndarray_cell.value):
-            highlight_color = (255, 0, 0)
             width = 2
             pygame.draw.polygon(
                 self.capture_surface_cell.value,
-                color=highlight_color,
+                color=self.qr_highlight_color,
                 points=results[0].polygon,
                 width=width)
             self.sound_player.success()
@@ -85,10 +84,6 @@ def run(settings, sound_player):
     capture_ndarray_cell = capture_surface_cell.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
     capture_grayscale = capture_ndarray_cell.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
 
-    # face_detector = FaceDetector()
-    # qr_scanner = QRScanner()
-
-
     countdown = Countdown(1 / capture_fps)
     with Capturer(camera, capture_surface_cell) as capture:
         screen_data = {
@@ -99,6 +94,7 @@ def run(settings, sound_player):
             'capture_surface_cell': capture_surface_cell,
             'capture_ndarray_cell': capture_ndarray_cell,
             'sound_player': sound_player,
+            'qr_highlight_color': (settings['qr.highlight-color.r'], settings['qr.highlight-color.g'], settings['qr.highlight-color.b']),
         }
 
         current_screen = IdleScreen(screen_data)

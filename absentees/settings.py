@@ -22,6 +22,11 @@ DefaultSettings = {
     },
     'qr': {
         'ignore-repetition-duration': 1000,
+        'highlight-color': {
+            'r': 255,
+            'g': 0,
+            'b': 0,
+        }
     }
 }
 
