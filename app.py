@@ -13,18 +13,6 @@ def load_settings():
     return absentees.settings.load_settings(SETTINGS_PATH)
 
 
-@contextmanager
-def video_capture(source):
-    def read_frame():
-        _, frame = vc.read()
-        return frame
-    try:
-        vc = cv2.VideoCapture(source)
-        yield read_frame
-    finally:
-        vc.release()
-
-
 @click.group()
 def cli():
     pass
