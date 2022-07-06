@@ -1,10 +1,10 @@
 import cv2
 import pygame
-from pyzbar.pyzbar import decode
 from absentees.countdown import Countdown
 from absentees.cells import Cell
 from absentees.capturer import Capturer
 from absentees.face import FaceDetector
+from absentees.qr import QRScanner
 
 
 def get_window_size(settings):
@@ -34,6 +34,7 @@ def run(settings):
     capture_ndarray = capture_surface.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
     capture_grayscale = capture_ndarray.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
     face_detector = FaceDetector()
+    qr_scanner = QRScanner()
 
     countdown = Countdown(1 / capture_fps)
     with Capturer(camera, capture_surface) as capture:
@@ -53,17 +54,16 @@ def run(settings):
                 countdown.reset()
                 capture()
 
-                if decoded := decode(capture_ndarray.value):
+                if decoded := qr_scanner.scan(capture_ndarray.value):
                     data = decoded[0]
-                    polygon = data.polygon
-                    pygame.draw.polygon(capture_surface.value, highlight_color, [(p.x, p.y) for p in polygon], width=2)
+                    pygame.draw.polygon(capture_surface.value, highlight_color, data.polygon, width=2)
 
                     faces = face_detector.detect(capture_grayscale.value)
                     for (x, y, w, h) in faces:
                         rect = pygame.Rect(x, y, w, h)
                         pygame.draw.rect(capture_surface.value, highlight_color, rect, width=2)
 
-                    print(decoded)
+                    print(data.data)
 
                 if show_video:
                     surface.blit(capture_surface.value, (0, 0))
