@@ -2,16 +2,19 @@ class CellBase:
     def __init__(self):
         self.__observers = []
 
-    def _invalidate_observers(self):
+    def _notify_observers(self):
         for observer in self.__observers:
-            observer.invalidate()
+            observer()
+
+    def add_observer(self, func):
+        self.__observers.append(func)
 
     def refresh(self):
-        self._invalidate_observers()
+        self._notify_observers()
 
     def derive(self, func):
         result = Derived(self, func)
-        self.__observers.append(result)
+        self.add_observer(result.invalidate)
         return result
 
 
@@ -27,7 +30,7 @@ class Cell(CellBase):
     @value.setter
     def value(self, v):
         self.__value = v
-        self._invalidate_observers()
+        self._notify_observers()
 
 
 class Derived(CellBase):
