@@ -1,6 +1,7 @@
 import socketserver
 import threading
 import logging
+from contextlib import contextmanager
 
 
 class UnidirectionalChannel:
@@ -42,8 +43,8 @@ class Channel:
         self.__client_to_server.send(message)
 
 
-
-def start_server(channel):
+@contextmanager
+def server(channel):
     class Handler(socketserver.StreamRequestHandler):
         def handle(self):
             logging.debug('Server has received external message')
@@ -52,7 +53,6 @@ def start_server(channel):
             response = channel.send_to_client(line)
             logging.debug('Server received answer from client')
             print(response)
-
 
     def threadproc():
         nonlocal shutdown
@@ -74,4 +74,8 @@ def start_server(channel):
     thread.daemon = True
     thread.start()
     event.wait()
-    return shutdown
+    try:
+        yield
+    finally:
+        shutdown()
+

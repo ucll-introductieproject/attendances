@@ -1,6 +1,6 @@
 import pygame
 import logging
-from absentees.server import Channel, start_server
+from absentees.server import Channel, server
 import cv2
 from absentees.countdown import Countdown
 from absentees.cells import Cell
@@ -53,9 +53,8 @@ def run(settings, sound_player):
     pygame.init()
 
     channel = Channel()
-    shutdown_server = start_server(channel)
 
-    try:
+    with server(channel):
         fps = settings['frame-rate']
         capture_fps = settings['capture.rate']
         clock = pygame.time.Clock()
@@ -133,5 +132,3 @@ def run(settings, sound_player):
                 current_screen.render(render_surface)
 
                 pygame.display.flip()
-    finally:
-        shutdown_server()

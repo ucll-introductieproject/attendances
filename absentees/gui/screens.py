@@ -1,7 +1,7 @@
 import pygame
 import logging
 from absentees.gui.imgview import ImageViewer
-from absentees.server import Channel, start_server
+from absentees.server import Channel
 from absentees.countdown import Countdown
 
 
