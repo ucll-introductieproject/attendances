@@ -1,10 +1,8 @@
 import pygame
 import logging
+from absentees.gui.imgview import ImageViewer
 from absentees.server import Channel, start_server
-import cv2
 from absentees.countdown import Countdown
-
-
 
 
 class Sheet:
@@ -61,10 +59,11 @@ class Screen:
 
 
 class IdleScreen(Screen):
-    def __init__(self, screen_data):
+    def __init__(self, screen_data, current_frame_cell):
         super().__init__(screen_data)
         self.__scan_countdown = Countdown(1 / self.capture_rate)
         self.__sheet = Sheet((1920, 1080))
+        self.__video_viewer = ImageViewer(current_frame_cell, (0, 0))
 
     def tick(self, elapsed_seconds):
         self.__scan_countdown.tick(elapsed_seconds)
@@ -72,20 +71,21 @@ class IdleScreen(Screen):
     def render(self, surface):
         self.capture()
 
-        if self.__scan_countdown.ready:
-            self.__scan_countdown.reset()
-            if results := self.qr_scanner.scan(self.capture_ndarray_cell.value):
-                result = results[0]
-                width = 2
-                pygame.draw.polygon(
-                    self.capture_surface_cell.value,
-                    color=self.qr_highlight_color,
-                    points=result.polygon,
-                    width=width)
-                self.sound_player.success()
-                self.switch_screen(CapturedScreen(self._screen_data, result.data))
+        # if self.__scan_countdown.ready:
+        #     self.__scan_countdown.reset()
+        #     if results := self.qr_scanner.scan(self.capture_ndarray_cell.value):
+        #         result = results[0]
+        #         width = 2
+        #         pygame.draw.polygon(
+        #             self.capture_surface_cell.value,
+        #             color=self.qr_highlight_color,
+        #             points=result.polygon,
+        #             width=width)
+        #         self.sound_player.success()
+        #         self.switch_screen(CapturedScreen(self._screen_data, result.data))
 
         surface.fill((0, 0, 0))
+        self.__video_viewer.render(surface)
         self.__sheet.render(surface, (0, 0))
         self._blit_centered(source=self.capture_surface_cell.value, target=surface)
 

@@ -64,7 +64,7 @@ def run(settings, sound_player):
                 'freeze_time': settings['qr.freeze-time'],
             }
 
-            current_screen = IdleScreen(screen_data)
+            current_screen = IdleScreen(screen_data, capture_surface_cell)
 
             active = True
             while active:
@@ -104,6 +104,7 @@ def run(settings, sound_player):
                 #     if show_video:
                 #         render_surface.blit(capture_surface.value, (0, 0))
 
+                capture()
                 current_screen.tick(elapsed_seconds)
                 current_screen.render(render_surface)
 
