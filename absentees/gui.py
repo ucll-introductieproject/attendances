@@ -19,6 +19,45 @@ def get_window_size(settings):
     return window_width, window_height
 
 
+class Sheet:
+    def __init__(self, surface_size):
+        self.__column_count = 5
+        self.__children = [ 'magnolia', 'u0057764', *map(str, range(1, 100)) ]
+        self.__surface = pygame.Surface(surface_size)
+        self.__font = pygame.font.SysFont(None, 16)
+        self.__child_positions = self.__determine_positions()
+        self.__render_sheet()
+
+    def __determine_positions(self):
+        result = {}
+        for index, child in enumerate(self.__children):
+            x = index % self.__column_count
+            y = index // self.__column_count
+            result[child] = (x, y)
+        return result
+
+    def __render_sheet(self):
+        for child in self.__children:
+            self.__render_child(child)
+
+    def __render_child(self, child):
+        rect = self.__child_rectangle(child)
+        pygame.draw.rect(self.__surface, color=(0, 0, 0), rect=rect)
+        label_surface = self.__font.render(child, True, (255, 255, 255))
+        self.__surface.blit(label_surface, (rect.left, rect.top))
+
+    def __child_rectangle(self, child):
+        px, py = self.__child_positions[child]
+        child_width = self.__surface.get_width() / self.__column_count
+        child_height = 24
+        x = px * child_width
+        y = py * child_height
+        return pygame.Rect(x, y, child_width, child_height)
+
+    def render(self, target_surface, position):
+        target_surface.blit(self.__surface, position)
+
+
 class Screen:
     def __init__(self, screen_data):
         self._screen_data = screen_data
@@ -37,6 +76,7 @@ class IdleScreen(Screen):
     def __init__(self, screen_data):
         super().__init__(screen_data)
         self.__scan_countdown = Countdown(1 / self.capture_rate)
+        self.__sheet = Sheet((1920, 1080))
 
     def tick(self, elapsed_seconds):
         self.__scan_countdown.tick(elapsed_seconds)
@@ -58,6 +98,7 @@ class IdleScreen(Screen):
                 self.switch_screen(CapturedScreen(self._screen_data, result.data))
 
         surface.fill((0, 0, 0))
+        self.__sheet.render(surface, (0, 0))
         self._blit_centered(source=self.capture_surface_cell.value, target=surface)
 
 
