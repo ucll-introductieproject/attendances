@@ -8,6 +8,7 @@ from absentees.capturer import Capturer
 from absentees.face import FaceDetector
 from absentees.qr import QRScanner
 from absentees.gui.screens import *
+from absentees.gui.clock import Clock
 from contextlib import contextmanager
 
 class Repeater:
@@ -55,9 +56,8 @@ def run(settings, sound_player):
     channel = Channel()
 
     with server(channel):
-        fps = settings['frame-rate']
         capture_fps = settings['capture.rate']
-        clock = pygame.time.Clock()
+        clock = Clock(settings['frame-rate'])
         font = pygame.font.SysFont(None, settings['font-size'])
 
         window_size = get_window_size(settings)
@@ -88,12 +88,12 @@ def run(settings, sound_player):
 
             current_screen = IdleScreen(screen_data, capture_surface_cell)
 
+            clock.add_observer(countdown.tick)
+            clock.add_observer(auto_capturer.tick)
+            clock.add_observer(lambda dt: current_screen.tick(dt))
+
             active = True
             while active:
-                elapsed_seconds = clock.tick(fps) / 1000
-                countdown.tick(elapsed_seconds)
-                auto_capturer.tick(elapsed_seconds)
-
                 if channel.message_from_server_waiting:
                     logging.debug('Client receives message from server')
                     request = channel.receive_from_server()
@@ -104,6 +104,8 @@ def run(settings, sound_player):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         active = False
+
+                clock.update()
 
                 # if countdown.ready:
                 #     countdown.reset()
@@ -124,7 +126,5 @@ def run(settings, sound_player):
                 #     if show_video:
                 #         render_surface.blit(capture_surface.value, (0, 0))
 
-                current_screen.tick(elapsed_seconds)
                 current_screen.render(render_surface)
-
                 pygame.display.flip()
