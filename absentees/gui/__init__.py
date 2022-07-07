@@ -9,19 +9,9 @@ from absentees.face import FaceDetector
 from absentees.qr import QRScanner
 from absentees.gui.screens import *
 from absentees.gui.clock import Clock
+from absentees.repeater import Repeater
 from contextlib import contextmanager
 
-class Repeater:
-    def __init__(self, func, time_interval):
-        self.__func = func
-        self.__time_interval = time_interval
-        self.__time_left = self.__time_interval
-
-    def tick(self, elapsed_seconds):
-        self.__time_left -= elapsed_seconds
-        while self.__time_left <= 0:
-            self.__func()
-            self.__time_left += self.__time_interval
 
 
 @contextmanager
