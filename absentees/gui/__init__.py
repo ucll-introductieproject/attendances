@@ -49,7 +49,7 @@ def run(settings, sound_player):
         capture_grayscale = capture_ndarray_cell.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
 
         countdown = Countdown(1 / capture_fps)
-        with Capturer(camera, capture_surface_cell) as capture:
+        with Capturer(camera, capture_surface_cell.value) as capture:
             screen_data = {
                 'switch_screen': switch_screen,
                 'capture': capture,
@@ -105,6 +105,8 @@ def run(settings, sound_player):
                 #         render_surface.blit(capture_surface.value, (0, 0))
 
                 capture()
+                capture_surface_cell.refresh()
+
                 current_screen.tick(elapsed_seconds)
                 current_screen.render(render_surface)
 
