@@ -6,11 +6,11 @@ pygame.init()
 pygame.camera.init()
 
 class Capturer:
-    def __init__(self, camera, target_surface):
+    def __init__(self, camera_name, target_surface):
         assert isinstance(target_surface, pygame.Surface)
 
         width, height = target_surface.get_size()
-        self.__camera = pygame.camera.Camera(camera, (width, height), 'RGB')
+        self.__camera = pygame.camera.Camera(camera_name, (width, height), 'RGB')
         self.__target = target_surface
 
     def __enter__(self):

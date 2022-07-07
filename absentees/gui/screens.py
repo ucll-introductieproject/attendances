@@ -69,8 +69,6 @@ class IdleScreen(Screen):
         self.__scan_countdown.tick(elapsed_seconds)
 
     def render(self, surface):
-        self.capture()
-
         # if self.__scan_countdown.ready:
         #     self.__scan_countdown.reset()
         #     if results := self.qr_scanner.scan(self.capture_ndarray_cell.value):

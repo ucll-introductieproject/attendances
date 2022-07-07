@@ -8,6 +8,31 @@ from absentees.capturer import Capturer
 from absentees.face import FaceDetector
 from absentees.qr import QRScanner
 from absentees.gui.screens import *
+from contextlib import contextmanager
+
+class Repeater:
+    def __init__(self, func, time_interval):
+        self.__func = func
+        self.__time_interval = time_interval
+        self.__time_left = self.__time_interval
+
+    def tick(self, elapsed_seconds):
+        self.__time_left -= elapsed_seconds
+        while self.__time_left <= 0:
+            self.__func()
+            self.__time_left += self.__time_interval
+
+
+@contextmanager
+def auto_capture(surface_cell, time_interval):
+    camera_name = Capturer.default_camera()
+    with Capturer(camera_name, surface_cell.value) as capture:
+        def capture_and_refresh():
+            capture()
+            surface_cell.refresh()
+
+        repeater = Repeater(capture_and_refresh, time_interval)
+        yield repeater
 
 
 def get_window_size(settings):
@@ -35,7 +60,7 @@ def run(settings, sound_player):
         capture_fps = settings['capture.rate']
         clock = pygame.time.Clock()
         font = pygame.font.SysFont(None, settings['font-size'])
-        camera = Capturer.default_camera()
+
         show_video = True
         window_size = get_window_size(settings)
         capture_width, capture_height = settings['capture.width'], settings['capture.height']
@@ -49,10 +74,9 @@ def run(settings, sound_player):
         capture_grayscale = capture_ndarray_cell.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
 
         countdown = Countdown(1 / capture_fps)
-        with Capturer(camera, capture_surface_cell.value) as capture:
+        with auto_capture(capture_surface_cell, 1 / 30) as auto_capturer:
             screen_data = {
                 'switch_screen': switch_screen,
-                'capture': capture,
                 'face_detector': FaceDetector(),
                 'qr_scanner': QRScanner(),
                 'capture_surface_cell': capture_surface_cell,
@@ -70,6 +94,7 @@ def run(settings, sound_player):
             while active:
                 elapsed_seconds = clock.tick(fps) / 1000
                 countdown.tick(elapsed_seconds)
+                auto_capturer.tick(elapsed_seconds)
 
                 if channel.message_from_server_waiting:
                     logging.debug('Client receives message from server')
@@ -103,9 +128,6 @@ def run(settings, sound_player):
 
                 #     if show_video:
                 #         render_surface.blit(capture_surface.value, (0, 0))
-
-                capture()
-                capture_surface_cell.refresh()
 
                 current_screen.tick(elapsed_seconds)
                 current_screen.render(render_surface)
