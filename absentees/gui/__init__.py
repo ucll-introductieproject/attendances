@@ -60,7 +60,6 @@ def run(settings, sound_player):
         clock = pygame.time.Clock()
         font = pygame.font.SysFont(None, settings['font-size'])
 
-        show_video = True
         window_size = get_window_size(settings)
         capture_width, capture_height = settings['capture.width'], settings['capture.height']
         current_screen = None
@@ -105,9 +104,6 @@ def run(settings, sound_player):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         active = False
-                    # elif event.type == pygame.KEYDOWN:
-                    #     if event.key == pygame.K_v:
-                    #         show_video = not show_video
 
                 # if countdown.ready:
                 #     countdown.reset()
