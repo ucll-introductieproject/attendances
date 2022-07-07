@@ -4,6 +4,7 @@ import click
 import absentees.settings
 from pathlib import Path
 import json
+import socket
 
 
 SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
@@ -82,6 +83,16 @@ def cameras():
         print(f'[{index}] {id}')
 
 cli.add_command(cameras)
+
+
+@click.command()
+@click.argument('message')
+def send(message):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect(('127.0.0.1', 12345))
+        s.sendall(message.encode('utf-8'))
+
+cli.add_command(send)
 
 
 if __name__ == '__main__':

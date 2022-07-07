@@ -11,8 +11,8 @@ DefaultSettings = {
         'theme': 'big-sur',
     },
     'window': {
-        'width': 0,
-        'height': 0,
+        'width': 640,
+        'height': 480,
     },
     'capture': {
         'width': 640,
