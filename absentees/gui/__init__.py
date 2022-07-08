@@ -1,7 +1,9 @@
+from tkinter import Frame
 import pygame
 import logging
 from absentees.server import Channel, server
 import cv2
+import time
 from absentees.countdown import Countdown
 from absentees.cells import Cell
 from absentees.capturer import Capturer
@@ -26,6 +28,117 @@ def auto_capture(surface_cell, time_interval):
         yield repeater
 
 
+class FrameAnalyzer:
+    def __init__(self, surface_cell):
+        assert isinstance(surface_cell, Cell)
+        self.__surface_cell = surface_cell
+        self.__pixels_cell = self.__surface_cell.derive(self.__convert_to_pixels)
+        # self.__grayscale_cell = self.__pixels_cell.derive(self.__convert_to_grayscale)
+        self.__qr_codes = self.__pixels_cell.derive(self.__decode_qr_codes)
+        self.__qr_scanner = QRScanner()
+
+    @property
+    def surface(self):
+        return self.__surface_cell
+
+    @property
+    def qr_codes(self):
+        return self.__qr_codes
+
+    def __convert_to_pixels(self, surface):
+        assert isinstance(surface, pygame.Surface), f'type {type(surface)}'
+        return pygame.surfarray.array3d(surface).swapaxes(0, 1)
+
+    # def __convert_to_grayscale(self, pixels):
+    #     return cv2.cvtColor(pixels, cv2.COLOR_BGR2GRAY)
+
+    def __decode_qr_codes(self, pixels):
+        results = self.__qr_scanner.scan(pixels)
+        if results:
+            logging.debug(f'Found {len(results)} QR code(s)')
+        return results
+
+
+class Model:
+    def __init__(self, settings):
+        self.__current_frame = Cell(Model.__create_frame(settings))
+        self.__analyzer = FrameAnalyzer(self.__current_frame)
+        self.__qr_scan_countdown = Countdown(0.25)
+
+    @staticmethod
+    def __create_frame(settings):
+        capture_size = settings['capture.width'], settings['capture.height']
+        return pygame.Surface(capture_size)
+
+    def tick(self, elapsed_seconds):
+        self.__qr_scan_countdown.tick(elapsed_seconds)
+
+    @property
+    def current_frame(self):
+        return self.__current_frame
+
+    @property
+    def qr_codes(self):
+        return self.__analyzer.qr_codes
+
+    # def __on_current_frame_updated(self):
+    #     if self.__qr_scan_countdown.ready:
+    #         self.__qr_scan_countdown.reset()
+    #         self.__look_for_qr()
+
+    # def __look_for_qr(self):
+    #     image = pygame.surfarray.array3d(self.__current_frame.value).swapaxes(0, 1)
+    #     if results := self.__qr_scanner.scan(image):
+    #         result = results[0]
+    #         highlight_color = (255, 0, 0)
+    #         width = 2
+    #         pygame.draw.polygon(
+    #             surface=self.current_frame.value,
+    #             color=highlight_color,
+    #             points=result.polygon,
+    #             width=width)
+
+
+class FrameViewer:
+    def __init__(self, model):
+        self.__freeze_time = 2
+        self.__countdown = Countdown(self.__freeze_time)
+        self.__model = model
+        self.__surface = pygame.Surface(self.__model.current_frame.value.get_size())
+        self.__image_cell = Cell(self.__model.current_frame.value)
+        self.__image_viewer = ImageViewer(self.__image_cell, (0, 0))
+        self.__model.current_frame.add_observer(self.__on_frame_updated)
+
+    def tick(self, elapsed_seconds):
+        self.__countdown.tick(elapsed_seconds)
+
+    def render(self, surface):
+        self.__image_viewer.render(surface)
+
+    def __on_frame_updated(self):
+        if self.__model.qr_codes.value:
+            self.__freeze_frame()
+        elif self.__countdown.ready:
+            self.__show_current_frame()
+
+    def __freeze_frame(self):
+        self.__countdown.reset()
+        self.__copy_current_frame()
+        self.__highlight_qr_codes()
+        self.__image_cell.value = self.__surface
+
+    def __copy_current_frame(self):
+        self.__surface.blit(self.__model.current_frame.value, (0, 0))
+
+    def __highlight_qr_codes(self):
+        highlight_color = (255, 0, 0)
+        for qr_code in self.__model.qr_codes.value:
+            pygame.draw.polygon(self.__surface, highlight_color, qr_code.polygon, width=2)
+
+    def __show_current_frame(self):
+        self.__image_cell.value = self.__model.current_frame.value
+
+
 def get_window_size(settings):
     info = pygame.display.Info()
     window_width, window_height = settings['window.width'], settings['window.height']
@@ -48,37 +161,39 @@ def run(settings, sound_player):
     clock = Clock(settings['frame-rate'])
     font = pygame.font.SysFont(None, settings['font-size'])
     window_size = get_window_size(settings)
-    capture_width, capture_height = settings['capture.width'], settings['capture.height']
+
     current_screen = None
 
     logging.debug(f'Creating window with size {window_size[0]}x{window_size[1]}')
-    render_surface = pygame.display.set_mode(window_size)
+    surface = pygame.display.set_mode(window_size)
 
-    capture_surface_cell = Cell(pygame.Surface((capture_width, capture_height)))
-    capture_ndarray_cell = capture_surface_cell.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
-    capture_grayscale = capture_ndarray_cell.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
+    # capture_surface_cell = Cell(pygame.Surface((capture_width, capture_height)))
+    # capture_ndarray_cell = capture_surface_cell.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
+    # capture_grayscale = capture_ndarray_cell.derive(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY))
 
-    countdown = Countdown(1 / capture_fps)
+    # countdown = Countdown(1 / capture_fps)
+    model = Model(settings)
+    frame_viewer = FrameViewer(model)
 
-    with server(channel), auto_capture(capture_surface_cell, 1 / 30) as auto_capturer:
-        screen_data = {
-            'switch_screen': switch_screen,
-            'face_detector': FaceDetector(),
-            'qr_scanner': QRScanner(),
-            'capture_surface_cell': capture_surface_cell,
-            'capture_ndarray_cell': capture_ndarray_cell,
-            'sound_player': sound_player,
-            'qr_highlight_color': settings.color('qr.highlight-color'),
-            'font': font,
-            'capture_rate': settings['qr.capture-rate'],
-            'freeze_time': settings['qr.freeze-time'],
-        }
+    with server(channel), auto_capture(model.current_frame, 1 / 30) as auto_capturer:
+        # screen_data = {
+        #     'switch_screen': switch_screen,
+        #     'face_detector': FaceDetector(),
+        #     'qr_scanner': QRScanner(),
+        #     'sound_player': sound_player,
+        #     'qr_highlight_color': settings.color('qr.highlight-color'),
+        #     'font': font,
+        #     'capture_rate': settings['qr.capture-rate'],
+        #     'freeze_time': settings['qr.freeze-time'],
+        # }
 
-        current_screen = IdleScreen(screen_data, capture_surface_cell)
+        # current_screen = IdleScreen(screen_data, model.current_frame)
 
-        clock.add_observer(countdown.tick)
+        clock.add_observer(model.tick)
         clock.add_observer(auto_capturer.tick)
-        clock.add_observer(lambda dt: current_screen.tick(dt))
+        clock.add_observer(frame_viewer.tick)
+        # clock.add_observer(countdown.tick)
+        # clock.add_observer(lambda dt: current_screen.tick(dt))
 
         active = True
         while active:
@@ -112,7 +227,9 @@ def run(settings, sound_player):
             #         sound_player.success()
 
             #     if show_video:
-            #         render_surface.blit(capture_surface.value, (0, 0))
+            #         surface.blit(capture_surface.value, (0, 0))
 
-            current_screen.render(render_surface)
+            # current_screen.render(surface)
+
+            frame_viewer.render(surface)
             pygame.display.flip()

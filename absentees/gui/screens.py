@@ -61,12 +61,14 @@ class Screen:
 class IdleScreen(Screen):
     def __init__(self, screen_data, current_frame_cell):
         super().__init__(screen_data)
-        self.__scan_countdown = Countdown(1 / self.capture_rate)
+        # self.__scan_countdown = Countdown(1 / self.capture_rate)
         self.__sheet = Sheet((1920, 1080))
         self.__video_viewer = ImageViewer(current_frame_cell, (0, 0))
 
+
     def tick(self, elapsed_seconds):
-        self.__scan_countdown.tick(elapsed_seconds)
+        # self.__scan_countdown.tick(elapsed_seconds)
+        pass
 
     def render(self, surface):
         # if self.__scan_countdown.ready:
@@ -84,9 +86,7 @@ class IdleScreen(Screen):
 
         surface.fill((0, 0, 0))
         self.__video_viewer.render(surface)
-        self.__sheet.render(surface, (0, 0))
-        self._blit_centered(source=self.capture_surface_cell.value, target=surface)
-
+        # self.__sheet.render(surface, (0, 0))
 
 class CapturedScreen(Screen):
     def __init__(self, screen_data, data):

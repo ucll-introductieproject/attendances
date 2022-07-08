@@ -13,9 +13,7 @@ class CellBase:
         self._notify_observers()
 
     def derive(self, func):
-        result = Derived(self, func)
-        self.add_observer(result.invalidate)
-        return result
+        return StrictDerived(self, func)
 
 
 class Cell(CellBase):
@@ -33,13 +31,14 @@ class Cell(CellBase):
         self._notify_observers()
 
 
-class Derived(CellBase):
+class LazyDerived(CellBase):
     def __init__(self, cell, func):
         super().__init__()
         self.__cell = cell
         self.__func = func
         self.__valid = False
         self.__value = None
+        self.__cell.add_observer(self.__invalidate)
 
     @property
     def value(self):
@@ -48,6 +47,24 @@ class Derived(CellBase):
             self.__valid = True
         return self.__value
 
-    def invalidate(self):
+    def __invalidate(self):
         self.__valid = False
         self.__value = None
+        self._notify_observers()
+
+
+class StrictDerived(CellBase):
+    def __init__(self, cell, func):
+        super().__init__()
+        self.__cell = cell
+        self.__func = func
+        self.__value = None
+        self.__cell.add_observer(self.__refresh)
+
+    @property
+    def value(self):
+        return self.__value
+
+    def __refresh(self):
+        self.__value = self.__func(self.__cell.value)
+        self._notify_observers()
