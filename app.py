@@ -1,7 +1,7 @@
 import logging
 from absentees.sound import SoundPlayer
 import click
-import absentees.settings
+from absentees.settings import load_settings, default_settings
 from pathlib import Path
 import json
 import socket
@@ -10,18 +10,18 @@ import socket
 SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
 
 
-def load_settings():
-    return absentees.settings.load_settings(SETTINGS_PATH)
-
-
 @click.group()
 @click.option('-v', '--verbose', help='Verbose', is_flag=True)
 @click.option('-q', '--quiet', help='Quiet', is_flag=True)
+@click.option('--default', help='Use default settings', is_flag=True)
 @click.pass_context
-def cli(ctx, verbose, quiet):
+def cli(ctx, verbose, quiet, default):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
     ctx.ensure_object(dict)
+
+    settings = default_settings() if default else load_settings(SETTINGS_PATH)
+    ctx.obj['settings'] = settings
     ctx.obj['quiet'] = quiet
 
 
@@ -29,7 +29,7 @@ def cli(ctx, verbose, quiet):
 @click.pass_context
 def tui(ctx):
    import absentees.tui as tui
-   settings = load_settings()
+   settings = ctx.obj['settings']
    sound_player = SoundPlayer(settings['sound.theme'], quiet=ctx.obj['quiet'])
    tui.run(settings, sound_player)
 
@@ -40,7 +40,7 @@ cli.add_command(tui)
 @click.pass_context
 def gui(ctx):
     import absentees.gui as gui
-    settings = load_settings()
+    settings = ctx.obj['settings']
     gui.run(settings, ctx.obj['quiet'])
 
 cli.add_command(gui)

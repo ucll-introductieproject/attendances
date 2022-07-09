@@ -34,9 +34,8 @@ DefaultSettings = {
 
 
 class Settings:
-    def __init__(self, path):
-        with open(path) as file:
-            self.__data = json.loads(path.read_text())
+    def __init__(self, data):
+        self.__data = data
 
     def __getitem__(self, key):
         parts = key.split('.')
@@ -57,4 +56,9 @@ def load_settings(path):
     if not path.exists():
         logging.info(f'Could not find {path}; generating default settings')
         path.write_text(json.dumps(DefaultSettings))
-    return Settings(path)
+    data = json.loads(path.read_text())
+    return Settings(data)
+
+
+def default_settings():
+    return Settings(DefaultSettings)
