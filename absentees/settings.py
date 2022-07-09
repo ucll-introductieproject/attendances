@@ -17,7 +17,8 @@ DefaultSettings = {
     'capture': {
         'width': 640,
         'height': 480,
-        'rate': 5
+        'rate': 5,
+        'dummy': True,
     },
     'qr': {
         'ignore-repetition-duration': 1000,

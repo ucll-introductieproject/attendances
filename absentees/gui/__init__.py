@@ -5,7 +5,7 @@ from absentees.server import Channel, server
 from absentees.sound import SoundPlayer
 from absentees.countdown import Countdown
 from absentees.cells import Cell
-from absentees.capturer import Capturer
+from absentees.capturer import DummyCapturer, VideoCapturer
 from absentees.gui.viewer import FrameViewer
 from absentees.gui.clock import Clock
 from absentees.repeater import Repeater
@@ -14,15 +14,24 @@ from contextlib import contextmanager
 
 
 
+def create_capturer(settings):
+    if settings['capture.dummy']:
+        return DummyCapturer
+    else:
+        camera_name = VideoCapturer.default_camera()
+        return lambda target: VideoCapturer(camera_name, target)
+
+
 @contextmanager
-def auto_capture(surface_cell, time_interval):
-    camera_name = Capturer.default_camera()
-    with Capturer(camera_name, surface_cell.value) as capture:
+def auto_capture(settings, surface_cell):
+    rate = settings['capture.rate']
+    capturer = create_capturer(settings)
+    with capturer(surface_cell.value) as capture:
         def capture_and_refresh():
             capture()
             surface_cell.refresh()
 
-        repeater = Repeater(capture_and_refresh, time_interval)
+        repeater = Repeater(capture_and_refresh, 1 / rate)
         yield repeater
 
 
@@ -135,7 +144,7 @@ def run(settings, quiet):
     attendances_viewer = create_attendances_viewer(settings, model, window_size)
     analysis_repeater = Repeater(model.analyze_current_frame, settings['qr.capture-rate'])
 
-    with server(channel), auto_capture(model.current_frame, 1 / 30) as auto_capturer:
+    with server(channel), auto_capture(settings, model.current_frame) as auto_capturer:
         clock.add_observer(auto_capturer.tick)
         clock.add_observer(frame_viewer.tick)
         clock.add_observer(analysis_repeater.tick)
