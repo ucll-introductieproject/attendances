@@ -1,7 +1,7 @@
 import pygame
 import logging
-from collections import namedtuple
 import cv2
+from collections import namedtuple
 from absentees.server import Channel, server
 from absentees.countdown import Countdown
 from absentees.cells import Cell
@@ -45,6 +45,24 @@ class FrameAnalyzer:
         else:
             return None
 
+    def highlight_qr_code(self, surface, qr_code):
+        highlight_color = (255, 0, 0)
+        pygame.draw.polygon(surface, highlight_color, qr_code.polygon, width=2)
+
+    def highlight_qr_codes(self, surface, qr_codes):
+        for qr_code in qr_codes:
+            self.highlight_qr_code(surface, qr_code)
+
+    def highlight_face(self, surface, face):
+        assert isinstance(surface, pygame.Surface)
+        assert isinstance(face, pygame.Rect), f'is {type(face)} instead'
+        highlight_color = (255, 0, 0)
+        pygame.draw.rect(surface=surface, color=highlight_color, rect=face, width=2)
+
+    def highlight_faces(self, surface, faces):
+        for face in faces:
+            self.highlight_face(surface, face)
+
     @staticmethod
     def __convert_to_pixels(surface):
         assert isinstance(surface, pygame.Surface), f'type {type(surface)}'
@@ -57,13 +75,13 @@ class FrameAnalyzer:
 
 class Model:
     def __init__(self, settings):
-        self.__current_frame = Cell(Model.__create_frame(settings))
-        self.__analyzed_frame = Model.__create_frame(settings)
+        self.__current_frame = Cell(Model.__create_surface(settings))
+        self.__analyzed_frame = Model.__create_surface(settings)
         self.__frame_analysis = Cell(None)
         self.__analyzer = FrameAnalyzer()
 
     @staticmethod
-    def __create_frame(settings):
+    def __create_surface(settings):
         capture_size = settings['capture.width'], settings['capture.height']
         return pygame.Surface(capture_size)
 
@@ -73,8 +91,12 @@ class Model:
 
     def analyze_current_frame(self):
         if analysis := self.__analyzer.analyze(self.current_frame.value):
+            logging.debug(analysis)
             logging.debug('Found QR code')
             self.__copy_current_frame()
+            logging.debug('Highlighting QR codes and faces')
+            self.__analyzer.highlight_qr_codes(self.__analyzed_frame, analysis.qr_codes)
+            self.__analyzer.highlight_faces(self.__analyzed_frame, analysis.faces)
             self.frame_analysis.value = (self.__analyzed_frame, analysis)
 
     def __copy_current_frame(self):
