@@ -1,11 +1,12 @@
 import pygame
 import logging
+from absentees.gui.attviewer import AttendancesViewer
 from absentees.server import Channel, server
 from absentees.sound import SoundPlayer
 from absentees.countdown import Countdown
 from absentees.cells import Cell
 from absentees.capturer import Capturer
-from absentees.gui.screens import *
+from absentees.gui.viewer import FrameViewer
 from absentees.gui.clock import Clock
 from absentees.repeater import Repeater
 from absentees.analyzer import FrameAnalyzer
@@ -25,12 +26,35 @@ def auto_capture(surface_cell, time_interval):
         yield repeater
 
 
+class Person:
+    def __init__(self, name):
+        self.__name = name
+
+    @property
+    def name(self):
+        return self.__name
+
+
+class Attendances:
+    def __init__(self, names):
+        self.__people = {name: Person(name) for name in names}
+
+    @property
+    def people(self):
+        return self.__people.values()
+
+
 class Model:
-    def __init__(self, settings):
+    def __init__(self, settings, names):
         self.__current_frame = Cell(Model.__create_surface(settings))
         self.__analyzed_frame = Model.__create_surface(settings)
         self.__frame_analysis = Cell(None)
         self.__analyzer = FrameAnalyzer()
+        self.__attendances = Attendances(names)
+
+    @property
+    def attendances(self):
+        return self.__attendances
 
     @staticmethod
     def __create_surface(settings):
@@ -55,28 +79,6 @@ class Model:
     @property
     def frame_analysis(self):
         return self.__frame_analysis
-
-
-class FrameViewer:
-    def __init__(self, model, position):
-        self.__model = model
-        self.__freeze_time = 2
-        self.__countdown = Countdown(self.__freeze_time, 0)
-        self.__image = Cell(self.__model.current_frame.value)
-        self.__image_viewer = ImageViewer(self.__image, position)
-        self.__model.frame_analysis.add_observer(self.__on_new_frame_analysis)
-
-    def tick(self, elapsed_seconds):
-        self.__countdown.tick(elapsed_seconds)
-        if self.__countdown.ready:
-            self.__image.value = self.__model.current_frame.value
-
-    def render(self, surface):
-        self.__image_viewer.render(surface)
-
-    def __on_new_frame_analysis(self):
-        self.__countdown.reset()
-        self.__image.value = self.__model.frame_analysis.value[0]
 
 
 def get_window_size(settings):
@@ -113,6 +115,12 @@ def create_frame_viewer(model, window_size):
     return FrameViewer(model, (x, y))
 
 
+def create_attendances_viewer(settings, model, window_size):
+    window_width, window_height = window_size
+    rect = pygame.Rect(0, 480, window_width, window_height - 480)
+    return AttendancesViewer(settings, model, rect)
+
+
 def run(settings, quiet):
     pygame.init()
 
@@ -122,8 +130,9 @@ def run(settings, quiet):
     surface = create_window(window_size)
     sound_player = create_sound_player(settings, quiet)
 
-    model = Model(settings)
+    model = Model(settings, range(0, 100))
     frame_viewer = create_frame_viewer(model, window_size)
+    attendances_viewer = create_attendances_viewer(settings, model, window_size)
     analysis_repeater = Repeater(model.analyze_current_frame, settings['qr.capture-rate'])
 
     with server(channel), auto_capture(model.current_frame, 1 / 30) as auto_capturer:
@@ -147,4 +156,5 @@ def run(settings, quiet):
             clock.update()
 
             frame_viewer.render(surface)
+            attendances_viewer.render(surface)
             pygame.display.flip()
