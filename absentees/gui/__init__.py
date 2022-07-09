@@ -129,30 +129,6 @@ class FrameViewer:
         self.__image.value = self.__model.frame_analysis.value[0]
 
 
-    # def __on_frame_updated(self):
-    #     if self.__model.qr_codes.value:
-    #         self.__freeze_frame()
-    #     elif self.__countdown.ready:
-    #         self.__show_current_frame()
-
-    # def __freeze_frame(self):
-    #     self.__countdown.reset()
-    #     self.__copy_current_frame()
-    #     self.__highlight_qr_codes()
-    #     self.__image_cell.value = self.__surface
-
-    # def __copy_current_frame(self):
-    #     self.__surface.blit(self.__model.current_frame.value, (0, 0))
-
-    # def __highlight_qr_codes(self):
-    #     highlight_color = (255, 0, 0)
-    #     for qr_code in self.__model.qr_codes.value:
-    #         pygame.draw.polygon(self.__surface, highlight_color, qr_code.polygon, width=2)
-
-    # def __show_current_frame(self):
-    #     self.__image_cell.value = self.__model.current_frame.value
-
-
 def get_window_size(settings):
     info = pygame.display.Info()
     window_width, window_height = settings['window.width'], settings['window.height']
