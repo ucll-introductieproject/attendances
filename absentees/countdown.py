@@ -1,7 +1,7 @@
 class Countdown:
-    def __init__(self, duration):
+    def __init__(self, duration, initial=None):
         self.__duration = duration
-        self.__time_left = duration
+        self.__time_left = duration if initial is None else initial
 
     def tick(self, elapsed_seconds):
         self.__time_left = max(0, self.__time_left - elapsed_seconds)
