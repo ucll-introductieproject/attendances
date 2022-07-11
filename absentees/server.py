@@ -1,6 +1,8 @@
 import socketserver
+import socket
 import threading
 import logging
+import json
 from contextlib import contextmanager
 
 
@@ -50,9 +52,9 @@ def server(channel):
             logging.debug('Server has received external message')
             line = self.rfile.readline()
             logging.debug("Server sends message to client and waits for response")
-            response = channel.send_to_client(line)
+            response = channel.send_to_client(json.loads(line.decode('utf-8')))
             logging.debug('Server received answer from client')
-            print(response)
+            print(response.decode('utf-8'))
 
     def threadproc():
         nonlocal shutdown
@@ -79,3 +81,8 @@ def server(channel):
     finally:
         shutdown()
 
+
+def send(message):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect(('127.0.0.1', 12345))
+        s.sendall(message.encode('utf-8'))

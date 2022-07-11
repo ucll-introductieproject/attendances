@@ -1,6 +1,7 @@
 import logging
 from absentees.sound import SoundPlayer
 import click
+import absentees.commands as commands
 from absentees.settings import load_settings, default_settings
 from pathlib import Path
 import json
@@ -84,14 +85,27 @@ def cameras():
 cli.add_command(cameras)
 
 
-@click.command()
-@click.argument('message')
-def send(message):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('127.0.0.1', 12345))
-        s.sendall(message.encode('utf-8'))
+# @click.command()
+# @click.argument('message')
+# def send(message):
+#     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+#         s.connect(('127.0.0.1', 12345))
+#         s.sendall(message.encode('utf-8'))
 
-cli.add_command(send)
+# cli.add_command(send)
+
+
+@click.group()
+def cmd():
+    pass
+
+cli.add_command(cmd)
+
+
+for command_type in commands.enumerate_commands():
+    create_command = getattr(command_type, 'create_cli_command')
+    command = create_command()
+    cmd.add_command(command)
 
 
 if __name__ == '__main__':

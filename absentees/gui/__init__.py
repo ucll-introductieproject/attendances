@@ -10,6 +10,7 @@ from absentees.gui.viewer import FrameViewer
 from absentees.gui.clock import Clock
 from absentees.repeater import Repeater
 from absentees.analyzer import FrameAnalyzer
+import absentees.commands as commands
 from contextlib import contextmanager
 
 
@@ -61,6 +62,9 @@ class Attendances:
     @property
     def people(self):
         return self.__people.values()
+
+    def register(self, name):
+        self.__people[name].present = True
 
 
 class Model:
@@ -149,7 +153,7 @@ def run(settings, quiet):
     surface = create_window(window_size)
     sound_player = create_sound_player(settings, quiet)
 
-    model = Model(settings, [str(k).rjust(5, '0') for k in range(0, 100)])
+    model = Model(settings, [str(k).rjust(5, '0') for k in range(0, 98)])
     frame_viewer = create_frame_viewer(model, window_size)
     attendances_viewer = create_attendances_viewer(settings, model, window_size)
     analysis_repeater = Repeater(model.analyze_current_frame, settings['qr.capture-rate'])
@@ -162,11 +166,14 @@ def run(settings, quiet):
         active = True
         while active:
             if channel.message_from_server_waiting:
-                logging.debug('Client receives message from server')
                 request = channel.receive_from_server()
-                print(request)
-                logging.debug('Client answers server')
-                channel.respond_to_server('ok'.encode('utf-8'))
+                try:
+                    logging.debug(f'Received {request}')
+                    command_class = commands.find_command_with_name(request['command'])
+                    command_object = command_class(**request['args'])
+                    command_object.execute(model)
+                finally:
+                    channel.respond_to_server('ok'.encode('utf-8'))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
