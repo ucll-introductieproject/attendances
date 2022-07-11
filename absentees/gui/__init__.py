@@ -37,11 +37,21 @@ def auto_capture(settings, surface_cell):
 
 class Person:
     def __init__(self, name):
+        assert isinstance(name, str)
         self.__name = name
+        self.__present = False
 
     @property
     def name(self):
         return self.__name
+
+    @property
+    def present(self):
+        return self.__present
+
+    @present.setter
+    def present(self, value):
+        self.__present = value
 
 
 class Attendances:
@@ -139,7 +149,7 @@ def run(settings, quiet):
     surface = create_window(window_size)
     sound_player = create_sound_player(settings, quiet)
 
-    model = Model(settings, range(0, 100))
+    model = Model(settings, [str(k).rjust(5, '0') for k in range(0, 100)])
     frame_viewer = create_frame_viewer(model, window_size)
     attendances_viewer = create_attendances_viewer(settings, model, window_size)
     analysis_repeater = Repeater(model.analyze_current_frame, settings['qr.capture-rate'])
