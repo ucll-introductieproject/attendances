@@ -1,6 +1,8 @@
+from math import ceil
 import socketserver
 import socket
 import threading
+import struct
 import logging
 import json
 from contextlib import contextmanager
@@ -47,28 +49,37 @@ class Channel:
 
 @contextmanager
 def server(channel):
-    class Handler(socketserver.StreamRequestHandler):
-        def handle(self):
-            logging.debug('Server has received external message')
-            line = self.rfile.readline()
-            logging.debug("Server sends message to client and waits for response")
-            response = channel.send_to_client(json.loads(line.decode('utf-8')))
-            logging.debug('Server received answer from client')
-            print(response.decode('utf-8'))
-
     def threadproc():
         nonlocal shutdown
         host = '127.0.0.1'
         port = 12345
+        exit_message = ':exit'
 
-        with socketserver.TCPServer((host, port), Handler) as server:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             def shutdown_func():
                 logging.info('Shutting down TCP server')
-                server.shutdown()
+                send(exit_message)
+
             shutdown = shutdown_func
             event.set()
-            logging.info(f'Started TCP server on {host}:{port}')
-            server.serve_forever()
+            s.bind((host, port))
+            s.listen()
+            message = None
+
+            while message != exit_message:
+                connection, address = s.accept()
+                try:
+                    message = _receive_data(connection)
+
+                    if message == exit_message:
+                        _send_data(connection, 'ok')
+                        continue
+                    else:
+                        response = channel.send_to_client(message)
+                        _send_data(connection, response)
+                finally:
+                    connection.close()
+
 
     event = threading.Event()
     shutdown = None
@@ -82,7 +93,36 @@ def server(channel):
         shutdown()
 
 
+def _send_data(socket, message):
+    assert isinstance(message, str)
+    raw_bytes = message.encode('utf-8')
+    length = struct.pack('I', len(raw_bytes))
+    buffer = length + raw_bytes
+    socket.sendall(buffer)
+
+
+def _receive_data(socket):
+    block_size = 4096
+    buffer = socket.recv(4)
+    byte_count = struct.unpack('I', buffer)[0]
+    nblocks = ceil(byte_count / block_size)
+    buffer = b''
+    for _ in range(nblocks):
+        buffer += socket.recv(block_size)
+    return buffer.decode('utf-8')
+
+
 def send(message):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('127.0.0.1', 12345))
-        s.sendall(message.encode('utf-8'))
+        host = '127.0.0.1'
+        port = 12345
+
+        logging.debug(f'Connecting to {host}:{port}')
+        s.connect((host, port))
+
+        logging.debug(f'Sending message {message}')
+        _send_data(s, message)
+
+        logging.debug(f'Waiting for response')
+        response = _receive_data(s)
+        print(response)

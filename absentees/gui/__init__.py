@@ -1,5 +1,6 @@
-import pygame
 import logging
+import pygame
+import json
 from absentees.gui.attviewer import AttendancesViewer
 from absentees.server import Channel, server
 from absentees.sound import SoundPlayer
@@ -58,6 +59,10 @@ class Person:
 class Attendances:
     def __init__(self, names):
         self.__people = {name: Person(name) for name in names}
+
+    @property
+    def names(self):
+        return self.__people.keys()
 
     @property
     def people(self):
@@ -166,14 +171,16 @@ def run(settings, quiet):
         active = True
         while active:
             if channel.message_from_server_waiting:
-                request = channel.receive_from_server()
+                request = json.loads(channel.receive_from_server())
                 try:
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    command_object.execute(model)
-                finally:
-                    channel.respond_to_server('ok'.encode('utf-8'))
+                    response = command_object.execute(model)
+                    channel.respond_to_server(response)
+                except:
+                    channel.respond_to_server('exception thrown')
+                    raise
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

@@ -14,14 +14,19 @@ class RegisterAttendanceCommand(Command):
         @click.argument('name', type=str)
         def register(**kwargs):
             data = { "command": c.__name__, "args": kwargs }
-            send(json.dumps(data))
+            response = send(json.dumps(data))
+            print(response)
         return register
 
     def __init__(self, name):
         self.__name = name
 
     def execute(self, model):
-        model.attendances.register(self.__name)
+        if self.__name in model.attendances.names:
+            model.attendances.register(self.__name)
+            return 'Success'
+        else:
+            return f'{self.__name} unknown'
 
 
 def enumerate_commands():
