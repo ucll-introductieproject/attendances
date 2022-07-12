@@ -5,6 +5,9 @@ class Attendances:
     def __init__(self, names):
         self.__people = {name: Person(name) for name in names}
 
+    def __getitem__(self, name):
+        return self.__people[name]
+
     @property
     def names(self):
         return self.__people.keys()

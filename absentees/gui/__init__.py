@@ -4,8 +4,6 @@ import json
 from absentees.gui.attviewer import AttendancesViewer
 from absentees.server import Channel, server
 from absentees.sound import SoundPlayer
-from absentees.countdown import Countdown
-from absentees.cells import Cell
 from absentees.capturer import DummyCapturer, VideoCapturer
 from absentees.gui.viewer import FrameViewer
 from absentees.gui.clock import Clock
