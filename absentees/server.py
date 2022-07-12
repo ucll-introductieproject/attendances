@@ -125,4 +125,4 @@ def send(message):
 
         logging.debug(f'Waiting for response')
         response = _receive_data(s)
-        print(response)
+        return response

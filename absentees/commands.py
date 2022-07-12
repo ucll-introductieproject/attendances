@@ -1,10 +1,25 @@
 from absentees.server import send
+import logging
 import click
 import json
 
 
 class Command:
     pass
+
+
+class ListPeopleCommand(Command):
+    @classmethod
+    def create_cli_command(c):
+        @click.command()
+        def list_people():
+            data = { "command": c.__name__, "args": {} }
+            response = send(json.dumps(data))
+            print(response)
+        return list_people
+
+    def execute(self, model):
+        return "\n".join(model.attendances.names)
 
 
 class RegisterAttendanceCommand(Command):
