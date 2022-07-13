@@ -1,19 +1,28 @@
 from math import ceil
+from absentees.model.person import Person
 from absentees.gui.grid import Grid
 import pygame
 from operator import attrgetter
 
 
 class AttendanceSlotViewer:
-    def __init__(self, model, rectangle, name, font):
-        self.__model = model
+    def __init__(self, rectangle, person, font):
+        assert isinstance(rectangle, pygame.Rect)
+        assert isinstance(person, Person)
         self.__rectangle = rectangle
-        self.__name = name
+        self.__person = person
         self.__font = font
+        self.__dirty = True
+        self.__person.present.add_observer(self.__on_person_changed)
 
-    def render(self, surface):
-        self.__render_background(surface)
-        self.__render_name(surface)
+    def __on_person_changed(self):
+        self.__dirty = True
+
+    def render(self, surface, force=False):
+        if self.__dirty or force:
+            self.__render_background(surface)
+            self.__render_name(surface)
+            self.__dirty = False
 
     def __render_background(self, surface):
         pygame.draw.rect(surface, self.__background_color, self.__rectangle)
@@ -29,14 +38,13 @@ class AttendanceSlotViewer:
 
     @property
     def __background_color(self):
-        if self.__person.present:
+        if self.__person.present.value:
             return (0, 64, 0)
         else:
             return (64, 0, 0)
 
-    @property
-    def __person(self):
-        return self.__model.attendances[self.__name]
+    def tick(self, elapsed_seconds):
+        pass
 
 
 class EmptySlotViewer:
@@ -46,6 +54,9 @@ class EmptySlotViewer:
     def render(self, surface):
         color = (0, 0, 0)
         pygame.draw.rect(surface, color, self.__rectangle)
+
+    def tick(self, elapsed_seconds):
+        pass
 
 
 class AttendancesViewer:
@@ -68,7 +79,7 @@ class AttendancesViewer:
         rectangle = self.__grid.child_rectangle(position)
         if index < len(self.__people):
             person = self.__people[index]
-            return AttendanceSlotViewer(self.__model, rectangle, person.name, font)
+            return AttendanceSlotViewer(rectangle, person, font)
         else:
             return EmptySlotViewer(rectangle)
 
@@ -76,3 +87,8 @@ class AttendancesViewer:
         for row in self.__slots_viewers:
             for viewer in row:
                 viewer.render(surface)
+
+    def tick(self, elapsed_seconds):
+        for row in self.__slots_viewers:
+            for viewer in row:
+                viewer.tick(elapsed_seconds)

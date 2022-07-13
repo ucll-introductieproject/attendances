@@ -92,6 +92,7 @@ def run(settings, quiet):
         clock.add_observer(auto_capturer.tick)
         clock.add_observer(frame_viewer.tick)
         clock.add_observer(analysis_repeater.tick)
+        clock.add_observer(attendances_viewer.tick)
 
         active = True
         while active:

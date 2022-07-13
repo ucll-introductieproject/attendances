@@ -17,4 +17,4 @@ class Attendances:
         return self.__people.values()
 
     def register(self, name):
-        self.__people[name].present = True
+        self.__people[name].present.value = True
