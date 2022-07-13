@@ -1,6 +1,7 @@
 from math import ceil
 from absentees.model.person import Person
 from absentees.gui.grid import Grid
+from absentees.animations import ConstantAnimation, Animation, TupleAnimation, FloatAnimation
 import pygame
 from operator import attrgetter
 
@@ -12,11 +13,20 @@ class AttendanceSlotViewer:
         self.__rectangle = rectangle
         self.__person = person
         self.__font = font
-        self.__dirty = True
         self.__person.present.add_observer(self.__on_person_changed)
+        self.__background = (64, 0, 0)
+        self.__dirty = True
 
     def __on_person_changed(self):
         self.__dirty = True
+        if self.__person.present.value == True:
+            r_animation = ConstantAnimation(0)
+            g_animation = FloatAnimation(255, 64, 0.25)
+            b_animation = ConstantAnimation(0)
+            color_animation = TupleAnimation((r_animation, g_animation, b_animation))
+            self.__background = color_animation
+        else:
+            self.__background = ConstantAnimation((64, 0, 0))
 
     def render(self, surface, force=False):
         if self.__dirty or force:
@@ -25,7 +35,8 @@ class AttendanceSlotViewer:
             self.__dirty = False
 
     def __render_background(self, surface):
-        pygame.draw.rect(surface, self.__background_color, self.__rectangle)
+        color = self.__background.value if isinstance(self.__background, Animation) else self.__background
+        pygame.draw.rect(surface, color, self.__rectangle)
 
     def __render_name(self, surface):
         name = self.__person.name
@@ -36,15 +47,10 @@ class AttendanceSlotViewer:
         y = self.__rectangle.top + (self.__rectangle.height - h) // 2
         surface.blit(label, (x, y))
 
-    @property
-    def __background_color(self):
-        if self.__person.present.value:
-            return (0, 64, 0)
-        else:
-            return (64, 0, 0)
-
     def tick(self, elapsed_seconds):
-        pass
+        if isinstance(self.__background, Animation):
+            self.__background.tick(elapsed_seconds)
+            self.__dirty = True
 
 
 class EmptySlotViewer:
