@@ -15,6 +15,11 @@ class CellBase:
     def derive(self, func, /, lazy=False):
         return (LazyDerived if lazy else StrictDerived)(self, func)
 
+    def synchronize(self, target, func):
+        def syncer():
+            target.value = func(self.value)
+        self.add_observer(syncer)
+
 
 class Cell(CellBase):
     def __init__(self, initial_value):

@@ -2,9 +2,10 @@ from absentees.animations import Animation
 
 
 class FloatAnimation(Animation):
-    def __init__(self, start, target, duration):
-        self.__start = start
+    def __init__(self, target, start, end, duration):
         self.__target = target
+        self.__start = start
+        self.__end = end
         self.__duration = duration
         self.__time = 0
 
@@ -12,16 +13,9 @@ class FloatAnimation(Animation):
         new_time = self.__time + elapsed_seconds
         if new_time >= self.__duration:
             self.__time = self.__duration
+            self.__target.value = self.__end
             return new_time - self.__duration
         else:
             self.__time = new_time
+            self.__target.value = self.__start + (self.__end - self.__start) * self.__time / self.__duration
             return 0
-
-    @property
-    def value(self):
-        t = self.__time / self.__duration
-        return self.__start + t * (self.__target - self.__start)
-
-    @property
-    def finished(self):
-        return self.__time == self.__duration

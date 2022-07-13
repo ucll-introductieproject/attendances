@@ -1,7 +1,9 @@
 from math import ceil
+from absentees.animations.sequence import SequenceAnimation
 from absentees.model.person import Person
 from absentees.gui.grid import Grid
-from absentees.animations import ConstantAnimation, Animation, TupleAnimation, FloatAnimation
+from absentees.cells import Cell
+from absentees.animations import ConstantAnimation, Animation, ParallelAnimation, FloatAnimation, DiracAnimation, NullAnimation
 import pygame
 from operator import attrgetter
 
@@ -14,17 +16,20 @@ class AttendanceSlotViewer:
         self.__person = person
         self.__font = font
         self.__person.present.add_observer(self.__on_person_changed)
-        self.__background = (64, 0, 0)
+        self.__background = Cell((64, 0, 0))
+        self.__dirty = True
+        self.__background.add_observer(self.__on_background_changed)
+        self.__background_animation = None
+
+    def __on_background_changed(self):
         self.__dirty = True
 
     def __on_person_changed(self):
         self.__dirty = True
         if self.__person.present.value == True:
-            r_animation = ConstantAnimation(0)
-            g_animation = FloatAnimation(255, 64, 0.25)
-            b_animation = ConstantAnimation(0)
-            color_animation = TupleAnimation((r_animation, g_animation, b_animation))
-            self.__background = color_animation
+            cell = Cell(0)
+            self.__background_animation = SequenceAnimation(FloatAnimation(cell, 255, 64, 0.5), NullAnimation())
+            cell.synchronize(self.__background, lambda g: (0, g, 0))
         else:
             self.__background = ConstantAnimation((64, 0, 0))
 
@@ -35,8 +40,7 @@ class AttendanceSlotViewer:
             self.__dirty = False
 
     def __render_background(self, surface):
-        color = self.__background.value if isinstance(self.__background, Animation) else self.__background
-        pygame.draw.rect(surface, color, self.__rectangle)
+        pygame.draw.rect(surface, self.__background.value, self.__rectangle)
 
     def __render_name(self, surface):
         name = self.__person.name
@@ -48,9 +52,8 @@ class AttendanceSlotViewer:
         surface.blit(label, (x, y))
 
     def tick(self, elapsed_seconds):
-        if isinstance(self.__background, Animation):
-            self.__background.tick(elapsed_seconds)
-            self.__dirty = True
+        if self.__background_animation:
+            self.__background_animation.tick(elapsed_seconds)
 
 
 class EmptySlotViewer:
