@@ -1,9 +1,10 @@
 from math import ceil
+from absentees.animations.dirac import DiracAnimation
 from absentees.animations.sequence import SequenceAnimation
 from absentees.model.person import Person
 from absentees.gui.grid import Grid
 from absentees.cells import Cell
-from absentees.animations import ConstantAnimation, Animation, ParallelAnimation, FloatAnimation, DiracAnimation, NullAnimation
+from absentees.animations import FloatAnimation, NullAnimation
 import time
 import pygame
 from operator import attrgetter
@@ -27,11 +28,17 @@ class AttendanceSlotViewer:
         self.__dirty = True
 
     def __on_person_changed(self):
+        def remove_animation():
+            self.__background_animation = None
+
         self.__dirty = True
         if self.__person.present.value == True:
             cell = Cell(0)
             highlight_duration = self.__settings['highlight-duration']
-            self.__background_animation = SequenceAnimation(FloatAnimation(cell, 255, 64, highlight_duration), NullAnimation())
+            self.__background_animation = SequenceAnimation(
+                FloatAnimation(cell, 255, 64, highlight_duration),
+                DiracAnimation(remove_animation)
+            )
             cell.synchronize(self.__background, lambda g: (0, g, 0))
         else:
             self.__background = self.__settings.color('colors.absent')
