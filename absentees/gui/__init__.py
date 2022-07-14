@@ -87,7 +87,7 @@ def run(settings):
     for person in model.attendances.people:
         person.present.add_observer(sound_player.success)
     frame_viewer = create_frame_viewer(model, surface.get_size())
-    attendances_viewer = create_attendances_viewer(settings, model, surface.get_size())
+    attendances_viewer = create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
     analysis_repeater = Repeater(model.analyze_current_frame, settings['qr.capture-rate'])
 
     with server(channel), auto_capture(settings.subtree('capture'), model.current_frame) as auto_capturer:

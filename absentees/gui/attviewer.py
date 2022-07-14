@@ -4,19 +4,21 @@ from absentees.model.person import Person
 from absentees.gui.grid import Grid
 from absentees.cells import Cell
 from absentees.animations import ConstantAnimation, Animation, ParallelAnimation, FloatAnimation, DiracAnimation, NullAnimation
+import time
 import pygame
 from operator import attrgetter
 
 
 class AttendanceSlotViewer:
-    def __init__(self, rectangle, person, font):
+    def __init__(self, settings, rectangle, person, font):
         assert isinstance(rectangle, pygame.Rect)
         assert isinstance(person, Person)
+        self.__settings = settings
         self.__rectangle = rectangle
         self.__person = person
         self.__font = font
         self.__person.present.add_observer(self.__on_person_changed)
-        self.__background = Cell((64, 0, 0))
+        self.__background = Cell(self.__settings.color('colors.absent'))
         self.__dirty = True
         self.__background.add_observer(self.__on_background_changed)
         self.__background_animation = None
@@ -28,13 +30,16 @@ class AttendanceSlotViewer:
         self.__dirty = True
         if self.__person.present.value == True:
             cell = Cell(0)
-            self.__background_animation = SequenceAnimation(FloatAnimation(cell, 255, 64, 0.5), NullAnimation())
+            highlight_duration = self.__settings['highlight-duration']
+            self.__background_animation = SequenceAnimation(FloatAnimation(cell, 255, 64, highlight_duration), NullAnimation())
             cell.synchronize(self.__background, lambda g: (0, g, 0))
         else:
-            self.__background = ConstantAnimation((64, 0, 0))
+            self.__background = self.__settings.color('colors.absent')
+            self.__background_animation = None
 
     def render(self, surface, force=False):
         if self.__dirty or force:
+            print(time.monotonic())
             self.__render_background(surface)
             self.__render_name(surface)
             self.__dirty = False
@@ -44,7 +49,7 @@ class AttendanceSlotViewer:
 
     def __render_name(self, surface):
         name = self.__person.name
-        color = (255, 255, 255)
+        color = self.__settings.color('colors.font')
         label = self.__font.render(name, True, color)
         w, h = label.get_size()
         x = self.__rectangle.left + (self.__rectangle.width - w) // 2
@@ -73,13 +78,13 @@ class AttendancesViewer:
         self.__settings = settings
         self.__model = model
         self.__people = sorted(model.attendances.people, key=attrgetter('name'))
-        self.__ncolumns = 10
+        self.__ncolumns = self.__settings['columns']
         self.__nrows = ceil(len(self.__people) / self.__ncolumns)
         self.__grid = Grid(rectangle, (self.__ncolumns, self.__nrows))
         self.__slots_viewers = self.__create_slot_viewers()
 
     def __create_slot_viewers(self):
-        font = pygame.font.SysFont(None, size=24)
+        font = pygame.font.SysFont(None, size=self.__settings['font-size'])
         return [[self.__create_slot_viewer(font, (x, y)) for x in range(self.__ncolumns)] for y in range(self.__nrows)]
 
     def __create_slot_viewer(self, font, position):
@@ -88,7 +93,7 @@ class AttendancesViewer:
         rectangle = self.__grid.child_rectangle(position)
         if index < len(self.__people):
             person = self.__people[index]
-            return AttendanceSlotViewer(rectangle, person, font)
+            return AttendanceSlotViewer(self.__settings, rectangle, person, font)
         else:
             return EmptySlotViewer(rectangle)
 

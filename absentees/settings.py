@@ -16,6 +16,23 @@ DefaultSettingsData = {
             'width': 1920,
             'height': 1080,
         },
+        'attendances': {
+            'columns': 24,
+            'font-size': 16,
+            'colors': {
+                'absent': {
+                    'r': 64,
+                    'g': 0,
+                    'b': 0,
+                },
+                'font': {
+                    'r': 255,
+                    'g': 255,
+                    'b': 255,
+                }
+            },
+            'highlight-duration': 0.5,
+        },
     },
     'capture': {
         'width': 640,
@@ -60,9 +77,9 @@ class Settings:
         return [*self.__key_prefix, *key_string.split('.')]
 
     def color(self, key):
-        r = self[key]['r']
-        g = self[key]['g']
-        b = self[key]['b']
+        r = self[f'{key}.r']
+        g = self[f'{key}.g']
+        b = self[f'{key}.b']
         return (r, g, b)
 
     @property
