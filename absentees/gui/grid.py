@@ -19,10 +19,3 @@ class Grid:
         y = rectangle.top + vmargin + py * height
         result = pygame.Rect(x, y, width, height)
         return result
-
-    # def render(self, surface):
-    #     grid_width, grid_height = self.__grid_size
-    #     for y in range(grid_height):
-    #         for x in range(grid_width):
-    #             rect = self.__determine_child_rectangle((x, y))
-    #             self.__render_child(surface, (x, y), rect)
