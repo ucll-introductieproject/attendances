@@ -84,6 +84,8 @@ def run(settings):
     sound_player = create_sound_player(settings.subtree('sound'))
 
     model = Model(settings, [str(k).rjust(5, '0') for k in range(0, 98)])
+    for person in model.attendances.people:
+        person.present.add_observer(sound_player.success)
     frame_viewer = create_frame_viewer(model, surface.get_size())
     attendances_viewer = create_attendances_viewer(settings, model, surface.get_size())
     analysis_repeater = Repeater(model.analyze_current_frame, settings['qr.capture-rate'])
