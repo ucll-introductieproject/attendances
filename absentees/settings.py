@@ -1,18 +1,21 @@
-from pathlib import Path
 from functools import reduce
+from absentees.cells import Cell
 import logging
 import json
 
 
-DefaultSettings = {
+DefaultSettingsData = {
     'frame-rate': 30,
     'font-size': 64,
     'sound': {
         'theme': 'big-sur',
+        'quiet': False,
     },
-    'window': {
-        'width': 1920,
-        'height': 1080,
+    'gui': {
+        'window': {
+            'width': 1920,
+            'height': 1080,
+        },
     },
     'capture': {
         'width': 640,
@@ -29,7 +32,7 @@ DefaultSettings = {
         },
         'capture-rate': 5,
         'freeze-time': 1,
-    }
+    },
 }
 
 
@@ -40,6 +43,13 @@ class Settings:
 
     def __getitem__(self, key=''):
         parts = self.__split_key(key)
+        return self.__get_cell_at(parts).value
+
+    def __setitem__(self, key, value):
+        parts = self.__split_key(key)
+        self.__get_cell_at(parts).value = value
+
+    def __get_cell_at(self, parts):
         return reduce(lambda current, part: current[part], parts, self.__data)
 
     def subtree(self, key):
@@ -60,13 +70,28 @@ class Settings:
         return self.__data
 
 
+def _cellify(data):
+    if isinstance(data, dict):
+        return {key: _cellify(value) for key, value in data.items()}
+    else:
+        return Cell(data)
+
+
+def _create_settings_from_data(data):
+    return Settings(_cellify(data))
+
+
+def _create_settings_from_json(json_string):
+    return _create_settings_from_data(json.loads(json_string))
+
+
 def load_settings(path):
     if not path.exists():
         logging.info(f'Could not find {path}; generating default settings')
-        path.write_text(json.dumps(DefaultSettings))
-    data = json.loads(path.read_text())
-    return Settings(data)
+        path.write_text(json.dumps(DefaultSettingsData))
+    json_string = path.read_text()
+    return _create_settings_from_json(json_string)
 
 
 def default_settings():
-    return Settings(DefaultSettings)
+    return _create_settings_from_data(DefaultSettingsData)

@@ -34,9 +34,9 @@ def auto_capture(settings, surface_cell):
         yield repeater
 
 
-def get_window_size(settings):
+def _get_window_size(settings):
     info = pygame.display.Info()
-    window_width, window_height = settings['window.width'], settings['window.height']
+    window_width, window_height = settings['width'], settings['height']
     if window_width == 0:
         window_width = info.current_w
     if window_height == 0:
@@ -50,14 +50,15 @@ def create_clock(settings):
     return Clock(rate)
 
 
-def create_window(window_size):
-    logging.info(f'Creating window with size {window_size[0]}x{window_size[1]}')
-    return pygame.display.set_mode(window_size)
+def create_window(settings):
+    width, height = _get_window_size(settings)
+    logging.info(f'Creating window with size {width}x{height}')
+    return pygame.display.set_mode((width, height))
 
 
-def create_sound_player(settings, quiet):
+def create_sound_player(settings):
     logging.info('Creating sound player')
-    return SoundPlayer(settings['sound.theme'], quiet=quiet)
+    return SoundPlayer(settings['theme'], quiet=settings['quiet'])
 
 
 def create_frame_viewer(model, window_size):
@@ -74,18 +75,17 @@ def create_attendances_viewer(settings, model, window_size):
     return AttendancesViewer(settings, model, rect)
 
 
-def run(settings, quiet):
+def run(settings):
     pygame.init()
 
     channel = Channel()
     clock = create_clock(settings)
-    window_size = get_window_size(settings)
-    surface = create_window(window_size)
-    sound_player = create_sound_player(settings, quiet)
+    surface = create_window(settings.subtree('gui.window'))
+    sound_player = create_sound_player(settings.subtree('sound'))
 
     model = Model(settings, [str(k).rjust(5, '0') for k in range(0, 98)])
-    frame_viewer = create_frame_viewer(model, window_size)
-    attendances_viewer = create_attendances_viewer(settings, model, window_size)
+    frame_viewer = create_frame_viewer(model, surface.get_size())
+    attendances_viewer = create_attendances_viewer(settings, model, surface.get_size())
     analysis_repeater = Repeater(model.analyze_current_frame, settings['qr.capture-rate'])
 
     with server(channel), auto_capture(settings.subtree('capture'), model.current_frame) as auto_capturer:

@@ -19,11 +19,16 @@ SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
 def cli(ctx, verbose, quiet, default):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
+
     ctx.ensure_object(dict)
 
     settings = default_settings() if default else load_settings(SETTINGS_PATH)
+
+    if quiet:
+        settings['sound.quiet'] = True
+
     ctx.obj['settings'] = settings
-    ctx.obj['quiet'] = quiet
+
 
 
 @click.command()
@@ -42,7 +47,7 @@ cli.add_command(tui)
 def gui(ctx):
     import absentees.gui as gui
     settings = ctx.obj['settings']
-    gui.run(settings, ctx.obj['quiet'])
+    gui.run(settings)
 
 cli.add_command(gui)
 
