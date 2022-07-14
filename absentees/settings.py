@@ -17,7 +17,7 @@ DefaultSettings = {
     'capture': {
         'width': 640,
         'height': 480,
-        'rate': 5,
+        'rate': 30,
         'dummy': True,
     },
     'qr': {
@@ -34,12 +34,20 @@ DefaultSettings = {
 
 
 class Settings:
-    def __init__(self, data):
+    def __init__(self, data, key_prefix=[]):
         self.__data = data
+        self.__key_prefix = key_prefix
 
-    def __getitem__(self, key):
-        parts = key.split('.')
+    def __getitem__(self, key=''):
+        parts = self.__split_key(key)
         return reduce(lambda current, part: current[part], parts, self.__data)
+
+    def subtree(self, key):
+        parts = self.__split_key(key)
+        return Settings(self.__data, parts)
+
+    def __split_key(self, key_string):
+        return [*self.__key_prefix, *key_string.split('.')]
 
     def color(self, key):
         r = self[key]['r']
