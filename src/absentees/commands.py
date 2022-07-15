@@ -75,6 +75,30 @@ class InjectFrameCommand(Command):
             return 'Failure: video capturer does not support frame injection :('
 
 
+class InjectFrameCommand(Command):
+    @classmethod
+    def create_cli_command(c):
+        return _create_default_command_function(
+            c.__name__,
+            click.command(name='inject-qr'),
+            click.argument('data', type=str),
+            click.option('-n', '--count', type=int, default=10)
+        )
+
+    def execute(self, model, settings):
+        logging.debug('Checking if video capturer supports injection')
+        if hasattr(model.video_capturer, 'inject'):
+            logging.debug('Video capturer does indeed support injection')
+            logging.debug(f'Generating QR code')
+            size = settings.size('video-capturing')
+            surface = generate_qr_code(self.data, size)
+            logging.debug(f'Injecting image')
+            model.video_capturer.inject(surface, self.count)
+            return 'Success'
+        else:
+            return 'Failure: video capturer does not support frame injection :('
+
+
 def enumerate_commands():
     return Command.__subclasses__()
 

@@ -86,6 +86,11 @@ class Settings:
         b = self[f'{key}.b']
         return (r, g, b)
 
+    def size(self, key):
+        width = self[f'{key}.width']
+        height = self[f'{key}.height']
+        return (width, height)
+
     @property
     def data(self):
         return self.__data
