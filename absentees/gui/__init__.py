@@ -9,6 +9,7 @@ from absentees.gui.viewer import FrameViewer
 from absentees.gui.clock import Clock
 from absentees.repeater import Repeater
 from absentees.model import Model
+from absentees.timeline import repeat
 import absentees.commands as commands
 from contextlib import contextmanager
 
@@ -30,7 +31,7 @@ def auto_capture(settings, surface_cell):
             capture()
             surface_cell.refresh()
 
-        repeater = Repeater(capture_and_refresh, 1 / rate)
+        repeater = repeat(capture_and_refresh, 1 / rate).instantiate()
         yield repeater
 
 
@@ -83,7 +84,7 @@ def run(settings):
     surface = create_window(settings.subtree('gui.window'))
     sound_player = create_sound_player(settings.subtree('sound'))
 
-    model = Model(settings, [str(k).rjust(5, '0') for k in range(0, 98)])
+    model = Model(settings, clock, [str(k).rjust(5, '0') for k in range(0, 98)])
     for person in model.attendances.people:
         person.present.add_observer(sound_player.success)
     frame_viewer = create_frame_viewer(model, surface.get_size())

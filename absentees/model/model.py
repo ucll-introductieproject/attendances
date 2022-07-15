@@ -6,12 +6,16 @@ from absentees.model.attendances import Attendances
 
 
 class Model:
-    def __init__(self, settings, names):
+    def __init__(self, settings, clock, names):
+        clock.add_observer(self.__tick)
         self.__current_frame = Cell(Model.__create_surface(settings))
         self.__analyzed_frame = Model.__create_surface(settings)
         self.__frame_analysis = Cell(None)
         self.__analyzer = FrameAnalyzer()
         self.__attendances = Attendances(names)
+
+    def __tick(self, elapsed_seconds):
+        pass
 
     @property
     def attendances(self):
