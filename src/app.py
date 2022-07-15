@@ -1,11 +1,11 @@
 import logging
-from absentees.sound import SoundPlayer
 import click
-import absentees.commands as commands
-from absentees.settings import load_settings, default_settings
-from pathlib import Path
 import json
-import socket
+import absentees.commands as commands
+from absentees.sound import SoundPlayer
+from absentees.settings import load_settings, default_settings
+from absentees.qr import generate_qr_code
+from pathlib import Path
 
 
 SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
@@ -60,8 +60,9 @@ cli.add_command(config)
 
 
 @click.command('show')
-def config_show():
-    settings = load_settings()
+@click.pass_context
+def config_show(ctx):
+    settings = ctx.obj['settings']
     print(json.dumps(settings.data, indent=4, sort_keys=True))
 
 config.add_command(config_show)
@@ -95,6 +96,23 @@ def cmd():
     pass
 
 cli.add_command(cmd)
+
+
+@click.command(name='generate-qr')
+@click.argument('message', type=str)
+@click.argument('path', type=str)
+@click.pass_context
+def generate_qr(ctx, message, path):
+    import pygame
+    settings = ctx.obj['settings']
+    width = settings['video-capturing.width']
+    height = settings['video-capturing.height']
+    box_size = settings['qr.generation.box-size']
+    border = settings['qr.generation.border']
+    surface = generate_qr_code(message, (width, height), box_size=box_size, border=border)
+    pygame.image.save(surface, path)
+
+cli.add_command(generate_qr)
 
 
 for command_type in commands.enumerate_commands():

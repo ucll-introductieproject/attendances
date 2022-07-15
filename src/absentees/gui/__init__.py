@@ -85,6 +85,7 @@ def run(settings):
 
     for person in model.attendances.people:
         person.present.add_observer(sound_player.success)
+
     frame_viewer = create_frame_viewer(model, surface.get_size())
     attendances_viewer = create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
@@ -100,7 +101,7 @@ def run(settings):
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    response = command_object.execute(model)
+                    response = command_object.execute(model, settings)
                     channel.respond_to_server(response)
                 except:
                     channel.respond_to_server('exception thrown')

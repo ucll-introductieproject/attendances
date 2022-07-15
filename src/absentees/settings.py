@@ -49,6 +49,10 @@ DefaultSettingsData = {
         },
         'rate': 5,
         'freeze-time': 1,
+        'generation': {
+            'box-size': 10,
+            'border': 4,
+        },
     },
 }
 

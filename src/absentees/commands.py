@@ -1,3 +1,4 @@
+from absentees.qr import generate_qr_code
 from absentees.server import send
 import logging
 import pygame
@@ -5,11 +6,14 @@ import click
 import json
 
 
-def _create_default_command_function(name):
+def _create_default_command_function(name, *decorators):
     def function(**kwargs):
         data = { "command": name, "args": kwargs }
         response = send(json.dumps(data))
         print(response)
+
+    for decorator in reversed(decorators):
+        function = decorator(function)
     return function
 
 
@@ -22,23 +26,25 @@ class Command:
 class ListPeopleCommand(Command):
     @classmethod
     def create_cli_command(c):
-        function = _create_default_command_function(c.__name__)
-        function = click.command(name='list-people')(function)
-        return function
+        return _create_default_command_function(
+            c.__name__,
+            click.command(name='list-people')
+        )
 
-    def execute(self, model):
+    def execute(self, model, settings):
         return "\n".join(model.attendances.names)
 
 
 class RegisterAttendanceCommand(Command):
     @classmethod
     def create_cli_command(c):
-        function = _create_default_command_function(c.__name__)
-        function = click.argument('name', type=str)(function)
-        function = click.command(name='register')(function)
-        return function
+        return _create_default_command_function(
+            c.__name__,
+            click.command(name='register'),
+            click.argument('name', type=str)
+        )
 
-    def execute(self, model):
+    def execute(self, model, settings):
         if self.name in model.attendances.names:
             model.attendances.register(self.name)
             return 'Success'
@@ -49,13 +55,14 @@ class RegisterAttendanceCommand(Command):
 class InjectFrameCommand(Command):
     @classmethod
     def create_cli_command(c):
-        function = _create_default_command_function(c.__name__)
-        function = click.option('-n', '--count', type=int, default=10)(function)
-        function = click.argument('path', type=str)(function)
-        function = click.command(name='inject')(function)
-        return function
+        return _create_default_command_function(
+            c.__name__,
+            click.command(name='inject'),
+            click.argument('path', type=str),
+            click.option('-n', '--count', type=int, default=10)
+        )
 
-    def execute(self, model):
+    def execute(self, model, settings):
         logging.debug('Checking if video capturer supports injection')
         if hasattr(model.video_capturer, 'inject'):
             logging.debug('Video capturer does indeed support injection')
