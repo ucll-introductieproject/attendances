@@ -5,6 +5,14 @@ import click
 import json
 
 
+def _create_default_command_function(name):
+    def function(**kwargs):
+        data = { "command": name, "args": kwargs }
+        response = send(json.dumps(data))
+        print(response)
+    return function
+
+
 class Command:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -14,11 +22,8 @@ class Command:
 class ListPeopleCommand(Command):
     @classmethod
     def create_cli_command(c):
-        @click.command(name='list-people')
-        def function():
-            data = { "command": c.__name__, "args": {} }
-            response = send(json.dumps(data))
-            print(response)
+        function = _create_default_command_function(c.__name__)
+        function = click.command(name='list-people')(function)
         return function
 
     def execute(self, model):
@@ -28,32 +33,26 @@ class ListPeopleCommand(Command):
 class RegisterAttendanceCommand(Command):
     @classmethod
     def create_cli_command(c):
-        @click.command(name='register')
-        @click.argument('name', type=str)
-        def function(**kwargs):
-            data = { "command": c.__name__, "args": kwargs }
-            response = send(json.dumps(data))
-            print(response)
+        function = _create_default_command_function(c.__name__)
+        function = click.argument('name', type=str)(function)
+        function = click.command(name='register')(function)
         return function
 
     def execute(self, model):
-        if self.__name in model.attendances.names:
+        if self.name in model.attendances.names:
             model.attendances.register(self.name)
             return 'Success'
         else:
-            return f'{self.__name} unknown'
+            return f'{self.name} unknown'
 
 
 class InjectFrameCommand(Command):
     @classmethod
     def create_cli_command(c):
-        @click.command(name='inject')
-        @click.argument('path', type=str)
-        @click.option('-n', '--count', type=int, default=10)
-        def function(**kwargs):
-            data = { "command": c.__name__, "args": kwargs }
-            response = send(json.dumps(data))
-            print(response)
+        function = _create_default_command_function(c.__name__)
+        function = click.option('-n', '--count', type=int, default=10)(function)
+        function = click.argument('path', type=str)(function)
+        function = click.command(name='inject')(function)
         return function
 
     def execute(self, model):
