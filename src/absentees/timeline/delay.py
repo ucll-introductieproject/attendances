@@ -15,5 +15,6 @@ class _DelayInstance:
             self.__time_left -= elapsed_seconds
             return 0
         else:
+            result = elapsed_seconds - self.__time_left
             self.__time_left = 0
-            return elapsed_seconds - self.__time_left
+            return result

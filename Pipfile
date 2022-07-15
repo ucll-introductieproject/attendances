@@ -10,6 +10,7 @@ opencv-python = "*"
 chime = "*"
 click = "*"
 pygame = "*"
+pytest = "*"
 
 [dev-packages]
 
