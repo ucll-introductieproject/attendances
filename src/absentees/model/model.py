@@ -2,7 +2,7 @@ import logging
 import pygame
 from absentees.cells import Cell
 from absentees.model.attendances import Attendances
-from absentees.timeline import repeat
+from absentees.timeline import repeat, Parallel
 
 
 class Model:
@@ -15,8 +15,14 @@ class Model:
         self.__analyzer = frame_analyzer
         self.__attendances = Attendances(names)
         self.__capturer = video_capturer
-        self.__timeline = repeat(self.__capture_frame, 1/self.__settings['video-capturing.rate']).instantiate()
+        self.__timeline = self.__create_timeline()
         self.__active = False
+
+    def __create_timeline(self):
+        capturing_timeline = repeat(self.__capture_frame, 1/self.__settings['video-capturing.rate'])
+        analysis_timeline = repeat(self.__analyze_current_frame, 1/self.__settings['qr.rate'])
+        return Parallel(capturing_timeline, analysis_timeline).instantiate()
+
 
     def __capture_frame(self):
         self.__capturer.capture(self.__current_frame.value)
@@ -46,7 +52,7 @@ class Model:
     def current_frame(self):
         return self.__current_frame
 
-    def analyze_current_frame(self):
+    def __analyze_current_frame(self):
         if analysis := self.__analyzer.analyze(self.current_frame.value):
             logging.debug(f'Found QR codes: {analysis}')
             self.__copy_current_frame()

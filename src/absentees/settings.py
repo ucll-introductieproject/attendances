@@ -47,7 +47,7 @@ DefaultSettingsData = {
             'g': 0,
             'b': 0,
         },
-        'capture-rate': 5,
+        'rate': 5,
         'freeze-time': 1,
     },
 }

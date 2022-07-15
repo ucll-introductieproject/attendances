@@ -87,11 +87,9 @@ def run(settings):
         person.present.add_observer(sound_player.success)
     frame_viewer = create_frame_viewer(model, surface.get_size())
     attendances_viewer = create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
-    analysis_repeater = repeat(model.analyze_current_frame, settings['qr.capture-rate']).instantiate()
 
     with server(channel), model:
         clock.add_observer(frame_viewer.tick)
-        clock.add_observer(analysis_repeater.tick)
         clock.add_observer(attendances_viewer.tick)
 
         active = True
