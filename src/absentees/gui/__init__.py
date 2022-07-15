@@ -10,6 +10,7 @@ from absentees.gui.clock import Clock
 from absentees.repeater import Repeater
 from absentees.model import Model
 from absentees.timeline import repeat
+from absentees.analyzer import FrameAnalyzer
 import absentees.commands as commands
 from contextlib import contextmanager
 
@@ -22,17 +23,8 @@ def create_capturer(settings):
         return VideoCapturer(camera_name)
 
 
-# @contextmanager
-# def auto_capture(settings, surface_cell):
-#     rate = settings['rate']
-#     capturer = create_capturer(settings)
-#     with capturer(surface_cell.value) as capture:
-#         def capture_and_refresh():
-#             capture()
-#             surface_cell.refresh()
-
-#         repeater = repeat(capture_and_refresh, 1 / rate).instantiate()
-#         yield repeater
+def create_frame_analyzer(settings):
+    return FrameAnalyzer()
 
 
 def _get_window_size(settings):
@@ -83,10 +75,10 @@ def run(settings):
     clock = create_clock(settings)
     surface = create_window(settings.subtree('gui.window'))
     sound_player = create_sound_player(settings.subtree('sound'))
-    video_capturer = create_capturer(settings.subtree('video-capturing'))
     model = Model(
         settings=settings,
-        video_capturer=video_capturer,
+        video_capturer=create_capturer(settings.subtree('video-capturing')),
+        frame_analyzer=create_frame_analyzer(settings.subtree('frame-analyzing')),
         clock=clock,
         names=[str(k).rjust(5, '0') for k in range(0, 98)]
     )

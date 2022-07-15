@@ -1,19 +1,18 @@
 import logging
 import pygame
 from absentees.cells import Cell
-from absentees.analyzer import FrameAnalyzer
 from absentees.model.attendances import Attendances
 from absentees.timeline import repeat
 
 
 class Model:
-    def __init__(self, settings, video_capturer, clock, names):
+    def __init__(self, settings, video_capturer, frame_analyzer, clock, names):
         clock.add_observer(self.__tick)
         self.__settings = settings
         self.__current_frame = Cell(Model.__create_surface(settings))
         self.__analyzed_frame = Model.__create_surface(settings)
         self.__frame_analysis = Cell(None)
-        self.__analyzer = FrameAnalyzer()
+        self.__analyzer = frame_analyzer
         self.__attendances = Attendances(names)
         self.__capturer = video_capturer
         self.__timeline = repeat(self.__capture_frame, 1/self.__settings['video-capturing.rate']).instantiate()
