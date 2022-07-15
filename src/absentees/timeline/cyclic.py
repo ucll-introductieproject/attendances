@@ -14,3 +14,4 @@ class _CyclicInstance:
     def tick(self, elapsed_seconds):
         while (elapsed_seconds := self.__child_instance.tick(elapsed_seconds)) > 0:
             self.__child_instance = self.__child.instantiate()
+        return elapsed_seconds
