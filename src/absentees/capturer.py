@@ -49,3 +49,25 @@ class DummyCapturer:
         y = (surface_height - text_height) / 2
         target_surface.blit(text, (x, y))
         self.__counter += 1
+
+
+class InjectingCapturer:
+    def __init__(self, capturer):
+        self.__capturer = capturer
+        self.__injected = None
+
+    def __enter__(self):
+        return self.__capturer.__enter__()
+
+    def __exit__(self, exception, value, traceback):
+        return self.__capturer.__exit__(exception, value, traceback)
+
+    def inject(self, surface):
+        self.__injected = surface
+
+    def capture(self, target_surface):
+        if self.__injected:
+            target_surface.blit(self.__injected, (0, 0))
+            self.__injected = None
+        else:
+            self.__capturer.capture(target_surface)

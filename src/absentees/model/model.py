@@ -1,5 +1,6 @@
 import logging
 import pygame
+from absentees.capturer import InjectingCapturer
 from absentees.cells import Cell
 from absentees.model.attendances import Attendances
 from absentees.timeline import repeat, Parallel
@@ -14,7 +15,7 @@ class Model:
         self.__frame_analysis = Cell(None)
         self.__analyzer = frame_analyzer
         self.__attendances = Attendances(names)
-        self.__capturer = video_capturer
+        self.__video_capturer = InjectingCapturer(video_capturer)
         self.__timeline = self.__create_timeline()
         self.__active = False
 
@@ -23,21 +24,24 @@ class Model:
         analysis_timeline = repeat(self.__analyze_current_frame, 1/self.__settings['qr.rate'])
         return Parallel(capturing_timeline, analysis_timeline).instantiate()
 
-
     def __capture_frame(self):
-        self.__capturer.capture(self.__current_frame.value)
+        self.__video_capturer.capture(self.__current_frame.value)
 
     def __enter__(self):
-        self.__capturer.__enter__()
+        self.__video_capturer.__enter__()
         self.__active = True
 
     def __exit__(self, exception, value, traceback):
         self.__active = False
-        self.__capturer.__exit__(exception, value, traceback)
+        self.__video_capturer.__exit__(exception, value, traceback)
 
     def __tick(self, elapsed_seconds):
         if self.__active:
             self.__timeline.tick(elapsed_seconds)
+
+    @property
+    def video_capturer(self):
+        return self.__video_capturer
 
     @property
     def attendances(self):

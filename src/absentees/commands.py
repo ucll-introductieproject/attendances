@@ -1,22 +1,25 @@
 from absentees.server import send
 import logging
+import pygame
 import click
 import json
 
 
 class Command:
-    pass
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 class ListPeopleCommand(Command):
     @classmethod
     def create_cli_command(c):
-        @click.command()
-        def list_people():
+        @click.command(name='list-people')
+        def function():
             data = { "command": c.__name__, "args": {} }
             response = send(json.dumps(data))
             print(response)
-        return list_people
+        return function
 
     def execute(self, model):
         return "\n".join(model.attendances.names)
@@ -25,23 +28,44 @@ class ListPeopleCommand(Command):
 class RegisterAttendanceCommand(Command):
     @classmethod
     def create_cli_command(c):
-        @click.command()
+        @click.command(name='register')
         @click.argument('name', type=str)
-        def register(**kwargs):
+        def function(**kwargs):
             data = { "command": c.__name__, "args": kwargs }
             response = send(json.dumps(data))
             print(response)
-        return register
-
-    def __init__(self, name):
-        self.__name = name
+        return function
 
     def execute(self, model):
         if self.__name in model.attendances.names:
-            model.attendances.register(self.__name)
+            model.attendances.register(self.name)
             return 'Success'
         else:
             return f'{self.__name} unknown'
+
+
+class InjectFrameCommand(Command):
+    @classmethod
+    def create_cli_command(c):
+        @click.command(name='inject')
+        @click.argument('path', type=str)
+        def function(**kwargs):
+            data = { "command": c.__name__, "args": kwargs }
+            response = send(json.dumps(data))
+            print(response)
+        return function
+
+    def execute(self, model):
+        logging.debug('Checking if video capturer supports injection')
+        if hasattr(model.video_capturer, 'inject'):
+            logging.debug('Video capturer does indeed support injection')
+            logging.debug(f'Loading image {self.path}')
+            surface = pygame.image.load(self.path)
+            logging.debug(f'Injecting image')
+            model.video_capturer.inject(surface)
+            return 'Success'
+        else:
+            return 'Failure: video capturer does not support frame injection :('
 
 
 def enumerate_commands():
