@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4fd55f26d20415e51f8ca5f1e92e776037af4927622eae560d3171baad22fefe"
+            "sha256": "d87ae913c498843a36470f6c9227d2bce084289bb6c1112514901940471bf31e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -52,7 +52,7 @@
                 "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da",
                 "sha256:e6c6b4334fc50988a639d9b98aa429a0b57da6e17b9a44f0451f930b6967b7a4"
             ],
-            "markers": "sys_platform == 'win32'",
+            "markers": "platform_system == 'Windows'",
             "version": "==0.4.5"
         },
         "iniconfig": {
@@ -87,7 +87,7 @@
                 "sha256:d748ef349bfef2e1194b59da37ed5a29c19ea8d7e6342019921ba2ba4fd8b624",
                 "sha256:e0d7447679ae9a7124385ccf0ea990bb85bb869cef217e2ea6c844b6a6855073"
             ],
-            "markers": "python_version >= '3.9'",
+            "markers": "python_version >= '3.7'",
             "version": "==1.23.1"
         },
         "opencv-python": {
@@ -279,6 +279,16 @@
             ],
             "index": "pypi",
             "version": "==0.1.9"
+        },
+        "qrcode": {
+            "extras": [
+                "pil"
+            ],
+            "hashes": [
+                "sha256:375a6ff240ca9bd41adc070428b5dfc1dcfbb0f2507f1ac848f6cded38956578"
+            ],
+            "index": "pypi",
+            "version": "==7.3.1"
         },
         "tomli": {
             "hashes": [

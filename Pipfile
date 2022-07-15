@@ -11,6 +11,7 @@ chime = "*"
 click = "*"
 pygame = "*"
 pytest = "*"
+qrcode = {extras = ["pil"], version = "*"}
 
 [dev-packages]
 
