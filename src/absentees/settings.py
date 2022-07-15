@@ -34,7 +34,7 @@ DefaultSettingsData = {
             'highlight-duration': 0.5,
         },
     },
-    'capture': {
+    'video-capturing': {
         'width': 640,
         'height': 480,
         'rate': 30,

@@ -46,7 +46,6 @@ class AttendanceSlotViewer:
 
     def render(self, surface, force=False):
         if self.__dirty or force:
-            print(time.monotonic())
             self.__render_background(surface)
             self.__render_name(surface)
             self.__dirty = False

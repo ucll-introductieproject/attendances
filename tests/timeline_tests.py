@@ -1,5 +1,5 @@
 from re import X
-from absentees.timeline import Action, Delay, Sequence, Cyclic
+from absentees.timeline import Action, Delay, Sequence, Cyclic, repeat
 import pytest
 
 
@@ -46,6 +46,26 @@ def test_cyclic():
 
     x = 0
     timeline = Cyclic(Sequence(Delay(5), Action(increment_x))).instantiate()
+    assert x == 0
+    assert timeline.tick(2) == 0
+    assert x == 0
+    assert timeline.tick(2) == 0
+    assert x == 0
+    assert timeline.tick(2) == 0
+    assert x == 1
+    assert timeline.tick(2) == 0
+    assert x == 1
+    assert timeline.tick(2.1) == 0
+    assert x == 2
+
+
+def test_repeat():
+    def increment_x():
+        nonlocal x
+        x += 1
+
+    x = 0
+    timeline = repeat(increment_x, 5).instantiate()
     assert x == 0
     assert timeline.tick(2) == 0
     assert x == 0

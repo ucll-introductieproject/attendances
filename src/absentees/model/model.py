@@ -3,19 +3,36 @@ import pygame
 from absentees.cells import Cell
 from absentees.analyzer import FrameAnalyzer
 from absentees.model.attendances import Attendances
+from absentees.timeline import repeat
 
 
 class Model:
-    def __init__(self, settings, clock, names):
+    def __init__(self, settings, video_capturer, clock, names):
         clock.add_observer(self.__tick)
+        self.__settings = settings
         self.__current_frame = Cell(Model.__create_surface(settings))
         self.__analyzed_frame = Model.__create_surface(settings)
         self.__frame_analysis = Cell(None)
         self.__analyzer = FrameAnalyzer()
         self.__attendances = Attendances(names)
+        self.__capturer = video_capturer
+        self.__timeline = repeat(self.__capture_frame, 1/self.__settings['video-capturing.rate']).instantiate()
+        self.__active = False
+
+    def __capture_frame(self):
+        self.__capturer.capture(self.__current_frame.value)
+
+    def __enter__(self):
+        self.__capturer.__enter__()
+        self.__active = True
+
+    def __exit__(self, exception, value, traceback):
+        self.__active = False
+        self.__capturer.__exit__(exception, value, traceback)
 
     def __tick(self, elapsed_seconds):
-        pass
+        if self.__active:
+            self.__timeline.tick(elapsed_seconds)
 
     @property
     def attendances(self):
@@ -23,7 +40,7 @@ class Model:
 
     @staticmethod
     def __create_surface(settings):
-        capture_size = settings['capture.width'], settings['capture.height']
+        capture_size = settings['video-capturing.width'], settings['video-capturing.height']
         return pygame.Surface(capture_size)
 
     @property
