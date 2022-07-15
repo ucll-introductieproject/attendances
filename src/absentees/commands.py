@@ -49,6 +49,7 @@ class InjectFrameCommand(Command):
     def create_cli_command(c):
         @click.command(name='inject')
         @click.argument('path', type=str)
+        @click.option('-n', '--count', type=int, default=10)
         def function(**kwargs):
             data = { "command": c.__name__, "args": kwargs }
             response = send(json.dumps(data))
@@ -62,7 +63,7 @@ class InjectFrameCommand(Command):
             logging.debug(f'Loading image {self.path}')
             surface = pygame.image.load(self.path)
             logging.debug(f'Injecting image')
-            model.video_capturer.inject(surface)
+            model.video_capturer.inject(surface, self.count)
             return 'Success'
         else:
             return 'Failure: video capturer does not support frame injection :('

@@ -55,6 +55,7 @@ class InjectingCapturer:
     def __init__(self, capturer):
         self.__capturer = capturer
         self.__injected = None
+        self.__count = 0
 
     def __enter__(self):
         return self.__capturer.__enter__()
@@ -62,12 +63,15 @@ class InjectingCapturer:
     def __exit__(self, exception, value, traceback):
         return self.__capturer.__exit__(exception, value, traceback)
 
-    def inject(self, surface):
+    def inject(self, surface, count=1):
         self.__injected = surface
+        self.__count = count
 
     def capture(self, target_surface):
         if self.__injected:
             target_surface.blit(self.__injected, (0, 0))
-            self.__injected = None
+            self.__count -= 1
+            if self.__count == 0:
+                self.__injected = None
         else:
             self.__capturer.capture(target_surface)
