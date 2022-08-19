@@ -26,7 +26,7 @@ class VideoCapturer(Capturer):
     def __init__(self, camera_name, size):
         format = 'RGB'
         logging.info(f"Creating pygame camera with name={camera_name}, size={size}, format={format}")
-        self.__camera = pygame.camera.Camera(camera_name, size, )
+        self.__camera = pygame.camera.Camera(camera_name, size, format)
 
     def __enter__(self):
         self.__camera.start()
