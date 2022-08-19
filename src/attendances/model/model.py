@@ -7,8 +7,7 @@ from attendances.timeline import repeat, Parallel
 
 
 class Model:
-    def __init__(self, settings, video_capturer, frame_analyzer, clock, names):
-        clock.add_observer(self.__tick)
+    def __init__(self, settings, video_capturer, frame_analyzer, names):
         self.__settings = settings
         self.__current_frame = Cell(Model.__create_surface(settings))
         self.__analyzed_frame = Model.__create_surface(settings)
@@ -35,7 +34,7 @@ class Model:
         self.__active = False
         self.__video_capturer.__exit__(exception, value, traceback)
 
-    def __tick(self, elapsed_seconds):
+    def tick(self, elapsed_seconds):
         if self.__active:
             self.__timeline.tick(elapsed_seconds)
 

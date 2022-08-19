@@ -77,7 +77,6 @@ def run(settings):
             settings=settings,
             video_capturer=video_capturer,
             frame_analyzer=frame_analyzer,
-            clock=clock,
             names=names
         )
 
@@ -98,6 +97,7 @@ def run(settings):
     with server(channel), model:
         clock.add_observer(frame_viewer.tick)
         clock.add_observer(attendances_viewer.tick)
+        clock.add_observer(model.tick)
 
         active = True
         while active:
