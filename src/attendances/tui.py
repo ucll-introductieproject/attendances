@@ -1,7 +1,7 @@
 import logging
 from time import sleep, monotonic
 from attendances.analyzer import FrameAnalyzer
-from attendances.capturer import DummyCapturer, VideoCapturer
+from attendances.capturers import DummyCapturer, VideoCapturer
 from attendances.gui import _create_frame_analyzer
 from attendances.gui.clock import Clock
 from attendances.model.model import Model

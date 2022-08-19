@@ -90,7 +90,7 @@ config.add_command(config_delete)
 
 @click.command()
 def cameras():
-    from attendances.capturer import Capturer
+    from attendances.capturers import Capturer
     for index, id in enumerate(Capturer.cameras()):
         print(f'[{index}] {id}')
 

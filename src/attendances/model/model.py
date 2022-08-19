@@ -1,6 +1,6 @@
 import logging
 import pygame
-from attendances.capturer import InjectingCapturer
+from attendances.capturers import InjectingCapturer
 from attendances.cells import Cell
 from attendances.model.attendances import Attendances
 from attendances.timeline import repeat, Parallel

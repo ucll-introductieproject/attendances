@@ -4,7 +4,7 @@ import json
 from attendances.gui.attviewer import AttendancesViewer
 from attendances.server import Channel, server
 from attendances.sound import SoundPlayer
-from attendances.capturer import DummyCapturer, VideoCapturer
+from attendances.capturers import DummyCapturer, VideoCapturer
 from attendances.gui.viewer import FrameViewer
 from attendances.gui.clock import Clock
 from attendances.model import Model

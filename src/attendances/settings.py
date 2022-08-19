@@ -38,7 +38,7 @@ DefaultSettingsData = {
         'width': 640,
         'height': 480,
         'rate': 30,
-        'dummy': False,
+        'dummy': True,
     },
     'qr': {
         'ignore-repetition-duration': 1000,
