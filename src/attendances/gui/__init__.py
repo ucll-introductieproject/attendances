@@ -2,12 +2,13 @@ import logging
 import pygame
 import json
 from attendances.gui.attviewer import AttendancesViewer
+from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
 from attendances.tools.sound import SoundPlayer
 from attendances.tools.capturing import DummyCapturer, VideoCapturer
 from attendances.gui.viewer import FrameViewer
 from attendances.gui.clock import Clock
-from attendances.model import Model
+from attendances.pipeline import *
 from attendances.tools.analyzing import FrameAnalyzer
 import attendances.commands as commands
 
@@ -54,12 +55,12 @@ def _create_sound_player(settings):
     return SoundPlayer(settings['theme'], quiet=settings['quiet'])
 
 
-def _create_frame_viewer(model, window_size):
-    window_width, window_height = window_size
-    frame_width, frame_height = model.current_frame.value.get_size()
-    x = (window_width - frame_width) // 2
-    y = 0
-    return FrameViewer(model, (x, y))
+# def _create_frame_viewer(model, window_size):
+#     window_width, window_height = window_size
+#     frame_width, frame_height = model.current_frame.value.get_size()
+#     x = (window_width - frame_width) // 2
+#     y = 0
+#     return FrameViewer(model, (x, y))
 
 
 def _create_attendances_viewer(settings, model, window_size):
@@ -69,35 +70,37 @@ def _create_attendances_viewer(settings, model, window_size):
 
 
 def run(settings):
-    def create_model():
-        names = [str(k).rjust(5, '0') for k in range(0, 98)]
-        return Model(
-            settings=settings,
-            video_capturer=video_capturer,
-            frame_analyzer=frame_analyzer,
-            names=names
-        )
-
     pygame.init()
 
     channel = Channel()
     clock = _create_clock(settings)
     surface = _create_window(settings.subtree('gui.window'))
+    capturing_surface = pygame.Surface((settings['video-capturing.width'], settings['video-capturing.height']))
     sound_player = _create_sound_player(settings.subtree('sound'))
     video_capturer = _create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
-    model = create_model()
+    names = [str(k).rjust(5, '0') for k in range(0, 98)]
+    attendances = Attendances(names)
+    context = commands.Context(attendances=attendances, capturer=video_capturer)
 
-    for person in model.attendances.people:
+    for person in attendances.people:
         person.present.add_observer(sound_player.success)
 
-    frame_viewer = _create_frame_viewer(model, surface.get_size())
-    attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
+    frame_viewer = FrameViewer(surface, (0, 0))
+    # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
-    with server(channel), model:
-        clock.add_observer(frame_viewer.tick)
-        clock.add_observer(attendances_viewer.tick)
-        clock.add_observer(model.tick)
+    with server(channel), video_capturer as handle:
+        # clock.add_observer(frame_viewer.tick)
+        # clock.add_observer(attendances_viewer.tick)
+        capturing_node = CapturingNode(handle, capturing_surface)
+        analyzing_node = AnalyzerNode(frame_analyzer)
+        registering_node = RegisteringNode(attendances)
+
+        capturing_node.on_captured(analyzing_node.analyze)
+        capturing_node.on_captured(frame_viewer.new_frame)
+        analyzing_node.on_analysis(registering_node.update_attendances)
+
+        clock.on_tick(lambda dt: capturing_node.capture())
 
         active = True
         while active:
@@ -107,7 +110,7 @@ def run(settings):
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    response = command_object.execute(model, settings)
+                    response = command_object.execute(context, settings)
                     channel.respond_to_server(response)
                 except:
                     channel.respond_to_server('exception thrown')
@@ -119,6 +122,6 @@ def run(settings):
 
             clock.update()
 
-            frame_viewer.render(surface)
-            attendances_viewer.render(surface)
+            # frame_viewer.render(surface)
+            # attendances_viewer.render(surface)
             pygame.display.flip()

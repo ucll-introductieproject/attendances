@@ -7,7 +7,7 @@ class Clock:
         self.__clock = pygame.time.Clock()
         self.__observers = []
 
-    def add_observer(self, observer):
+    def on_tick(self, observer):
         self.__observers.append(observer)
 
     def update(self):

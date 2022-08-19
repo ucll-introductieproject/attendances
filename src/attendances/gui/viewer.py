@@ -1,25 +1,19 @@
 from attendances.countdown import Countdown
-from attendances.cells import Cell
-from attendances.gui.imgview import ImageViewer
+import logging
 
 
 class FrameViewer:
-    def __init__(self, model, position):
-        self.__model = model
-        self.__freeze_time = 2
-        self.__countdown = Countdown(self.__freeze_time, 0)
-        self.__image = Cell(self.__model.current_frame.value)
-        self.__image_viewer = ImageViewer(self.__image, position)
-        self.__model.frame_analysis.add_observer(self.__on_new_frame_analysis)
+    def __init__(self, surface, position):
+        self.__surface = surface
+        self.__position = position
+        # self.__freeze_time = 2
+        # self.__countdown = Countdown(self.__freeze_time, 0)
 
     def tick(self, elapsed_seconds):
-        self.__countdown.tick(elapsed_seconds)
-        if self.__countdown.ready:
-            self.__image.value = self.__model.current_frame.value
+        pass
 
-    def render(self, surface):
-        self.__image_viewer.render(surface)
+    def new_frame(self, image):
+        self.__surface.blit(image, self.__position)
 
-    def __on_new_frame_analysis(self):
-        self.__countdown.reset()
-        self.__image.value = self.__model.frame_analysis.value[0]
+    def new_analysis(self):
+        pass
