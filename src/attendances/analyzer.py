@@ -34,7 +34,7 @@ class FrameAnalyzer:
 
     def highlight_face(self, surface, face):
         assert isinstance(surface, pygame.Surface)
-        assert isinstance(face, pygame.Rect), f'is {type(face)} instead'
+        assert isinstance(face, pygame.Rect), f'face should be pygame.Rect, is {type(face)} instead'
         highlight_color = (255, 0, 0)
         pygame.draw.rect(surface=surface, color=highlight_color, rect=face, width=2)
 
