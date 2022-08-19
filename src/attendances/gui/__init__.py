@@ -8,7 +8,7 @@ from attendances.tools.capturers import DummyCapturer, VideoCapturer
 from attendances.gui.viewer import FrameViewer
 from attendances.gui.clock import Clock
 from attendances.model import Model
-from attendances.analyzer import FrameAnalyzer
+from attendances.tools.analyzer import FrameAnalyzer
 import attendances.commands as commands
 
 
