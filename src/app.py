@@ -1,4 +1,5 @@
 import logging
+from unicodedata import name
 import click
 import json
 import absentees.commands as commands
@@ -19,6 +20,9 @@ SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
 def cli(ctx, verbose, quiet, default):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
+        logging.info('Turning on verbose mode')
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     ctx.ensure_object(dict)
 
