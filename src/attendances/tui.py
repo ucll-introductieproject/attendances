@@ -5,7 +5,7 @@ from attendances.tools.capturers import DummyCapturer, VideoCapturer
 from attendances.gui import _create_frame_analyzer
 from attendances.gui.clock import Clock
 from attendances.model.model import Model
-from attendances.sound import SoundPlayer
+from attendances.tools.sound import SoundPlayer
 import time
 
 

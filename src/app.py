@@ -3,7 +3,7 @@ from unicodedata import name
 import click
 import json
 import attendances.commands as commands
-from attendances.sound import SoundPlayer
+from attendances.tools.sound import SoundPlayer
 from attendances.settings import load_settings, default_settings
 from attendances.tools.qr import generate_qr_code
 from pathlib import Path
