@@ -5,7 +5,7 @@ import json
 import attendances.commands as commands
 from attendances.sound import SoundPlayer
 from attendances.settings import load_settings, default_settings
-from attendances.qr import generate_qr_code
+from attendances.tools.qr import generate_qr_code
 from pathlib import Path
 
 

@@ -1,4 +1,4 @@
-from attendances.qr import generate_qr_code
+from attendances.tools.qr import generate_qr_code
 from attendances.server import send
 import logging
 import pygame
