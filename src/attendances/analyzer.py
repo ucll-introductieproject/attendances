@@ -1,7 +1,7 @@
 import pygame
 import cv2
 from collections import namedtuple
-from attendances.face import FaceDetector
+from attendances.tools.face import FaceDetector
 from attendances.tools.qr import QRScanner
 
 
