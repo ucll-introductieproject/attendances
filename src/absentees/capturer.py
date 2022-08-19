@@ -1,3 +1,4 @@
+import logging
 import pygame
 import pygame.camera
 
@@ -8,7 +9,9 @@ pygame.camera.init()
 
 class VideoCapturer:
     def __init__(self, camera_name, size):
-        self.__camera = pygame.camera.Camera(camera_name, size, 'RGB')
+        format = 'RGB'
+        logging.info(f"Creating pygame camera with name={camera_name}, size={size}, format={format}")
+        self.__camera = pygame.camera.Camera(camera_name, size, )
 
     def __enter__(self):
         self.__camera.start()
@@ -18,15 +21,19 @@ class VideoCapturer:
         self.__camera.stop()
 
     def capture(self, target_surface):
-        self.__capture.get_image(target_surface)
+        self.__camera.get_image(target_surface)
 
     @staticmethod
     def cameras():
         return pygame.camera.list_cameras()
 
     @staticmethod
-    def default_camera():
+    def default_camera_name():
         return VideoCapturer.cameras()[0]
+
+    @staticmethod
+    def default_camera(size):
+        return VideoCapturer(VideoCapturer.default_camera_name(), size)
 
 
 class DummyCapturer:
