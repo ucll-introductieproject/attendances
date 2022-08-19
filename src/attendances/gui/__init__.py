@@ -70,8 +70,6 @@ def _create_attendances_viewer(settings, model, window_size):
 
 def run(settings):
     def create_model():
-        video_capturer = _create_capturer(settings.subtree('video-capturing'))
-        frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
         names = [str(k).rjust(5, '0') for k in range(0, 98)]
         return Model(
             settings=settings,
@@ -86,6 +84,8 @@ def run(settings):
     clock = _create_clock(settings)
     surface = _create_window(settings.subtree('gui.window'))
     sound_player = _create_sound_player(settings.subtree('sound'))
+    video_capturer = _create_capturer(settings.subtree('video-capturing'))
+    frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
     model = create_model()
 
     for person in model.attendances.people:
