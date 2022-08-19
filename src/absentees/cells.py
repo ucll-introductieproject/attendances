@@ -35,6 +35,12 @@ class Cell(CellBase):
         self.__value = v
         self._notify_observers()
 
+    def __str__(self):
+        return f"Cell({self.__value})"
+
+    def __repr__(self):
+        return f"Cell({self.__value})"
+
 
 class LazyDerived(CellBase):
     def __init__(self, cell, func):
