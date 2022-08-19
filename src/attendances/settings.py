@@ -1,5 +1,5 @@
 from functools import reduce
-from absentees.cells import Cell
+from attendances.cells import Cell
 import logging
 import json
 

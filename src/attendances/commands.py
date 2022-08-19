@@ -1,5 +1,5 @@
-from absentees.qr import generate_qr_code
-from absentees.server import send
+from attendances.qr import generate_qr_code
+from attendances.server import send
 import logging
 import pygame
 import click

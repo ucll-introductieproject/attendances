@@ -1,6 +1,6 @@
-from absentees.countdown import Countdown
-from absentees.cells import Cell
-from absentees.gui.imgview import ImageViewer
+from attendances.countdown import Countdown
+from attendances.cells import Cell
+from attendances.gui.imgview import ImageViewer
 
 
 class FrameViewer:

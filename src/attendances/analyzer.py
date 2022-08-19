@@ -1,8 +1,8 @@
 import pygame
 import cv2
 from collections import namedtuple
-from absentees.face import FaceDetector
-from absentees.qr import QRScanner
+from attendances.face import FaceDetector
+from attendances.qr import QRScanner
 
 
 FrameAnalysis = namedtuple('FrameAnalysis', ['qr_codes', 'faces'])

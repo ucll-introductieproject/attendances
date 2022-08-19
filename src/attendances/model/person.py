@@ -1,4 +1,4 @@
-from absentees.cells import Cell
+from attendances.cells import Cell
 
 
 class Person:

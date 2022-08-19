@@ -1,15 +1,15 @@
 import logging
 import pygame
 import json
-from absentees.gui.attviewer import AttendancesViewer
-from absentees.server import Channel, server
-from absentees.sound import SoundPlayer
-from absentees.capturer import DummyCapturer, VideoCapturer
-from absentees.gui.viewer import FrameViewer
-from absentees.gui.clock import Clock
-from absentees.model import Model
-from absentees.analyzer import FrameAnalyzer
-import absentees.commands as commands
+from attendances.gui.attviewer import AttendancesViewer
+from attendances.server import Channel, server
+from attendances.sound import SoundPlayer
+from attendances.capturer import DummyCapturer, VideoCapturer
+from attendances.gui.viewer import FrameViewer
+from attendances.gui.clock import Clock
+from attendances.model import Model
+from attendances.analyzer import FrameAnalyzer
+import attendances.commands as commands
 
 
 def _create_capturer(settings):

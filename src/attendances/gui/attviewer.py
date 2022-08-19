@@ -1,10 +1,10 @@
 from math import ceil
-from absentees.animations.dirac import DiracAnimation
-from absentees.animations.sequence import SequenceAnimation
-from absentees.model.person import Person
-from absentees.gui.grid import Grid
-from absentees.cells import Cell
-from absentees.animations import FloatAnimation, NullAnimation
+from attendances.animations.dirac import DiracAnimation
+from attendances.animations.sequence import SequenceAnimation
+from attendances.model.person import Person
+from attendances.gui.grid import Grid
+from attendances.cells import Cell
+from attendances.animations import FloatAnimation, NullAnimation
 import time
 import pygame
 from operator import attrgetter

@@ -2,10 +2,10 @@ import logging
 from unicodedata import name
 import click
 import json
-import absentees.commands as commands
-from absentees.sound import SoundPlayer
-from absentees.settings import load_settings, default_settings
-from absentees.qr import generate_qr_code
+import attendances.commands as commands
+from attendances.sound import SoundPlayer
+from attendances.settings import load_settings, default_settings
+from attendances.qr import generate_qr_code
 from pathlib import Path
 
 
@@ -41,7 +41,7 @@ def tui(ctx):
     """
     Simple text based UI
     """
-    import absentees.tui as tui
+    import attendances.tui as tui
     settings = ctx.obj['settings']
     tui.run(settings)
 
@@ -51,7 +51,7 @@ cli.add_command(tui)
 @click.command()
 @click.pass_context
 def gui(ctx):
-    import absentees.gui as gui
+    import attendances.gui as gui
     settings = ctx.obj['settings']
     gui.run(settings)
 
@@ -90,7 +90,7 @@ config.add_command(config_delete)
 
 @click.command()
 def cameras():
-    from absentees.capturer import Capturer
+    from attendances.capturer import Capturer
     for index, id in enumerate(Capturer.cameras()):
         print(f'[{index}] {id}')
 

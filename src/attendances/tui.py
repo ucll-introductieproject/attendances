@@ -1,11 +1,11 @@
 import logging
 from time import sleep, monotonic
-from absentees.analyzer import FrameAnalyzer
-from absentees.capturer import DummyCapturer, VideoCapturer
-from absentees.gui import _create_frame_analyzer
-from absentees.gui.clock import Clock
-from absentees.model.model import Model
-from absentees.sound import SoundPlayer
+from attendances.analyzer import FrameAnalyzer
+from attendances.capturer import DummyCapturer, VideoCapturer
+from attendances.gui import _create_frame_analyzer
+from attendances.gui.clock import Clock
+from attendances.model.model import Model
+from attendances.sound import SoundPlayer
 import time
 
 

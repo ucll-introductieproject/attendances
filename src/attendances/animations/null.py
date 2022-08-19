@@ -1,4 +1,4 @@
-from absentees.animations import Animation
+from attendances.animations import Animation
 
 
 class NullAnimation(Animation):

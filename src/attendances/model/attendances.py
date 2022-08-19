@@ -1,4 +1,4 @@
-from absentees.model.person import Person
+from attendances.model.person import Person
 import json
 
 
