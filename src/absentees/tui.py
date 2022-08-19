@@ -1,50 +1,68 @@
+import logging
 from time import sleep, monotonic
-from absentees.capturer import Capturer
-import chime
-import pygame
-from absentees.cells import Cell
-from pyzbar.pyzbar import decode
+from absentees.analyzer import FrameAnalyzer
+from absentees.capturer import DummyCapturer, VideoCapturer
+from absentees.gui import _create_frame_analyzer
+from absentees.gui.clock import Clock
+from absentees.model.model import Model
+from absentees.sound import SoundPlayer
+import time
 
 
 def now():
     return monotonic()
 
 
-def run(settings, sound_player):
-    capture_rate = settings['capture.rate']
-    capture_width = settings['capture.width']
-    capture_height = settings['capture.height']
-    ignore_repetition_duration = settings['qr.ignore-repetition-duration']
+def _create_capturer(settings):
+    if settings['dummy']:
+        logging.info('Creating dummy capturer')
+        return DummyCapturer()
+    else:
+        size = (settings['width'], settings['height'])
+        logging.info(f'Creating video capturer with size {size}')
+        return VideoCapturer.default_camera(size)
 
-    def initialize():
-        print('Initializing...')
-        chime.theme(settings['sound.theme'])
-        pygame.init()
-        pygame.camera.init()
 
-    def scan():
-        scanned = {}
+def _create_frame_analyzer(settings):
+    logging.info("Creating frame analyzer")
+    return FrameAnalyzer()
 
-        camera = Capturer.default_camera()
-        capture_surface = Cell(pygame.Surface((capture_width, capture_height)))
-        capture_ndarray = capture_surface.derive(lambda x: pygame.surfarray.array3d(x).swapaxes(0, 1))
 
-        with Capturer(camera, capture_surface) as capture:
-            print('Ready to scan QR codes!')
-            while True:
-                capture()
-                for decoded in decode(capture_ndarray.value):
-                    data = decoded.data.decode('utf-8')
-                    if data not in scanned:
-                        scanned[data] = now()
-                        print(data)
-                        sound_player.success()
-                    else:
-                        delta = now() - scanned[data]
-                        if delta > ignore_repetition_duration / 1000:
-                            print(f'Already scanned {data}')
+def _create_clock(settings):
+    rate = settings['frame-rate']
+    logging.info(f'Creating clock with rate {rate}')
+    return Clock(rate)
 
-                sleep(1 / capture_rate)
 
-    initialize()
-    scan()
+def _create_model(settings, clock):
+    video_capturer = _create_capturer(settings.subtree('video-capturing'))
+    frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
+    names = [str(k).rjust(5, '0') for k in range(0, 98)]
+    return Model(
+        settings=settings,
+        video_capturer=video_capturer,
+        frame_analyzer=frame_analyzer,
+        clock=clock,
+        names=names
+    )
+
+
+def _create_sound_player(settings):
+    logging.info('Creating sound player')
+    return SoundPlayer(settings['theme'], quiet=settings['quiet'])
+
+
+def run(settings):
+    logging.info('Initializing...')
+    sound_player = _create_sound_player(settings.subtree('sound'))
+    clock = _create_clock(settings)
+    model = _create_model(settings, clock)
+
+    for person in model.attendances.people:
+        person.present.add_observer(sound_player.success)
+
+    logging.info('Ready and keeping an eye on you...')
+
+    with model:
+        clock.update()
+        time.sleep(50)

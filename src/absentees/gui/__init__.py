@@ -7,15 +7,12 @@ from absentees.sound import SoundPlayer
 from absentees.capturer import DummyCapturer, VideoCapturer
 from absentees.gui.viewer import FrameViewer
 from absentees.gui.clock import Clock
-from absentees.repeater import Repeater
 from absentees.model import Model
-from absentees.timeline import repeat
 from absentees.analyzer import FrameAnalyzer
 import absentees.commands as commands
-from contextlib import contextmanager
 
 
-def create_capturer(settings):
+def _create_capturer(settings):
     if settings['dummy']:
         logging.info('Creating dummy capturer')
         return DummyCapturer()
@@ -25,7 +22,7 @@ def create_capturer(settings):
         return VideoCapturer.default_camera(size)
 
 
-def create_frame_analyzer(settings):
+def _create_frame_analyzer(settings):
     logging.info("Creating frame analyzer")
     return FrameAnalyzer()
 
@@ -40,24 +37,24 @@ def _get_window_size(settings):
     return window_width, window_height
 
 
-def create_clock(settings):
+def _create_clock(settings):
     rate = settings['frame-rate']
     logging.info(f'Creating clock with rate {rate}')
     return Clock(rate)
 
 
-def create_window(settings):
+def _create_window(settings):
     width, height = _get_window_size(settings)
     logging.info(f'Creating window with size {width}x{height}')
     return pygame.display.set_mode((width, height))
 
 
-def create_sound_player(settings):
+def _create_sound_player(settings):
     logging.info('Creating sound player')
     return SoundPlayer(settings['theme'], quiet=settings['quiet'])
 
 
-def create_frame_viewer(model, window_size):
+def _create_frame_viewer(model, window_size):
     window_width, window_height = window_size
     frame_width, frame_height = model.current_frame.value.get_size()
     x = (window_width - frame_width) // 2
@@ -65,7 +62,7 @@ def create_frame_viewer(model, window_size):
     return FrameViewer(model, (x, y))
 
 
-def create_attendances_viewer(settings, model, window_size):
+def _create_attendances_viewer(settings, model, window_size):
     window_width, window_height = window_size
     rect = pygame.Rect(0, 480, window_width, window_height - 480)
     return AttendancesViewer(settings, model, rect)
@@ -73,8 +70,8 @@ def create_attendances_viewer(settings, model, window_size):
 
 def run(settings):
     def create_model():
-        video_capturer = create_capturer(settings.subtree('video-capturing'))
-        frame_analyzer = create_frame_analyzer(settings.subtree('frame-analyzing'))
+        video_capturer = _create_capturer(settings.subtree('video-capturing'))
+        frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
         names = [str(k).rjust(5, '0') for k in range(0, 98)]
         return Model(
             settings=settings,
@@ -87,16 +84,16 @@ def run(settings):
     pygame.init()
 
     channel = Channel()
-    clock = create_clock(settings)
-    surface = create_window(settings.subtree('gui.window'))
-    sound_player = create_sound_player(settings.subtree('sound'))
+    clock = _create_clock(settings)
+    surface = _create_window(settings.subtree('gui.window'))
+    sound_player = _create_sound_player(settings.subtree('sound'))
     model = create_model()
 
     for person in model.attendances.people:
         person.present.add_observer(sound_player.success)
 
-    frame_viewer = create_frame_viewer(model, surface.get_size())
-    attendances_viewer = create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
+    frame_viewer = _create_frame_viewer(model, surface.get_size())
+    attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
     with server(channel), model:
         clock.add_observer(frame_viewer.tick)

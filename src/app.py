@@ -38,10 +38,12 @@ def cli(ctx, verbose, quiet, default):
 @click.command()
 @click.pass_context
 def tui(ctx):
-   import absentees.tui as tui
-   settings = ctx.obj['settings']
-   sound_player = SoundPlayer(settings['sound.theme'], quiet=ctx.obj['quiet'])
-   tui.run(settings, sound_player)
+    """
+    Simple text based UI
+    """
+    import absentees.tui as tui
+    settings = ctx.obj['settings']
+    tui.run(settings)
 
 cli.add_command(tui)
 
