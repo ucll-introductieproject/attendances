@@ -15,6 +15,7 @@ class Model:
         self.__analyzer = frame_analyzer
         self.__attendances = Attendances(names)
         self.__video_capturer = InjectingCapturer(video_capturer)
+        self.__video_capturer_handle = None
         self.__timeline = self.__create_timeline()
         self.__active = False
 
@@ -24,10 +25,10 @@ class Model:
         return Parallel(capturing_timeline, analysis_timeline).instantiate()
 
     def __capture_frame(self):
-        self.__video_capturer.capture(self.__current_frame.value)
+        self.__video_capturer_handle.capture(self.__current_frame.value)
 
     def __enter__(self):
-        self.__video_capturer.__enter__()
+        self.__video_capturer_handle = self.__video_capturer.__enter__()
         self.__active = True
 
     def __exit__(self, exception, value, traceback):

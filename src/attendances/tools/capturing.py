@@ -7,7 +7,22 @@ pygame.init()
 pygame.camera.init()
 
 
-class VideoCapturer:
+class Capturer:
+    """
+    Allows to identify Capturer subclasses using isinstance
+    """
+    pass
+
+
+class VideoCapturerHandle:
+    def __init__(self, func):
+        self.__func = func
+
+    def capture(self, target_surface):
+        return self.__func(target_surface)
+
+
+class VideoCapturer(Capturer):
     def __init__(self, camera_name, size):
         format = 'RGB'
         logging.info(f"Creating pygame camera with name={camera_name}, size={size}, format={format}")
@@ -15,12 +30,12 @@ class VideoCapturer:
 
     def __enter__(self):
         self.__camera.start()
-        return self.capture
+        return VideoCapturerHandle(self.__capture)
 
     def __exit__(self, exception, value, traceback):
         self.__camera.stop()
 
-    def capture(self, target_surface):
+    def __capture(self, target_surface):
         self.__camera.get_image(target_surface)
 
     @staticmethod
@@ -36,13 +51,13 @@ class VideoCapturer:
         return VideoCapturer(VideoCapturer.default_camera_name(), size)
 
 
-class DummyCapturer:
+class DummyCapturer(Capturer):
     def __init__(self):
         self.__counter = 0
         self.__font = pygame.font.SysFont(None, 64)
 
     def __enter__(self):
-        return self.capture
+        return VideoCapturerHandle(self.capture)
 
     def __exit__(self, exception, value, traceback):
         pass
@@ -58,8 +73,9 @@ class DummyCapturer:
         self.__counter += 1
 
 
-class InjectingCapturer:
+class InjectingCapturer(Capturer):
     def __init__(self, capturer):
+        assert isinstance(capturer, Capturer)
         self.__capturer = capturer
         self.__injected = None
         self.__count = 0
