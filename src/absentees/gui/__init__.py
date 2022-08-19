@@ -17,13 +17,16 @@ from contextlib import contextmanager
 
 def create_capturer(settings):
     if settings['dummy']:
+        logging.info('Creating dummy capturer')
         return DummyCapturer()
     else:
-        camera_name = VideoCapturer.default_camera()
-        return VideoCapturer(camera_name)
+        size = (settings['width'], settings['height'])
+        logging.info(f'Creating video capturer with size {size}')
+        return VideoCapturer.default_camera(size)
 
 
 def create_frame_analyzer(settings):
+    logging.info("Creating frame analyzer")
     return FrameAnalyzer()
 
 
@@ -69,19 +72,25 @@ def create_attendances_viewer(settings, model, window_size):
 
 
 def run(settings):
+    def create_model():
+        video_capturer = create_capturer(settings.subtree('video-capturing'))
+        frame_analyzer = create_frame_analyzer(settings.subtree('frame-analyzing'))
+        names = [str(k).rjust(5, '0') for k in range(0, 98)]
+        return Model(
+            settings=settings,
+            video_capturer=video_capturer,
+            frame_analyzer=frame_analyzer,
+            clock=clock,
+            names=names
+        )
+
     pygame.init()
 
     channel = Channel()
     clock = create_clock(settings)
     surface = create_window(settings.subtree('gui.window'))
     sound_player = create_sound_player(settings.subtree('sound'))
-    model = Model(
-        settings=settings,
-        video_capturer=create_capturer(settings.subtree('video-capturing')),
-        frame_analyzer=create_frame_analyzer(settings.subtree('frame-analyzing')),
-        clock=clock,
-        names=[str(k).rjust(5, '0') for k in range(0, 98)]
-    )
+    model = create_model()
 
     for person in model.attendances.people:
         person.present.add_observer(sound_player.success)
