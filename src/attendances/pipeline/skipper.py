@@ -1,4 +1,4 @@
-class Skipper:
+class SkipperNode:
     def __init__(self, n):
         self.__observers = []
         self.__n = n

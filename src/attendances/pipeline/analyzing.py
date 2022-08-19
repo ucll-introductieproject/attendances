@@ -9,7 +9,8 @@ class AnalyzerNode:
 
     def analyze(self, image):
         results = self.__analyzer.analyze(image)
-        self.__notify_observers(results)
+        if results:
+            self.__notify_observers(results)
 
     def on_analysis(self, observer):
         self.__observers.append(observer)

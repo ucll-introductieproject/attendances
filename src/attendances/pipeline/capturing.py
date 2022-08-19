@@ -1,7 +1,7 @@
 from attendances.tools.capturing import Capturer, VideoCapturerHandle
 
 
-class FrameNode:
+class CapturingNode:
     def __init__(self, capturer_handle, surface):
         assert isinstance(capturer_handle, VideoCapturerHandle)
         self.__capturer_handle = capturer_handle

@@ -6,6 +6,12 @@ import click
 import json
 
 
+class Context:
+    def __init__(self, /, capturer, attendances):
+        self.capturer = capturer
+        self.attendances = attendances
+
+
 def _create_default_command_function(name, *decorators):
     def function(**kwargs):
         data = { "command": name, "args": kwargs }
@@ -31,8 +37,8 @@ class ListPeopleCommand(Command):
             click.command(name='list-people')
         )
 
-    def execute(self, model, settings):
-        return "\n".join(model.attendances.names)
+    def execute(self, context, settings):
+        return "\n".join(context.attendances.names)
 
 
 class RegisterAttendanceCommand(Command):
@@ -44,9 +50,9 @@ class RegisterAttendanceCommand(Command):
             click.argument('name', type=str)
         )
 
-    def execute(self, model, settings):
-        if self.name in model.attendances.names:
-            model.attendances.register(self.name)
+    def execute(self, context, settings):
+        if self.name in context.attendances.names:
+            context.attendances.register(self.name)
             return 'Success'
         else:
             return f'{self.name} unknown'
@@ -62,14 +68,14 @@ class InjectFrameCommand(Command):
             click.option('-n', '--count', type=int, default=10)
         )
 
-    def execute(self, model, settings):
+    def execute(self, context, settings):
         logging.debug('Checking if video capturer supports injection')
-        if hasattr(model.video_capturer, 'inject'):
+        if hasattr(context.capturer, 'inject'):
             logging.debug('Video capturer does indeed support injection')
             logging.debug(f'Loading image {self.path}')
             surface = pygame.image.load(self.path)
             logging.debug(f'Injecting image')
-            model.video_capturer.inject(surface, self.count)
+            context.capturer.inject(surface, self.count)
             return 'Success'
         else:
             return 'Failure: video capturer does not support frame injection :('
@@ -85,18 +91,18 @@ class InjectFrameCommand(Command):
             click.option('-n', '--count', type=int, default=10)
         )
 
-    def execute(self, model, settings):
+    def execute(self, context, settings):
         logging.debug('Checking if video capturer supports injection')
-        if hasattr(model.video_capturer, 'inject'):
+        if hasattr(context.capturer, 'inject'):
             logging.debug('Video capturer does indeed support injection')
             logging.debug(f'Generating QR code')
             size = settings.size('video-capturing')
             surface = generate_qr_code(self.data, size)
             logging.debug(f'Injecting image')
-            model.video_capturer.inject(surface, self.count)
+            context.capturer.inject(surface, self.count)
             return 'Success'
         else:
-            return 'Failure: video capturer does not support frame injection :('
+            return 'Failure: capturer does not support frame injection :('
 
 
 def enumerate_commands():

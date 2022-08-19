@@ -22,6 +22,9 @@ class Attendances:
     def people(self):
         return self.__people.values()
 
+    def person_exists(self, id):
+        return id in self.__people
+
     def register(self, name):
         self.__people[name].present.value = True
 
