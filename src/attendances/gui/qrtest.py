@@ -33,14 +33,12 @@ def _create_label(counter, transformer):
 
 
 def _create_transformation_chain(*, capturing_node, transformation, frame_analyzer, surface, rect, clock):
-    transformer = TransformerNode(transformation)
-    analyzer = AnalyzerNode(frame_analyzer)
+    analyzer = AnalyzerNode([transformation], frame_analyzer)
     counter = Cell(0)
     label = _create_label(counter, transformation)
     highlighter = Highlighter(surface, rect, label)
 
-    capturing_node.link(transformer.transform)
-    transformer.link(analyzer.analyze)
+    capturing_node.link(analyzer.analyze)
     analyzer.link(partial(_log_qr_detection, transformation.__name__))
     analyzer.link(_ignore_parameters(highlighter.highlight))
     analyzer.link(_ignore_parameters(_incrementer(counter)))

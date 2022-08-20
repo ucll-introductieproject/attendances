@@ -3,6 +3,7 @@ import pygame
 import json
 from attendances.cells import Cell
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
+from attendances.imaging import identity
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
 from attendances.pipeline import *
@@ -32,7 +33,7 @@ def run(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        analyzing_node = AnalyzerNode(frame_analyzer)
+        analyzing_node = AnalyzerNode([identity], frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
         capturing_node.link(analyzing_node.analyze)

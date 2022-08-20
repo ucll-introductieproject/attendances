@@ -15,14 +15,13 @@ class FrameAnalyzer:
         self.__face_detector = FaceDetector()
         self.__highlight_qr = highlight_qr
 
-    def analyze(self, surface):
-        assert isinstance(surface, pygame.Surface)
-        pixels, qr_codes = self.__scan_for_qr_codes(surface)
+    def analyze(self, image):
+        pixels, qr_codes = self.__scan_for_qr_codes(image)
         if qr_codes:
             if self.__highlight_qr:
-                self.highlight_qr_codes(surface, qr_codes)
+                self.highlight_qr_codes(image, qr_codes)
             faces = self.__scan_for_faces(pixels)
-            return FrameAnalysis(image=surface, qr_codes=qr_codes, faces=faces)
+            return FrameAnalysis(image=image, qr_codes=qr_codes, faces=faces)
         else:
             return None
 
