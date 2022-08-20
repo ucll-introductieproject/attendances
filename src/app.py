@@ -63,7 +63,7 @@ cli.add_command(gui)
 
 @click.command()
 @click.pass_context
-def testqr(ctx):
+def qrtest(ctx):
     """
     Test QR code detection with different transformations
     """
@@ -71,7 +71,7 @@ def testqr(ctx):
     settings = ctx.obj['settings']
     gui.test_qr(settings)
 
-cli.add_command(testqr)
+cli.add_command(qrtest)
 
 
 @click.group()

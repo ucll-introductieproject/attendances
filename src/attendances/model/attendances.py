@@ -8,7 +8,7 @@ class Attendances:
         for name in names:
             person = Person(name)
             self.__people[name] = person
-            person.present.add_observer(self.__on_person_changed)
+            person.present.on_value_changed(self.__on_person_changed)
         self.__write_to_file()
 
     def __getitem__(self, name):

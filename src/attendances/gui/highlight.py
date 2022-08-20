@@ -16,8 +16,8 @@ class Highlighter:
         self.__font = pygame.font.SysFont(None, 16)
         self.__background = Cell((0, 0, 0))
         self.__background_animation = None
-        self.__label.add_observer(self.__label_updated)
-        self.__background.add_observer(self.__background_updated)
+        self.__label.on_value_changed(self.__label_updated)
+        self.__background.on_value_changed(self.__background_updated)
 
     def __render_background(self):
         pygame.draw.rect(self.__surface, self.__background.value, self.__rectangle)

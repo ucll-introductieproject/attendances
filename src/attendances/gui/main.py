@@ -25,7 +25,7 @@ def run(settings):
     context = commands.Context(attendances=attendances, capturer=video_capturer)
 
     for person in attendances.people:
-        person.present.add_observer(sound_player.success)
+        person.present.on_value_changed(sound_player.success)
 
     frame_viewer = create_frame_viewer(surface, frame_size)
     # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())

@@ -17,10 +17,10 @@ class AttendanceSlotViewer:
         self.__rectangle = rectangle
         self.__person = person
         self.__font = font
-        self.__person.present.add_observer(self.__on_person_changed)
+        self.__person.present.on_value_changed(self.__on_person_changed)
         self.__background = Cell(self.__settings.color('colors.absent'))
         self.__dirty = True
-        self.__background.add_observer(self.__on_background_changed)
+        self.__background.on_value_changed(self.__on_background_changed)
         self.__background_animation = None
 
     def __on_background_changed(self):

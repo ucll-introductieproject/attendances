@@ -47,7 +47,7 @@ def run(settings):
     context = commands.Context(attendances=attendances, capturer=video_capturer)
 
     for person in attendances.people:
-        person.present.add_observer(sound_player.success)
+        person.present.on_value_changed(sound_player.success)
 
     logging.info('Ready and keeping an eye on you...')
 

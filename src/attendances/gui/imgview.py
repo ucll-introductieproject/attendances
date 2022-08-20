@@ -2,7 +2,7 @@ class ImageViewer:
     def __init__(self, image_cell, position):
         self.__dirty = True
         self.__image_cell = image_cell
-        self.__image_cell.add_observer(self.__make_dirty)
+        self.__image_cell.on_value_changed(self.__make_dirty)
         self.__position = position
 
     def __make_dirty(self):

@@ -6,7 +6,7 @@ class CellBase:
         for observer in self.__observers:
             observer()
 
-    def add_observer(self, func):
+    def on_value_changed(self, func):
         self.__observers.append(func)
 
     def refresh(self):
@@ -18,7 +18,7 @@ class CellBase:
     def synchronize(self, target, func):
         def syncer():
             target.value = func(self.value)
-        self.add_observer(syncer)
+        self.on_value_changed(syncer)
 
     def __str__(self):
         return f"Cell({self.value})"
@@ -52,7 +52,7 @@ class LazyDerived(CellBase):
         self.__func = func
         self.__valid = False
         self.__value = None
-        self.__cell.add_observer(self.__invalidate)
+        self.__cell.on_value_changed(self.__invalidate)
 
     @property
     def value(self):
@@ -73,7 +73,7 @@ class StrictDerived(CellBase):
         self.__cell = cell
         self.__func = func
         self.__value = func(self.__cell.value)
-        self.__cell.add_observer(self.__refresh)
+        self.__cell.on_value_changed(self.__refresh)
 
     @property
     def value(self):
