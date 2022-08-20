@@ -51,6 +51,9 @@ cli.add_command(tui)
 @click.command()
 @click.pass_context
 def gui(ctx):
+    """
+    Run GUI
+    """
     import attendances.gui as gui
     settings = ctx.obj['settings']
     gui.run(settings)
@@ -61,6 +64,9 @@ cli.add_command(gui)
 @click.command()
 @click.pass_context
 def testqr(ctx):
+    """
+    Test QR code detection with different transformations
+    """
     import attendances.gui as gui
     settings = ctx.obj['settings']
     gui.test_qr(settings)
@@ -70,6 +76,9 @@ cli.add_command(testqr)
 
 @click.group()
 def config():
+    """
+    Configure attendances tool
+    """
     pass
 
 cli.add_command(config)
@@ -109,6 +118,9 @@ cli.add_command(cameras)
 
 @click.group()
 def cmd():
+    """
+    Send commands to TUI/GUI
+    """
     pass
 
 cli.add_command(cmd)
@@ -119,6 +131,9 @@ cli.add_command(cmd)
 @click.argument('path', type=str)
 @click.pass_context
 def generate_qr(ctx, message, path):
+    """
+    Generates a QR code and write its to file
+    """
     import pygame
     settings = ctx.obj['settings']
     width = settings['video-capturing.width']
