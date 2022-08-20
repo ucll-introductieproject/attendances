@@ -71,7 +71,7 @@ def test_qr(settings):
     surface = create_window(settings.subtree('gui.window'))
     capturing_surface = pygame.Surface(frame_size)
     video_capturer = create_capturer(settings.subtree('video-capturing'))
-    frame_analyzer = create_frame_analyzer(settings.subtree('frame-analyzing'))
+    frame_analyzer = create_frame_analyzer(highlight_qr=False)
     context = commands.Context(attendances=None, capturer=video_capturer)
     frame_viewer = create_frame_viewer(surface, frame_size)
 

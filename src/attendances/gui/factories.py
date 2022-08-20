@@ -35,9 +35,9 @@ def create_capturer(settings):
         return VideoCapturer.default_camera(size)
 
 
-def create_frame_analyzer(surface):
+def create_frame_analyzer(*, highlight_qr=False):
     logging.info("Creating frame analyzer")
-    return FrameAnalyzer(highlight_qr=True)
+    return FrameAnalyzer(highlight_qr=highlight_qr)
 
 
 def create_clock(settings):
