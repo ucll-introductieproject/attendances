@@ -3,11 +3,16 @@ import pygame
 import json
 from attendances.cells import Cell
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
-from attendances.imaging.transformations import identity
+from attendances.imaging.transformations import get_transformation_by_id
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
 from attendances.pipeline import *
 import attendances.commands as commands
+
+
+def _get_transformations(settings):
+    ids = settings['qr.transformations']
+    return [get_transformation_by_id(id) for id in ids]
 
 
 def run(settings):
@@ -33,7 +38,7 @@ def run(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        analyzing_node = AnalyzerNode([identity], frame_analyzer)
+        analyzing_node = AnalyzerNode(_get_transformations(settings), frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
         capturing_node.link(analyzing_node.analyze)

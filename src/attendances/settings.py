@@ -53,6 +53,10 @@ DefaultSettingsData = {
             'box-size': 10,
             'border': 4,
         },
+        'transformations': [
+            'bw',
+            'bw-mean',
+        ]
     },
 }
 
