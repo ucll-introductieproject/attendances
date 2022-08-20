@@ -50,13 +50,6 @@ def _create_transformation_chain(*, capturing_node, transformation, frame_analyz
 
 
 def test_qr(settings):
-    def highlighter_rect(i):
-        width = 200
-        height = 50
-        left = i * width
-        top = 800
-        return pygame.Rect(left, top, width, height)
-
     def determine_grid_rect():
         frame_width, frame_height = frame_size
         window_width, window_height = surface.get_size()
