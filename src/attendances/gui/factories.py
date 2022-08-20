@@ -4,7 +4,7 @@ import json
 from attendances.cells import Cell
 from attendances.gui.attviewer import AttendancesViewer
 from attendances.gui.clock import Clock
-from attendances.gui.viewer import FrameViewer
+from attendances.gui.frameviewer import FrameViewer
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
 from attendances.pipeline import *
