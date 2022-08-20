@@ -1,3 +1,4 @@
+import logging
 import pygame
 import cv2
 from collections import namedtuple
@@ -35,8 +36,12 @@ class FrameAnalyzer:
         return self.__face_detector.detect(grayscale)
 
     def highlight_qr_code(self, surface, qr_code):
-        highlight_color = (255, 0, 0)
-        pygame.draw.polygon(surface, highlight_color, qr_code.polygon, width=2)
+        polygon = qr_code.polygon
+        if len(polygon) < 3:
+            logging.critical(f'QR polygon has only {len(polygon)} vertices')
+        else:
+            highlight_color = (255, 0, 0)
+            pygame.draw.polygon(surface, highlight_color, qr_code.polygon, width=2)
 
     def highlight_qr_codes(self, surface, qr_codes):
         for qr_code in qr_codes:

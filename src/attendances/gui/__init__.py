@@ -2,7 +2,9 @@ import logging
 import pygame
 import json
 from attendances.gui.attviewer import AttendancesViewer
+from attendances.imaging import to_grayscale
 from attendances.model.attendances import Attendances
+from attendances.pipeline.transforming import TransformerNode
 from attendances.server import Channel, server
 from attendances.tools.sound import SoundPlayer
 from attendances.tools.capturing import DummyCapturer, VideoCapturer
@@ -128,6 +130,10 @@ def run(settings):
 
 
 def test_qr(settings):
+    def show_qr(analysis):
+        for qr_code in analysis.qr_codes:
+            logging.info(qr_code.data)
+
     pygame.init()
 
     channel = Channel()
@@ -143,12 +149,15 @@ def test_qr(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
+        transformer_node = TransformerNode(to_grayscale)
         analyzing_node = AnalyzerNode(frame_analyzer)
 
-        capturing_node.on_captured(analyzing_node.analyze)
+        capturing_node.on_captured(transformer_node.transform)
+        transformer_node.on_transformed(analyzing_node.analyze)
         capturing_node.on_captured(frame_viewer.new_frame)
         analyzing_node.on_analysis(frame_viewer.new_analysis)
         analyzing_node.on_analysis(lambda _: sound_player.success())
+        analyzing_node.on_analysis(show_qr)
 
         clock.on_tick(frame_viewer.tick)
         clock.on_tick(lambda _: capturing_node.capture())
