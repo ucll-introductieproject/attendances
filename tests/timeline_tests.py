@@ -1,5 +1,5 @@
 from re import X
-from absentees.timeline import Action, Delay, Sequence, Cyclic, repeat
+from attendances.timeline import Action, Delay, Sequence, Cyclic, repeat
 import pytest
 
 
