@@ -2,7 +2,7 @@ from attendances.animations import Animation
 
 
 class FloatAnimation(Animation):
-    def __init__(self, target, start, end, duration):
+    def __init__(self, /, target, start, end, duration):
         self.__target = target
         self.__start = start
         self.__end = end
