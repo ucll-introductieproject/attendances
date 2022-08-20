@@ -20,6 +20,12 @@ class CellBase:
             target.value = func(self.value)
         self.add_observer(syncer)
 
+    def __str__(self):
+        return f"Cell({self.value})"
+
+    def __repr__(self):
+        return f"Cell({self.value})"
+
 
 class Cell(CellBase):
     def __init__(self, initial_value):
@@ -35,11 +41,8 @@ class Cell(CellBase):
         self.__value = v
         self._notify_observers()
 
-    def __str__(self):
-        return f"Cell({self.__value})"
-
-    def __repr__(self):
-        return f"Cell({self.__value})"
+    def update(self, f):
+        self.__value = f(self.__value)
 
 
 class LazyDerived(CellBase):
@@ -69,7 +72,7 @@ class StrictDerived(CellBase):
         super().__init__()
         self.__cell = cell
         self.__func = func
-        self.__value = None
+        self.__value = func(self.__cell.value)
         self.__cell.add_observer(self.__refresh)
 
     @property
