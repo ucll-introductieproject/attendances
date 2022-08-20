@@ -35,10 +35,10 @@ def run(settings):
         analyzing_node = AnalyzerNode(frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
-        capturing_node.on_captured(analyzing_node.analyze)
-        capturing_node.on_captured(frame_viewer.new_frame)
-        analyzing_node.on_analysis(registering_node.update_attendances)
-        analyzing_node.on_analysis(frame_viewer.new_analysis)
+        capturing_node.link(analyzing_node.analyze)
+        capturing_node.link(frame_viewer.new_frame)
+        analyzing_node.link(registering_node.update_attendances)
+        analyzing_node.link(frame_viewer.new_analysis)
 
         # clock.on_tick(attendances_viewer.tick)
         clock.on_tick(frame_viewer.tick)

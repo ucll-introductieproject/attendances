@@ -1,15 +1,14 @@
-class SkipperNode:
+from attendances.pipeline.node import Node
+
+
+class SkipperNode(Node):
     def __init__(self, n):
-        self.__observers = []
+        super().__init__()
         self.__n = n
         self.__count = 0
-
-    def on_event(self, observer):
-        self.__observers.append(observer)
 
     def perform(self, *args, **kwargs):
         self.__count += 1
         if self.__count == self.__n:
             self.__count = 0
-            for observer in self.__observers:
-                observer(*args, **kwargs)
+            self._notify_observers(*args, **kwargs)

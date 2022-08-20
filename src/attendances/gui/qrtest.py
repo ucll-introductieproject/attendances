@@ -39,11 +39,11 @@ def _create_transformation_chain(*, capturing_node, transformation, frame_analyz
     label = _create_label(counter, transformation)
     highlighter = Highlighter(surface, rect, label)
 
-    capturing_node.on_captured(transformer.transform)
-    transformer.on_transformed(analyzer.analyze)
-    analyzer.on_analysis(partial(_log_qr_detection, transformation.__name__))
-    analyzer.on_analysis(_ignore_parameters(highlighter.highlight))
-    analyzer.on_analysis(_ignore_parameters(_incrementer(counter)))
+    capturing_node.link(transformer.transform)
+    transformer.link(analyzer.analyze)
+    analyzer.link(partial(_log_qr_detection, transformation.__name__))
+    analyzer.link(_ignore_parameters(highlighter.highlight))
+    analyzer.link(_ignore_parameters(_incrementer(counter)))
     clock.on_tick(highlighter.tick)
 
     highlighter.render()
@@ -93,7 +93,7 @@ def test_qr(settings):
                 clock=clock
             )
 
-        capturing_node.on_captured(frame_viewer.new_frame)
+        capturing_node.link(frame_viewer.new_frame)
 
         clock.on_tick(frame_viewer.tick)
         clock.on_tick(_ignore_parameters(capturing_node.capture))
