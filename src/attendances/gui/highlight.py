@@ -1,6 +1,6 @@
 from attendances.animations.dirac import DiracAnimation
 from attendances.animations.sequence import SequenceAnimation
-from attendances.cells import Cell
+from attendances.cells import Cell, CellBase
 from attendances.animations import FloatAnimation
 import pygame
 
@@ -9,7 +9,7 @@ class Highlighter:
     def __init__(self, surface, rectangle, label):
         assert isinstance(surface, pygame.Surface)
         assert isinstance(rectangle, pygame.Rect)
-        assert isinstance(label, Cell)
+        assert isinstance(label, CellBase)
         self.__surface = surface
         self.__rectangle = rectangle
         self.__label = label
