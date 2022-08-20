@@ -2,7 +2,7 @@ import logging
 import pygame
 import json
 from attendances.gui.attviewer import AttendancesViewer
-from attendances.imaging import to_black_and_white
+from attendances.imaging import identity, to_black_and_white, to_black_and_white_gaussian, to_black_and_white_mean, to_grayscale
 from attendances.model.attendances import Attendances
 from attendances.pipeline.transforming import TransformerNode
 from attendances.server import Channel, server
@@ -12,6 +12,7 @@ from attendances.gui.viewer import FrameViewer
 from attendances.gui.clock import Clock
 from attendances.pipeline import *
 from attendances.tools.analyzing import FrameAnalyzer
+from functools import partial
 import attendances.commands as commands
 
 
@@ -130,9 +131,9 @@ def run(settings):
 
 
 def test_qr(settings):
-    def show_qr(analysis):
+    def show_qr(description, analysis):
         for qr_code in analysis.qr_codes:
-            logging.info(qr_code.data)
+            logging.info(f'{description} found {qr_code.data}')
 
     pygame.init()
 
@@ -140,7 +141,6 @@ def test_qr(settings):
     clock = _create_clock(settings)
     surface = _create_window(settings.subtree('gui.window'))
     capturing_surface = pygame.Surface((settings['video-capturing.width'], settings['video-capturing.height']))
-    sound_player = _create_sound_player(settings.subtree('sound'))
     video_capturer = _create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
     context = commands.Context(attendances=None, capturer=video_capturer)
@@ -149,15 +149,17 @@ def test_qr(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        transformer_node = TransformerNode(to_black_and_white)
-        analyzing_node = AnalyzerNode(frame_analyzer)
 
-        capturing_node.on_captured(transformer_node.transform)
-        transformer_node.on_transformed(analyzing_node.analyze)
+        transformers = [identity, to_grayscale, to_black_and_white, to_black_and_white_mean, to_black_and_white_gaussian]
+        transformer_nodes = [TransformerNode(f) for f in transformers]
+        analyzer_nodes = [AnalyzerNode(frame_analyzer) for _ in transformers]
+
+        for transformer, transformer_node, analyzer_node in zip(transformers, transformer_nodes, analyzer_nodes):
+            capturing_node.on_captured(transformer_node.transform)
+            transformer_node.on_transformed(analyzer_node.analyze)
+            analyzer_node.on_analysis(partial(show_qr, transformer.__name__))
+
         capturing_node.on_captured(frame_viewer.new_frame)
-        analyzing_node.on_analysis(frame_viewer.new_analysis)
-        analyzing_node.on_analysis(lambda _: sound_player.success())
-        analyzing_node.on_analysis(show_qr)
 
         clock.on_tick(frame_viewer.tick)
         clock.on_tick(lambda _: capturing_node.capture())
