@@ -5,24 +5,34 @@ from attendances.tools.face import FaceDetector
 from attendances.tools.qr import QRScanner
 
 
-FrameAnalysis = namedtuple('FrameAnalysis', ['qr_codes', 'faces'])
+FrameAnalysis = namedtuple('FrameAnalysis', ['image', 'qr_codes', 'faces'])
 
 
 class FrameAnalyzer:
-    def __init__(self):
+    def __init__(self, /, highlight_qr=False):
         self.__qr_scanner = QRScanner()
         self.__face_detector = FaceDetector()
+        self.__highlight_qr = highlight_qr
 
     def analyze(self, surface):
         assert isinstance(surface, pygame.Surface)
-        pixels = FrameAnalyzer.__convert_to_pixels(surface)
-        qr_codes = self.__qr_scanner.scan(pixels)
+        pixels, qr_codes = self.__scan_for_qr_codes(surface)
         if qr_codes:
-            grayscale = FrameAnalyzer.__convert_to_grayscale(pixels)
-            faces = self.__face_detector.detect(grayscale)
-            return FrameAnalysis(qr_codes=qr_codes, faces=faces)
+            if self.__highlight_qr:
+                self.highlight_qr_codes(surface, qr_codes)
+            faces = self.__scan_for_faces(pixels)
+            return FrameAnalysis(image=surface, qr_codes=qr_codes, faces=faces)
         else:
             return None
+
+    def __scan_for_qr_codes(self, surface):
+        pixels = FrameAnalyzer.__convert_to_pixels(surface)
+        qr_codes = self.__qr_scanner.scan(pixels)
+        return pixels, qr_codes
+
+    def __scan_for_faces(self, pixels):
+        grayscale = FrameAnalyzer.__convert_to_grayscale(pixels)
+        return self.__face_detector.detect(grayscale)
 
     def highlight_qr_code(self, surface, qr_code):
         highlight_color = (255, 0, 0)

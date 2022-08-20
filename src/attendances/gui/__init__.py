@@ -25,7 +25,7 @@ def _create_capturer(settings):
 
 def _create_frame_analyzer(settings):
     logging.info("Creating frame analyzer")
-    return FrameAnalyzer()
+    return FrameAnalyzer(highlight_qr=True)
 
 
 def _get_window_size(settings):
@@ -90,7 +90,7 @@ def run(settings):
     # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
     with server(channel), video_capturer as handle:
-        # clock.add_observer(frame_viewer.tick)
+        clock.on_tick(frame_viewer.tick)
         # clock.add_observer(attendances_viewer.tick)
         capturing_node = CapturingNode(handle, capturing_surface)
         analyzing_node = AnalyzerNode(frame_analyzer)
@@ -99,6 +99,7 @@ def run(settings):
         capturing_node.on_captured(analyzing_node.analyze)
         capturing_node.on_captured(frame_viewer.new_frame)
         analyzing_node.on_analysis(registering_node.update_attendances)
+        analyzing_node.on_analysis(frame_viewer.new_analysis)
 
         clock.on_tick(lambda dt: capturing_node.capture())
 
