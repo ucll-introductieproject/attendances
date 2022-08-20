@@ -12,12 +12,12 @@ import attendances.commands as commands
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
 
 
+def log_qr_detection(transformer_name, analysis):
+    for qr_code in analysis.qr_codes:
+        logging.info(f'{transformer_name} found {qr_code.data}')
+
 
 def test_qr(settings):
-    def show_qr(description, analysis):
-        for qr_code in analysis.qr_codes:
-            logging.info(f'{description} found {qr_code.data}')
-
     def highlighter_rect(i):
         width = 200
         height = 50
@@ -61,7 +61,7 @@ def test_qr(settings):
         for transformer, transformer_node, analyzer_node, highlighter, counter in zip(transformers, transformer_nodes, analyzer_nodes, highlighters, detection_counters):
             capturing_node.on_captured(transformer_node.transform)
             transformer_node.on_transformed(analyzer_node.analyze)
-            analyzer_node.on_analysis(partial(show_qr, transformer.__name__))
+            analyzer_node.on_analysis(partial(log_qr_detection, transformer.__name__))
             analyzer_node.on_analysis(ignore_parameters(highlighter.highlight))
             analyzer_node.on_analysis(ignore_parameters(incrementer(counter)))
 
