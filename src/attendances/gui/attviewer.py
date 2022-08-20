@@ -4,8 +4,7 @@ from attendances.animations.sequence import SequenceAnimation
 from attendances.model.person import Person
 from attendances.gui.grid import Grid
 from attendances.cells import Cell
-from attendances.animations import FloatAnimation, NullAnimation
-import time
+from attendances.animations import FloatAnimation
 import pygame
 from operator import attrgetter
 
@@ -36,7 +35,7 @@ class AttendanceSlotViewer:
             cell = Cell(0)
             highlight_duration = self.__settings['highlight-duration']
             self.__background_animation = SequenceAnimation(
-                FloatAnimation(cell, 255, 64, highlight_duration),
+                FloatAnimation(target=cell, start=255, end=64, duration=highlight_duration),
                 DiracAnimation(remove_animation)
             )
             cell.synchronize(self.__background, lambda g: (0, g, 0))

@@ -1,7 +1,9 @@
 import logging
 import pygame
 import json
+from attendances.cells import Cell
 from attendances.gui.attviewer import AttendancesViewer
+from attendances.gui.highlight import Highlighter
 from attendances.imaging import identity, to_black_and_white, to_black_and_white_gaussian, to_black_and_white_mean, to_grayscale
 from attendances.model.attendances import Attendances
 from attendances.pipeline.transforming import TransformerNode
@@ -26,7 +28,7 @@ def _create_capturer(settings):
         return VideoCapturer.default_camera(size)
 
 
-def _create_frame_analyzer(settings):
+def _create_frame_analyzer(surface):
     logging.info("Creating frame analyzer")
     return FrameAnalyzer(highlight_qr=True)
 
@@ -58,12 +60,12 @@ def _create_sound_player(settings):
     return SoundPlayer(settings['theme'], quiet=settings['quiet'])
 
 
-# def _create_frame_viewer(model, window_size):
-#     window_width, window_height = window_size
-#     frame_width, frame_height = model.current_frame.value.get_size()
-#     x = (window_width - frame_width) // 2
-#     y = 0
-#     return FrameViewer(model, (x, y))
+def _create_frame_viewer(surface, frame_size):
+    window_width, window_height = surface.get_size()
+    frame_width, frame_height = frame_size
+    x = (window_width - frame_width) // 2
+    y = 0
+    return FrameViewer(surface, (x, y))
 
 
 def _create_attendances_viewer(settings, model, window_size):
@@ -76,9 +78,10 @@ def run(settings):
     pygame.init()
 
     channel = Channel()
+    frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     clock = _create_clock(settings)
     surface = _create_window(settings.subtree('gui.window'))
-    capturing_surface = pygame.Surface((settings['video-capturing.width'], settings['video-capturing.height']))
+    capturing_surface = pygame.Surface(frame_size)
     sound_player = _create_sound_player(settings.subtree('sound'))
     video_capturer = _create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
@@ -135,17 +138,27 @@ def test_qr(settings):
         for qr_code in analysis.qr_codes:
             logging.info(f'{description} found {qr_code.data}')
 
+    def highlighter_rect(i):
+        width = 200
+        height = 50
+        left = i * width
+        top = 800
+        return pygame.Rect(left, top, width, height)
+
+    def ignore_parameters(func):
+        return lambda *_: func()
+
     pygame.init()
 
+    frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     channel = Channel()
     clock = _create_clock(settings)
     surface = _create_window(settings.subtree('gui.window'))
-    capturing_surface = pygame.Surface((settings['video-capturing.width'], settings['video-capturing.height']))
+    capturing_surface = pygame.Surface(frame_size)
     video_capturer = _create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
     context = commands.Context(attendances=None, capturer=video_capturer)
-
-    frame_viewer = FrameViewer(surface, (0, 0))
+    frame_viewer = _create_frame_viewer(surface, frame_size)
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
@@ -153,16 +166,26 @@ def test_qr(settings):
         transformers = [identity, to_grayscale, to_black_and_white, to_black_and_white_mean, to_black_and_white_gaussian]
         transformer_nodes = [TransformerNode(f) for f in transformers]
         analyzer_nodes = [AnalyzerNode(frame_analyzer) for _ in transformers]
+        labels = [Cell(transformer.__name__) for transformer in transformers]
+        highlighters = [Highlighter(surface, highlighter_rect(i), label) for i, label in enumerate(labels)]
 
-        for transformer, transformer_node, analyzer_node in zip(transformers, transformer_nodes, analyzer_nodes):
+        for transformer, transformer_node, analyzer_node, highlighter in zip(transformers, transformer_nodes, analyzer_nodes, highlighters):
             capturing_node.on_captured(transformer_node.transform)
             transformer_node.on_transformed(analyzer_node.analyze)
             analyzer_node.on_analysis(partial(show_qr, transformer.__name__))
+            analyzer_node.on_analysis(ignore_parameters(highlighter.highlight))
 
         capturing_node.on_captured(frame_viewer.new_frame)
 
-        clock.on_tick(frame_viewer.tick)
-        clock.on_tick(lambda _: capturing_node.capture())
+        for highlighter in highlighters:
+            highlighter.render()
+
+        for observer in [ frame_viewer.tick,
+                          ignore_parameters(capturing_node.capture),
+                          *(highlighter.tick for highlighter in highlighters)
+                          ]:
+            clock.on_tick(observer)
+
 
         active = True
         while active:
