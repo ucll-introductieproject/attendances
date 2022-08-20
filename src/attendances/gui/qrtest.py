@@ -4,7 +4,7 @@ import json
 from attendances.cells import Cell
 from attendances.gui.grid import Grid
 from attendances.gui.highlight import Highlighter
-from attendances.imaging import identity, to_black_and_white, to_black_and_white_gaussian, to_black_and_white_mean, to_grayscale
+from attendances.imaging.transformations import identity, to_black_and_white, to_black_and_white_gaussian, to_black_and_white_mean, to_grayscale
 from attendances.pipeline.transforming import TransformerNode
 from attendances.server import Channel, server
 from attendances.pipeline import *
