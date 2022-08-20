@@ -2,6 +2,7 @@ import logging
 import pygame
 import json
 from attendances.cells import Cell
+from attendances.gui.grid import Grid
 from attendances.gui.highlight import Highlighter
 from attendances.imaging import identity, to_black_and_white, to_black_and_white_gaussian, to_black_and_white_mean, to_grayscale
 from attendances.pipeline.transforming import TransformerNode
@@ -56,6 +57,20 @@ def test_qr(settings):
         top = 800
         return pygame.Rect(left, top, width, height)
 
+    def determine_grid_rect():
+        frame_width, frame_height = frame_size
+        window_width, window_height = surface.get_size()
+        width = window_width
+        height = 20
+        top = frame_height + (window_height - frame_height) / 2 - height / 2
+        left = 0
+        return pygame.Rect(left, top, width, height)
+
+    def create_grid():
+        rect = determine_grid_rect()
+        size = (len(transformations), 1)
+        return Grid(rect, size)
+
     pygame.init()
     frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     channel = Channel()
@@ -71,9 +86,10 @@ def test_qr(settings):
         capturing_node = CapturingNode(handle, capturing_surface)
 
         transformations = [identity, to_grayscale, to_black_and_white, to_black_and_white_mean, to_black_and_white_gaussian]
+        grid = create_grid()
 
         for index, transformation in enumerate(transformations):
-            rect = highlighter_rect(index)
+            rect = grid.child_rectangle((index, 0))
 
             _create_transformation_chain(
                 capturing_node=capturing_node,
