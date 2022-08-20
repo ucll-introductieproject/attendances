@@ -3,6 +3,7 @@ import pygame
 import json
 from attendances.cells import Cell
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
+from attendances.gui.fps import FpsViewer
 from attendances.imaging.transformations import get_transformation_by_id
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
@@ -29,12 +30,16 @@ def run(settings):
     names = [str(k).rjust(5, '0') for k in range(0, 98)]
     attendances = Attendances(names)
     context = commands.Context(attendances=attendances, capturer=video_capturer)
+    fps = Cell(0)
 
     for person in attendances.people:
         person.present.on_value_changed(sound_player.success)
 
     frame_viewer = create_frame_viewer(surface, frame_size)
     # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
+
+    if settings['gui.show-fps']:
+        FpsViewer(surface, fps)
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
@@ -69,5 +74,6 @@ def run(settings):
                     active = False
 
             clock.update()
+            fps.value = clock.fps
 
             pygame.display.flip()

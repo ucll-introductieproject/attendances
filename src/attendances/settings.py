@@ -16,6 +16,7 @@ DefaultSettingsData = {
             'width': 1920,
             'height': 1080,
         },
+        'show-fps': True,
         'attendances': {
             'columns': 24,
             'font-size': 16,

@@ -14,3 +14,7 @@ class Clock:
         elapsed_seconds = self.__clock.tick(self.__ticks_per_second) / 1000
         for observer in self.__observers:
             observer(elapsed_seconds)
+
+    @property
+    def fps(self):
+        return self.__clock.get_fps()
