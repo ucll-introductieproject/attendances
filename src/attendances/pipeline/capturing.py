@@ -1,4 +1,4 @@
-from attendances.tools.capturing import Capturer, VideoCapturerHandle
+from attendances.tools.capturing import VideoCapturerHandle
 
 
 class CapturingNode:
