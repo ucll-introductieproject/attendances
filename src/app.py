@@ -58,6 +58,16 @@ def gui(ctx):
 cli.add_command(gui)
 
 
+@click.command()
+@click.pass_context
+def testqr(ctx):
+    import attendances.gui as gui
+    settings = ctx.obj['settings']
+    gui.test_qr(settings)
+
+cli.add_command(testqr)
+
+
 @click.group()
 def config():
     pass

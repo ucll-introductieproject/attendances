@@ -90,8 +90,6 @@ def run(settings):
     # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
     with server(channel), video_capturer as handle:
-        clock.on_tick(frame_viewer.tick)
-        # clock.add_observer(attendances_viewer.tick)
         capturing_node = CapturingNode(handle, capturing_surface)
         analyzing_node = AnalyzerNode(frame_analyzer)
         registering_node = RegisteringNode(attendances)
@@ -101,7 +99,9 @@ def run(settings):
         analyzing_node.on_analysis(registering_node.update_attendances)
         analyzing_node.on_analysis(frame_viewer.new_analysis)
 
-        clock.on_tick(lambda dt: capturing_node.capture())
+        # clock.on_tick(attendances_viewer.tick)
+        clock.on_tick(frame_viewer.tick)
+        clock.on_tick(lambda _: capturing_node.capture())
 
         active = True
         while active:
@@ -123,6 +123,54 @@ def run(settings):
 
             clock.update()
 
-            # frame_viewer.render(surface)
-            # attendances_viewer.render(surface)
+            pygame.display.flip()
+
+
+
+def test_qr(settings):
+    pygame.init()
+
+    channel = Channel()
+    clock = _create_clock(settings)
+    surface = _create_window(settings.subtree('gui.window'))
+    capturing_surface = pygame.Surface((settings['video-capturing.width'], settings['video-capturing.height']))
+    sound_player = _create_sound_player(settings.subtree('sound'))
+    video_capturer = _create_capturer(settings.subtree('video-capturing'))
+    frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
+    context = commands.Context(attendances=None, capturer=video_capturer)
+
+    frame_viewer = FrameViewer(surface, (0, 0))
+
+    with server(channel), video_capturer as handle:
+        capturing_node = CapturingNode(handle, capturing_surface)
+        analyzing_node = AnalyzerNode(frame_analyzer)
+
+        capturing_node.on_captured(analyzing_node.analyze)
+        capturing_node.on_captured(frame_viewer.new_frame)
+        analyzing_node.on_analysis(frame_viewer.new_analysis)
+        analyzing_node.on_analysis(lambda _: sound_player.success())
+
+        clock.on_tick(frame_viewer.tick)
+        clock.on_tick(lambda _: capturing_node.capture())
+
+        active = True
+        while active:
+            if channel.message_from_server_waiting:
+                request = json.loads(channel.receive_from_server())
+                try:
+                    logging.debug(f'Received {request}')
+                    command_class = commands.find_command_with_name(request['command'])
+                    command_object = command_class(**request['args'])
+                    response = command_object.execute(context, settings)
+                    channel.respond_to_server(response)
+                except:
+                    channel.respond_to_server('exception thrown')
+                    raise
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    active = False
+
+            clock.update()
+
             pygame.display.flip()
