@@ -92,7 +92,7 @@ def run(settings):
     for person in attendances.people:
         person.present.add_observer(sound_player.success)
 
-    frame_viewer = FrameViewer(surface, (0, 0))
+    frame_viewer = _create_frame_viewer(surface, frame_size)
     # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
     with server(channel), video_capturer as handle:
