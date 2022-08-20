@@ -2,7 +2,7 @@ import logging
 import pygame
 import json
 from attendances.gui.attviewer import AttendancesViewer
-from attendances.imaging import to_grayscale
+from attendances.imaging import to_black_and_white
 from attendances.model.attendances import Attendances
 from attendances.pipeline.transforming import TransformerNode
 from attendances.server import Channel, server
@@ -149,7 +149,7 @@ def test_qr(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        transformer_node = TransformerNode(to_grayscale)
+        transformer_node = TransformerNode(to_black_and_white)
         analyzing_node = AnalyzerNode(frame_analyzer)
 
         capturing_node.on_captured(transformer_node.transform)
