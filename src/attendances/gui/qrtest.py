@@ -12,9 +12,40 @@ import attendances.commands as commands
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
 
 
-def log_qr_detection(transformer_name, analysis):
+def _log_qr_detection(transformer_name, analysis):
     for qr_code in analysis.qr_codes:
         logging.info(f'{transformer_name} found {qr_code.data}')
+
+
+def _incrementer(counter):
+    def increment():
+        counter.value += 1
+    return increment
+
+
+def _ignore_parameters(func):
+    return lambda *_: func()
+
+
+def _create_label(counter, transformer):
+    return counter.derive(lambda n: f'{transformer.__name__} : {n}')
+
+
+def _create_transformation_chain(*, capturing_node, transformation, frame_analyzer, surface, rect, clock):
+    transformer = TransformerNode(transformation)
+    analyzer = AnalyzerNode(frame_analyzer)
+    counter = Cell(0)
+    label = _create_label(counter, transformation)
+    highlighter = Highlighter(surface, rect, label)
+
+    capturing_node.on_captured(transformer.transform)
+    transformer.on_transformed(analyzer.analyze)
+    analyzer.on_analysis(partial(_log_qr_detection, transformation.__name__))
+    analyzer.on_analysis(_ignore_parameters(highlighter.highlight))
+    analyzer.on_analysis(_ignore_parameters(_incrementer(counter)))
+    clock.on_tick(highlighter.tick)
+
+    highlighter.render()
 
 
 def test_qr(settings):
@@ -25,19 +56,7 @@ def test_qr(settings):
         top = 800
         return pygame.Rect(left, top, width, height)
 
-    def ignore_parameters(func):
-        return lambda *_: func()
-
-    def incrementer(counter):
-        def increment():
-            counter.value += 1
-        return increment
-
-    def create_label(counter, transformer):
-        return counter.derive(lambda n: f'{transformer.__name__} : {n}')
-
     pygame.init()
-
     frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     channel = Channel()
     clock = create_clock(settings)
@@ -51,29 +70,24 @@ def test_qr(settings):
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
 
-        transformers = [identity, to_grayscale, to_black_and_white, to_black_and_white_mean, to_black_and_white_gaussian]
-        transformer_nodes = [TransformerNode(f) for f in transformers]
-        analyzer_nodes = [AnalyzerNode(frame_analyzer) for _ in transformers]
-        detection_counters = [Cell(0) for _ in transformers]
-        labels = [create_label(counter, transformer) for counter, transformer in zip(detection_counters, transformers)]
-        highlighters = [Highlighter(surface, highlighter_rect(i), label) for i, label in enumerate(labels)]
+        transformations = [identity, to_grayscale, to_black_and_white, to_black_and_white_mean, to_black_and_white_gaussian]
 
-        for transformer, transformer_node, analyzer_node, highlighter, counter in zip(transformers, transformer_nodes, analyzer_nodes, highlighters, detection_counters):
-            capturing_node.on_captured(transformer_node.transform)
-            transformer_node.on_transformed(analyzer_node.analyze)
-            analyzer_node.on_analysis(partial(log_qr_detection, transformer.__name__))
-            analyzer_node.on_analysis(ignore_parameters(highlighter.highlight))
-            analyzer_node.on_analysis(ignore_parameters(incrementer(counter)))
+        for index, transformation in enumerate(transformations):
+            rect = highlighter_rect(index)
+
+            _create_transformation_chain(
+                capturing_node=capturing_node,
+                transformation=transformation,
+                frame_analyzer=frame_analyzer,
+                surface=surface,
+                rect=rect,
+                clock=clock
+            )
 
         capturing_node.on_captured(frame_viewer.new_frame)
 
-        for highlighter in highlighters:
-            highlighter.render()
-
-        for observer in [frame_viewer.tick,
-                         ignore_parameters(capturing_node.capture),
-                         *(highlighter.tick for highlighter in highlighters)]:
-            clock.on_tick(observer)
+        clock.on_tick(frame_viewer.tick)
+        clock.on_tick(_ignore_parameters(capturing_node.capture))
 
         active = True
         while active:
