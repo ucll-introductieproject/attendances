@@ -44,9 +44,9 @@ def run(settings):
         registering_node = RegisteringNode(attendances)
 
         capturing_node.link(skipper_node.perform)
+        capturing_node.link(frame_viewer.new_frame)
         skipper_node.link(wrapping_node.wrap)
         wrapping_node.link(analyzing_node.analyze)
-        wrapping_node.link(frame_viewer.new_frame)
         analyzing_node.link(registering_node.update_attendances)
         analyzing_node.link(frame_viewer.new_analysis)
 

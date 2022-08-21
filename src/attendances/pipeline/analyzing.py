@@ -11,7 +11,7 @@ class AnalyzerNode(Node):
         self.__transformations = transformations
 
     def analyze(self, image):
-        assert isinstance(image, Image)
+        assert isinstance(image, Image), f'was {type(image)}'
         for transformation in self.__transformations:
             transformed_image = getattr(image, transformation)
             analysis = self.__analyzer.analyze(transformed_image)

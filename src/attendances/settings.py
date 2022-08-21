@@ -62,8 +62,10 @@ DefaultSettingsData = {
         ]
     },
     'qrtest': {
-        'frame-rate': 30,
+        'frame-rate': 0,
         'show-fps': True,
+        'skip-rate': 5,
+        'font-size': 24,
     }
 }
 

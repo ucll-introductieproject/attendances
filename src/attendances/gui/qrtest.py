@@ -31,11 +31,11 @@ def _create_label(counter, transformer):
     return counter.derive(lambda n: f'{transformer} : {n}')
 
 
-def _create_transformation_chain(*, source_node, transformation, frame_analyzer, surface, rect, clock):
+def _create_transformation_chain(*, source_node, transformation, frame_analyzer, surface, rect, clock, font):
     analyzer = AnalyzerNode([transformation], frame_analyzer)
     counter = Cell(0)
     label = _create_label(counter, transformation)
-    highlighter = Highlighter(surface, rect, label)
+    highlighter = Highlighter(surface=surface, rectangle=rect, label=label, font=font)
 
     source_node.link(analyzer.analyze)
     analyzer.link(partial(_log_qr_detection, transformation))
@@ -64,6 +64,7 @@ def test_qr(settings):
     pygame.init()
     frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     channel = Channel()
+    font = pygame.font.SysFont(None, settings['qrtest.font-size'])
     clock = create_clock(settings.subtree('qrtest'))
     surface = create_window(settings.subtree('gui.window'))
     capturing_surface = pygame.Surface(frame_size)
@@ -101,7 +102,8 @@ def test_qr(settings):
                 frame_analyzer=frame_analyzer,
                 surface=surface,
                 rect=rect,
-                clock=clock
+                clock=clock,
+                font=font
             )
 
         capturing_node.link(frame_viewer.new_frame)

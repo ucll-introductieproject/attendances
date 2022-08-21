@@ -6,14 +6,14 @@ import pygame
 
 
 class Highlighter:
-    def __init__(self, surface, rectangle, label):
+    def __init__(self, /, surface, rectangle, label, font):
         assert isinstance(surface, pygame.Surface)
         assert isinstance(rectangle, pygame.Rect)
         assert isinstance(label, CellBase)
         self.__surface = surface
         self.__rectangle = rectangle
         self.__label = label
-        self.__font = pygame.font.SysFont(None, 16)
+        self.__font = font
         self.__background = Cell((0, 0, 0))
         self.__background_animation = None
         self.__label.on_value_changed(self.__label_updated)
