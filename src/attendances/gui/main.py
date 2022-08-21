@@ -38,11 +38,13 @@ def run(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
+        skipper_node = SkipperNode(settings['gui.skip-rate'])
         wrapping_node = ImageWrapper()
         analyzing_node = AnalyzerNode(settings['qr.transformations'], frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
-        capturing_node.link(wrapping_node.wrap)
+        capturing_node.link(skipper_node.perform)
+        skipper_node.link(wrapping_node.wrap)
         wrapping_node.link(analyzing_node.analyze)
         wrapping_node.link(frame_viewer.new_frame)
         analyzing_node.link(registering_node.update_attendances)

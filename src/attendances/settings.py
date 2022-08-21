@@ -12,6 +12,7 @@ DefaultSettingsData = {
     },
     'gui': {
         'frame-rate': 0,
+        'skip-rate': 5,
         'window': {
             'width': 1920,
             'height': 1080,
@@ -55,8 +56,8 @@ DefaultSettingsData = {
             'border': 4,
         },
         'transformations': [
-            # 'identity',
-            'bw',
+            # 'original',
+            # 'bw',
             'bw_mean',
         ]
     },
