@@ -1,5 +1,5 @@
 from functools import reduce
-from attendances.cells import Cell
+from attendances.cells import Cell, CellBase
 import logging
 import json
 
@@ -106,7 +106,7 @@ class Settings:
 
     @property
     def data(self):
-        return self.__data
+        return _decellify(self.__data)
 
 
 def _cellify(data):
@@ -114,6 +114,17 @@ def _cellify(data):
         return {key: _cellify(value) for key, value in data.items()}
     else:
         return Cell(data)
+
+
+def _decellify(data):
+    if isinstance(data, CellBase):
+        return data.value
+    elif isinstance(data, list):
+        return [_decellify(x) for x in data]
+    elif isinstance(data, dict):
+        return {key: _decellify(value) for key, value in data.items()}
+    else:
+        assert False
 
 
 def _create_settings_from_data(data):

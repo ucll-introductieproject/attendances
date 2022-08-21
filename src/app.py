@@ -1,11 +1,8 @@
 import logging
-from unicodedata import name
 import click
 import json
 import attendances.commands as commands
-from attendances.tools.sound import SoundPlayer
 from attendances.settings import load_settings, default_settings
-from attendances.tools.qr import generate_qr_code
 from pathlib import Path
 
 
@@ -134,6 +131,7 @@ def generate_qr(ctx, message, path):
     """
     Generates a QR code and write its to file
     """
+    from attendances.tools.qr import generate_qr_code
     import pygame
     settings = ctx.obj['settings']
     width = settings['video-capturing.width']
