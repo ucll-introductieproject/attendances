@@ -57,7 +57,7 @@ DefaultSettingsData = {
         'transformations': [
             # 'identity',
             'bw',
-            'bw-mean',
+            'bw_mean',
         ]
     },
     'qrtest': {

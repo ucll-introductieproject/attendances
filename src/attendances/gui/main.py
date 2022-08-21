@@ -11,11 +11,6 @@ from attendances.pipeline import *
 import attendances.commands as commands
 
 
-def _get_transformations(settings):
-    ids = settings['qr.transformations']
-    return [get_transformation_by_id(id) for id in ids]
-
-
 def run(settings):
     pygame.init()
 
@@ -43,11 +38,13 @@ def run(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        analyzing_node = AnalyzerNode(_get_transformations(settings), frame_analyzer)
+        wrapping_node = ImageWrapper()
+        analyzing_node = AnalyzerNode(settings['qr.transformations'], frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
-        capturing_node.link(analyzing_node.analyze)
-        capturing_node.link(frame_viewer.new_frame)
+        capturing_node.link(wrapping_node.wrap)
+        wrapping_node.link(analyzing_node.analyze)
+        wrapping_node.link(frame_viewer.new_frame)
         analyzing_node.link(registering_node.update_attendances)
         analyzing_node.link(frame_viewer.new_analysis)
 

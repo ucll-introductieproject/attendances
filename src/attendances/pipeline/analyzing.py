@@ -1,5 +1,6 @@
 from attendances.pipeline.node import Node
 from attendances.tools.analyzing import FrameAnalyzer
+from attendances.imaging.image import Image
 
 
 class AnalyzerNode(Node):
@@ -10,8 +11,9 @@ class AnalyzerNode(Node):
         self.__transformations = transformations
 
     def analyze(self, image):
+        assert isinstance(image, Image)
         for transformation in self.__transformations:
-            transformed_image = transformation(image)
+            transformed_image = getattr(image, transformation)
             analysis = self.__analyzer.analyze(transformed_image)
             if analysis:
                 self._notify_observers(analysis)
