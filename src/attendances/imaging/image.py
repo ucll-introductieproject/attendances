@@ -49,5 +49,5 @@ class Image:
         return self.__grayscale_array3d_to_surface(self.bw_gaussian_array3d)
 
     def __grayscale_array3d_to_surface(self, array3d):
-        bgr = cv2.cvtColor(self.grayscale_array3d, cv2.COLOR_GRAY2BGR)
+        bgr = cv2.cvtColor(array3d, cv2.COLOR_GRAY2BGR)
         return pygame.surfarray.make_surface(bgr)
