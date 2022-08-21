@@ -31,13 +31,13 @@ def _create_label(counter, transformer):
     return counter.derive(lambda n: f'{transformer} : {n}')
 
 
-def _create_transformation_chain(*, wrapper_node, transformation, frame_analyzer, surface, rect, clock):
+def _create_transformation_chain(*, source_node, transformation, frame_analyzer, surface, rect, clock):
     analyzer = AnalyzerNode([transformation], frame_analyzer)
     counter = Cell(0)
     label = _create_label(counter, transformation)
     highlighter = Highlighter(surface, rect, label)
 
-    wrapper_node.link(analyzer.analyze)
+    source_node.link(analyzer.analyze)
     analyzer.link(partial(_log_qr_detection, transformation))
     analyzer.link(_ignore_parameters(highlighter.highlight))
     analyzer.link(_ignore_parameters(_incrementer(counter)))
@@ -78,8 +78,10 @@ def test_qr(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
+        skipper_node = SkipperNode(settings['qrtest.skip-rate'])
         wrapper_node = ImageWrapper()
-        capturing_node.link(wrapper_node.wrap)
+        capturing_node.link(skipper_node.perform)
+        skipper_node.link(wrapper_node.wrap)
 
         transformations = [
             'original',
@@ -94,7 +96,7 @@ def test_qr(settings):
             rect = grid.child_rectangle((index, 0))
 
             _create_transformation_chain(
-                wrapper_node=wrapper_node,
+                source_node=wrapper_node,
                 transformation=transformation,
                 frame_analyzer=frame_analyzer,
                 surface=surface,
@@ -102,7 +104,7 @@ def test_qr(settings):
                 clock=clock
             )
 
-        wrapper_node.link(frame_viewer.new_frame)
+        capturing_node.link(frame_viewer.new_frame)
 
         clock.on_tick(frame_viewer.tick)
         clock.on_tick(_ignore_parameters(capturing_node.capture))
