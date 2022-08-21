@@ -4,7 +4,6 @@ import json
 from attendances.cells import Cell
 from attendances.gui.grid import Grid
 from attendances.gui.highlight import Highlighter
-from attendances.imaging.transformations import identity, to_black_and_white, to_black_and_white_gaussian, to_black_and_white_mean, to_grayscale
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_window
 from attendances.server import Channel, server
 from attendances.pipeline import *
@@ -29,17 +28,17 @@ def _ignore_parameters(func):
 
 
 def _create_label(counter, transformer):
-    return counter.derive(lambda n: f'{transformer.__name__} : {n}')
+    return counter.derive(lambda n: f'{transformer} : {n}')
 
 
-def _create_transformation_chain(*, capturing_node, transformation, frame_analyzer, surface, rect, clock):
+def _create_transformation_chain(*, wrapper_node, transformation, frame_analyzer, surface, rect, clock):
     analyzer = AnalyzerNode([transformation], frame_analyzer)
     counter = Cell(0)
     label = _create_label(counter, transformation)
     highlighter = Highlighter(surface, rect, label)
 
-    capturing_node.link(analyzer.analyze)
-    analyzer.link(partial(_log_qr_detection, transformation.__name__))
+    wrapper_node.link(analyzer.analyze)
+    analyzer.link(partial(_log_qr_detection, transformation))
     analyzer.link(_ignore_parameters(highlighter.highlight))
     analyzer.link(_ignore_parameters(_incrementer(counter)))
     clock.on_tick(highlighter.tick)
@@ -79,15 +78,23 @@ def test_qr(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
+        wrapper_node = ImageWrapper()
+        capturing_node.link(wrapper_node.wrap)
 
-        transformations = [identity, to_grayscale, to_black_and_white, to_black_and_white_mean, to_black_and_white_gaussian]
+        transformations = [
+            'original',
+            'grayscale',
+            'bw',
+            'bw_mean',
+            'bw_gaussian'
+        ]
         grid = create_grid()
 
         for index, transformation in enumerate(transformations):
             rect = grid.child_rectangle((index, 0))
 
             _create_transformation_chain(
-                capturing_node=capturing_node,
+                wrapper_node=wrapper_node,
                 transformation=transformation,
                 frame_analyzer=frame_analyzer,
                 surface=surface,
@@ -95,7 +102,7 @@ def test_qr(settings):
                 clock=clock
             )
 
-        capturing_node.link(frame_viewer.new_frame)
+        wrapper_node.link(frame_viewer.new_frame)
 
         clock.on_tick(frame_viewer.tick)
         clock.on_tick(_ignore_parameters(capturing_node.capture))
