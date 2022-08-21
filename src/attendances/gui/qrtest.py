@@ -5,12 +5,11 @@ from attendances.cells import Cell
 from attendances.gui.grid import Grid
 from attendances.gui.highlight import Highlighter
 from attendances.imaging.transformations import identity, to_black_and_white, to_black_and_white_gaussian, to_black_and_white_mean, to_grayscale
-from attendances.pipeline.transforming import TransformerNode
+from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_window
 from attendances.server import Channel, server
 from attendances.pipeline import *
 from functools import partial
 import attendances.commands as commands
-from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
 from attendances.gui.fps import FpsViewer
 
 
