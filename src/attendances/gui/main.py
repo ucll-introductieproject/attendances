@@ -21,7 +21,7 @@ def run(settings):
 
     channel = Channel()
     frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
-    clock = create_clock(settings)
+    clock = create_clock(settings.subtree('gui'))
     surface = create_window(settings.subtree('gui.window'))
     capturing_surface = pygame.Surface(frame_size)
     sound_player = create_sound_player(settings.subtree('sound'))

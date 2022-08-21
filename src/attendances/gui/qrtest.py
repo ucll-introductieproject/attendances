@@ -11,6 +11,7 @@ from attendances.pipeline import *
 from functools import partial
 import attendances.commands as commands
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
+from attendances.gui.fps import FpsViewer
 
 
 def _log_qr_detection(transformer_name, analysis):
@@ -65,13 +66,17 @@ def test_qr(settings):
     pygame.init()
     frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     channel = Channel()
-    clock = create_clock(settings)
+    clock = create_clock(settings.subtree('qrtest'))
     surface = create_window(settings.subtree('gui.window'))
     capturing_surface = pygame.Surface(frame_size)
     video_capturer = create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = create_frame_analyzer(highlight_qr=False)
     context = commands.Context(attendances=None, capturer=video_capturer)
     frame_viewer = create_frame_viewer(surface, frame_size)
+    fps = Cell(0)
+
+    if settings['gui.show-fps']:
+        FpsViewer(surface, fps)
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
@@ -115,5 +120,6 @@ def test_qr(settings):
                     active = False
 
             clock.update()
+            fps.value = clock.fps
 
             pygame.display.flip()

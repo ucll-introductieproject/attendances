@@ -5,13 +5,13 @@ import json
 
 
 DefaultSettingsData = {
-    'frame-rate': 30,
     'font-size': 64,
     'sound': {
         'theme': 'big-sur',
         'quiet': False,
     },
     'gui': {
+        'frame-rate': 0,
         'window': {
             'width': 1920,
             'height': 1080,
@@ -55,10 +55,15 @@ DefaultSettingsData = {
             'border': 4,
         },
         'transformations': [
+            # 'identity',
             'bw',
             'bw-mean',
         ]
     },
+    'qrtest': {
+        'frame-rate': 30,
+        'show-fps': True,
+    }
 }
 
 
