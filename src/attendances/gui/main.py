@@ -21,7 +21,7 @@ def run(settings):
     capturing_surface = pygame.Surface(frame_size)
     sound_player = create_sound_player(settings.subtree('sound'))
     video_capturer = create_capturer(settings.subtree('video-capturing'))
-    frame_analyzer = create_frame_analyzer(highlight_qr=True)
+    frame_analyzer = create_frame_analyzer(settings)
     names = [str(k).rjust(5, '0') for k in range(0, 98)]
     attendances = Attendances(names)
     context = commands.Context(attendances=attendances, capturer=video_capturer)

@@ -42,6 +42,7 @@ def _create_transformation_chain(*, source_node, transformation, frame_analyzer,
     analyzer.link(_ignore_parameters(highlighter.highlight))
     analyzer.link(_ignore_parameters(_incrementer(counter)))
     clock.on_tick(highlighter.tick)
+    clock.on_tick(analyzer.tick)
 
     highlighter.render()
 
@@ -69,7 +70,7 @@ def test_qr(settings):
     surface = create_window(settings.subtree('gui.window'))
     capturing_surface = pygame.Surface(frame_size)
     video_capturer = create_capturer(settings.subtree('video-capturing'))
-    frame_analyzer = create_frame_analyzer(highlight_qr=False)
+    frame_analyzer = create_frame_analyzer(settings)
     context = commands.Context(attendances=None, capturer=video_capturer)
     frame_viewer = create_frame_viewer(surface, frame_size)
     fps = Cell(0)

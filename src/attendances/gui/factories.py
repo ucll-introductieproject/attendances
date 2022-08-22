@@ -11,6 +11,8 @@ from attendances.pipeline import *
 import attendances.commands as commands
 from attendances.tools.analyzing import FrameAnalyzer
 from attendances.tools.capturing import DummyCapturer, VideoCapturer
+from attendances.tools.face import NullFaceDetector
+from attendances.tools.qr import QRScanner
 from attendances.tools.sound import SoundPlayer
 
 
@@ -35,9 +37,11 @@ def create_capturer(settings):
         return VideoCapturer.default_camera(size)
 
 
-def create_frame_analyzer(*, highlight_qr=False):
+def create_frame_analyzer(settings):
     logging.info("Creating frame analyzer")
-    return FrameAnalyzer(highlight_qr=highlight_qr)
+    qr_scanner = QRScanner()
+    face_detector = NullFaceDetector()
+    return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
 
 
 def create_clock(settings):

@@ -10,3 +10,8 @@ class FaceDetector:
     def detect(self, image):
         faces = self.__classifier.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5)
         return [pygame.Rect(*face) for face in faces]
+
+
+class NullFaceDetector:
+    def detect(self, image):
+        return []

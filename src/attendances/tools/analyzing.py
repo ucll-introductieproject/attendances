@@ -10,9 +10,9 @@ FrameAnalysis = namedtuple('FrameAnalysis', ['image', 'qr_codes', 'faces'])
 
 
 class FrameAnalyzer:
-    def __init__(self, /, highlight_qr=False):
-        self.__qr_scanner = QRScanner()
-        self.__face_detector = FaceDetector()
+    def __init__(self, *, qr_scanner, face_detector, highlight_qr=False):
+        self.__qr_scanner = qr_scanner
+        self.__face_detector = face_detector
         self.__highlight_qr = highlight_qr
 
     def analyze(self, image):

@@ -4,6 +4,8 @@ from attendances.server import Channel, server
 from attendances.model.attendances import Attendances
 from attendances.tools.analyzing import FrameAnalyzer
 from attendances.tools.capturing import DummyCapturer, VideoCapturer
+from attendances.tools.face import NullFaceDetector
+from attendances.tools.qr import QRScanner
 from attendances.tools.sound import SoundPlayer
 from attendances.pipeline import *
 import time
@@ -23,7 +25,9 @@ def _create_capturer(settings):
 
 def _create_frame_analyzer(settings):
     logging.info("Creating frame analyzer")
-    return FrameAnalyzer()
+    qr_scanner = QRScanner()
+    face_detector = NullFaceDetector()
+    return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
 
 
 def _create_sound_player(settings):
@@ -41,6 +45,7 @@ def run(settings):
     video_capturer = _create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
     names = [str(k).rjust(5, '0') for k in range(0, 98)]
+    pause_duration = 0.2
     attendances = Attendances(names)
     channel = Channel()
     context = commands.Context(attendances=attendances, capturer=video_capturer)
@@ -75,4 +80,5 @@ def run(settings):
                     raise
 
             capturing_node.capture()
-            time.sleep(0.2)
+            time.sleep(pause_duration)
+            analyzing_node.tick(pause_duration)
