@@ -53,6 +53,7 @@ def run(settings):
         # clock.on_tick(attendances_viewer.tick)
         clock.on_tick(frame_viewer.tick)
         clock.on_tick(lambda _: capturing_node.capture())
+        clock.on_tick(analyzing_node.tick)
 
         active = True
         while active:
