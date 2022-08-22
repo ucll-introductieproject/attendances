@@ -2,6 +2,7 @@ from attendances.countdown import Countdown
 import logging
 from pygame import Surface
 
+
 class FrameViewer:
     def __init__(self, surface, position):
         self.__surface = surface
