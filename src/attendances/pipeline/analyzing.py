@@ -4,6 +4,7 @@ from attendances.imaging.image import Image
 from attendances.countdown import Countdown
 import logging
 
+
 class AnalyzerNode(Node):
     def __init__(self, transformations, analyzer, countdown_duration=1):
         assert isinstance(analyzer, FrameAnalyzer)
