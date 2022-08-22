@@ -4,7 +4,6 @@ from attendances.server import Channel, server
 from attendances.model.attendances import Attendances
 from attendances.tools.analyzing import FrameAnalyzer
 from attendances.tools.capturing import DummyCapturer, VideoCapturer
-from attendances.gui import _create_frame_analyzer
 from attendances.tools.sound import SoundPlayer
 from attendances.pipeline import *
 import time
@@ -53,12 +52,14 @@ def run(settings):
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, surface)
-        analyzing_node = AnalyzerNode(frame_analyzer)
+        wrapper_node = ImageWrapper()
+        analyzing_node = AnalyzerNode(settings['qr.transformations'], frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
-        capturing_node.on_captured(analyzing_node.analyze)
-        analyzing_node.on_analysis(registering_node.update_attendances)
-        analyzing_node.on_analysis(show_analysis_results)
+        capturing_node.link(wrapper_node.wrap)
+        wrapper_node.link(analyzing_node.analyze)
+        analyzing_node.link(registering_node.update_attendances)
+        analyzing_node.link(show_analysis_results)
 
         while True:
             if channel.message_from_server_waiting:

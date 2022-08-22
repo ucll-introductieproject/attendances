@@ -66,7 +66,7 @@ DefaultSettingsData = {
         'show-fps': True,
         'skip-rate': 5,
         'font-size': 24,
-    }
+    },
 }
 
 
