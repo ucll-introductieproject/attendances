@@ -109,8 +109,8 @@ config.add_command(config_delete)
 
 @click.command()
 def cameras():
-    from attendances.tools.capturing import Capturer
-    for index, id in enumerate(Capturer.cameras()):
+    from attendances.tools.capturing import VideoCapturer
+    for index, id in enumerate(VideoCapturer.cameras()):
         print(f'[{index}] {id}')
 
 cli.add_command(cameras)
