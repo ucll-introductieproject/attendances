@@ -1,6 +1,8 @@
 import logging
 import pygame
 import json
+from pathlib import Path
+from functools import partial
 from attendances.cells import Cell
 from attendances.gui.attviewer import AttendancesViewer
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
@@ -11,6 +13,7 @@ from attendances.server import Channel, server
 from attendances.pipeline import *
 import attendances.commands as commands
 from attendances.gui.highlight import Highlighter
+from attendances.registration import FileRegistration
 
 
 def run(settings):
@@ -52,6 +55,11 @@ def run(settings):
             window_height-frame_height
         )
 
+    def create_registrations():
+        registration = FileRegistration(Path('registrations.txt'))
+        for person in attendances.people:
+            person.present.on_value_changed(partial(registration.register, person.name))
+
 
     pygame.init()
 
@@ -66,6 +74,7 @@ def run(settings):
     frame_analyzer = create_frame_analyzer(settings)
     names = [ "the leftovers", "breaking bad" ]
     attendances = Attendances(names)
+    create_registrations()
     context = commands.Context(attendances=attendances, capturer=video_capturer)
     create_registration_viewer()
     fps = Cell(0)
