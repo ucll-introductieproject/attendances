@@ -9,22 +9,46 @@ from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
 from attendances.pipeline import *
 import attendances.commands as commands
+from attendances.gui.highlight import Highlighter
 
 
 def run(settings):
+    def create_registration_viewer():
+        def observe_person(person):
+            def update_label():
+                label.value = person.name
+            person.present.on_value_changed(update_label)
+
+        rect = pygame.Rect(
+            0,
+            frame_height,
+            window_width,
+            window_height-frame_height
+        )
+        label = Cell('tralala')
+        font = pygame.font.SysFont(None, 64)
+        highlighter = Highlighter(surface=surface, rectangle=rect, label=label, font=font)
+        highlighter.render()
+        clock.on_tick(highlighter.tick)
+        for person in attendances.people:
+            observe_person(person)
+
+
     pygame.init()
 
     channel = Channel()
-    frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
+    frame_width, frame_height = frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     clock = create_clock(settings.subtree('gui'))
     surface = create_window(settings.subtree('gui.window'))
+    window_width, window_height = surface.get_size()
     capturing_surface = pygame.Surface(frame_size)
     sound_player = create_sound_player(settings.subtree('sound'))
     video_capturer = create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = create_frame_analyzer(settings)
-    names = [str(k).rjust(5, '0') for k in range(0, 98)]
+    names = [ "the leftovers", "breaking bad" ]
     attendances = Attendances(names)
     context = commands.Context(attendances=attendances, capturer=video_capturer)
+    create_registration_viewer()
     fps = Cell(0)
 
     for person in attendances.people:
