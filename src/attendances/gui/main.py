@@ -38,8 +38,11 @@ def run(settings):
         clock.on_tick(viewer.tick)
 
     def create_registration_viewer():
-        # return create_single_registration_viewer()
-        return create_overview_registration_viewer()
+        match settings['gui.attendances.mode']:
+            case 'single':
+                create_single_registration_viewer()
+            case 'overview':
+                create_overview_registration_viewer()
 
     def compute_registration_viewer_rectangle():
         return pygame.Rect(
