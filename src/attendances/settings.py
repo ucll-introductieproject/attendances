@@ -19,7 +19,7 @@ DefaultSettingsData = {
         },
         'show-fps': True,
         'attendances': {
-            'mode': 'single',   # single/overview
+            'mode': 'overview',   # single/overview
             'ncolumns': 24,
             'font-size': 16,
             'colors': {

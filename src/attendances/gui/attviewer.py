@@ -1,4 +1,6 @@
 from math import ceil
+from pygame import Color
+from attendances.animations.color import ColorAnimation
 from attendances.animations.dirac import DiracAnimation
 from attendances.animations.sequence import SequenceAnimation
 from attendances.model.person import Person
@@ -35,13 +37,15 @@ class AttendanceSlotViewer:
             self.__background_animation = None
 
         if self.__person.present.value == True:
-            cell = Cell(0)
-            highlight_duration = self.__highlight_duration
             self.__background_animation = SequenceAnimation(
-                FloatAnimation(target=cell, start=255, end=64, duration=highlight_duration),
+                ColorAnimation(
+                    target=self.__background,
+                    start=Color(0, 255, 0),
+                    end=Color(0, 64, 0),
+                    duration=self.__highlight_duration
+                ),
                 DiracAnimation(remove_animation)
             )
-            cell.synchronize(self.__background, lambda g: (0, g, 0))
         else:
             self.__background = self.__absent_background_color
             self.__background_animation = None
