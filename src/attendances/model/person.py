@@ -1,11 +1,12 @@
-from attendances.cells import Cell
+from attendances.cells import CellBase
 
 
 class Person:
-    def __init__(self, name):
+    def __init__(self, name, cell):
         assert isinstance(name, str)
+        assert isinstance(cell, CellBase)
         self.__name = name
-        self.__present = Cell(False)
+        self.__present = cell
 
     @property
     def name(self):

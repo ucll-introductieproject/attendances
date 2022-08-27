@@ -82,3 +82,14 @@ class StrictDerived(CellBase):
     def __refresh(self):
         self.__value = self.__func(self.__cell.value)
         self._notify_observers()
+
+
+class ReadonlyWrapper(CellBase):
+    def __init__(self, cell):
+        super().__init__()
+        self.__cell = cell
+        cell.on_value_changed(self._notify_observers)
+
+    @property
+    def value(self):
+        return self.__cell.value

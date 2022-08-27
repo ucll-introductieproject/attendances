@@ -1,3 +1,4 @@
+from attendances.cells import Cell, ReadonlyWrapper
 from attendances.model.person import Person
 import json
 
@@ -6,13 +7,13 @@ class Attendances:
     def __init__(self, names):
         self.__people = {}
         for name in names:
-            person = Person(name)
-            self.__people[name] = person
-            person.present.on_value_changed(self.__on_person_changed)
-        self.__write_to_file()
+            cell = Cell(False)
+            person = Person(name, ReadonlyWrapper(cell))
+            self.__people[name] = (cell, person)
 
     def __getitem__(self, name):
-        return self.__people[name]
+        cell, person = self.__people[name]
+        return person
 
     @property
     def names(self):
@@ -20,18 +21,13 @@ class Attendances:
 
     @property
     def people(self):
-        return self.__people.values()
+        return [person for cell, person in self.__people.values()]
 
     def person_exists(self, id):
         return id in self.__people
 
     def register(self, name):
-        self.__people[name].present.value = True
-
-    def __on_person_changed(self):
-        self.__write_to_file()
-
-    def __write_to_file(self):
-        with open('attendances.txt', 'w') as file:
-            data = {person.name: person.present.value for person in self.people}
-            json.dump(data, file)
+        assert name in self.__people
+        cell, person = self.__people[name]
+        if not cell.value:
+            cell.value = True
