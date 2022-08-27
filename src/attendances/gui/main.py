@@ -2,6 +2,7 @@ import logging
 import pygame
 import json
 from attendances.cells import Cell
+from attendances.gui.attviewer import AttendancesViewer
 from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
 from attendances.gui.fps import FpsViewer
 from attendances.imaging.transformations import get_transformation_by_id
@@ -13,25 +14,40 @@ from attendances.gui.highlight import Highlighter
 
 
 def run(settings):
-    def create_registration_viewer():
+    def create_single_registration_viewer():
         def observe_person(person):
             def update_label():
                 label.value = person.name
             person.present.on_value_changed(update_label)
 
-        rect = pygame.Rect(
-            0,
-            frame_height,
-            window_width,
-            window_height-frame_height
-        )
-        label = Cell('tralala')
+        rect = compute_registration_viewer_rectangle()
+        label = Cell('')
         font = pygame.font.SysFont(None, 64)
         highlighter = Highlighter(surface=surface, rectangle=rect, label=label, font=font)
         highlighter.render()
         clock.on_tick(highlighter.tick)
         for person in attendances.people:
             observe_person(person)
+
+    def create_overview_registration_viewer():
+        rect = compute_registration_viewer_rectangle()
+        ncolumns = settings['gui.attendances.ncolumns']
+        font = pygame.font.SysFont(None, 16)
+        viewer = AttendancesViewer(surface=surface, attendances=attendances, rectangle=rect, ncolumns=ncolumns, font=font)
+        viewer.render()
+        clock.on_tick(viewer.tick)
+
+    def create_registration_viewer():
+        # return create_single_registration_viewer()
+        return create_overview_registration_viewer()
+
+    def compute_registration_viewer_rectangle():
+        return pygame.Rect(
+            0,
+            frame_height,
+            window_width,
+            window_height-frame_height
+        )
 
 
     pygame.init()

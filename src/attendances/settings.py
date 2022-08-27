@@ -19,7 +19,7 @@ DefaultSettingsData = {
         },
         'show-fps': True,
         'attendances': {
-            'columns': 24,
+            'ncolumns': 24,
             'font-size': 16,
             'colors': {
                 'absent': {
