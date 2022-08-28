@@ -18,38 +18,36 @@ import attendances.settings as settings
 
 
 
-def create_capturer(settings):
-    if settings['dummy']:
-        logging.info('Creating dummy capturer')
-        return DummyCapturer()
-    else:
-        size = (settings['width'], settings['height'])
-        logging.info(f'Creating video capturer with size {size}')
-        return VideoCapturer.default_camera(size)
+def create_window(width, height):
+    logging.info(f'Creating window with size {width}x{height}')
+    return pygame.display.set_mode((width, height))
 
 
-def create_frame_analyzer(settings):
+def create_dummy_capturer():
+    logging.info('Creating dummy capturer')
+    return DummyCapturer()
+
+
+def create_camera_capturer(width, height):
+    logging.info(f'Creating video capturer with size {width}x{height}')
+    return VideoCapturer.default_camera((width, height))
+
+
+def create_frame_analyzer():
     logging.info("Creating frame analyzer")
     qr_scanner = QRScanner()
     face_detector = NullFaceDetector()
     return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
 
 
-def create_clock(settings):
-    rate = settings['frame-rate']
-    logging.info(f'Creating clock with rate {rate}')
-    return Clock(rate)
+def create_clock(*, frame_rate):
+    logging.info(f'Creating clock with rate {frame_rate}')
+    return Clock(frame_rate)
 
 
-def create_window():
-    width, height = size = settings.gui.window_size
-    logging.info(f'Creating window with size {width}x{height}')
-    return pygame.display.set_mode(size)
-
-
-def create_sound_player(settings):
-    logging.info('Creating sound player')
-    return SoundPlayer(settings['theme'], quiet=settings['quiet'])
+def create_sound_player(*, theme, quiet):
+    logging.info(f'Creating sound player with theme {theme}, quiet={quiet}')
+    return SoundPlayer(theme, quiet)
 
 
 def create_frame_viewer(surface, frame_size):
@@ -60,7 +58,6 @@ def create_frame_viewer(surface, frame_size):
     return FrameViewer(surface, (x, y))
 
 
-def create_attendances_viewer(settings, model, window_size):
-    window_width, window_height = window_size
-    rect = pygame.Rect(0, 480, window_width, window_height - 480)
-    return AttendancesViewer(settings, model, rect)
+def screen_size():
+    info = pygame.display.Info()
+    return (info.current_w, info.current_h)

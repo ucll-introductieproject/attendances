@@ -4,7 +4,7 @@ import json
 from attendances.cells import Cell
 from attendances.gui.grid import Grid
 from attendances.gui.highlight import Highlighter
-from attendances.gui.factories import create_frame_viewer
+from attendances.gui.factories import create_frame_viewer, create_window
 from attendances.server import Channel, server
 from attendances.pipeline import *
 from functools import partial
@@ -16,17 +16,13 @@ from attendances.tools.qr import QRScanner
 
 
 def _determine_window_size():
-    def screen_size():
-        info = pygame.display.Info()
-        return (info.current_w, info.current_h)
-
+    # return screen_size()
     return (1920, 1080)
 
 
 def _create_window():
-    width, height = size = _determine_window_size()
-    logging.info(f'Creating window with size {width}x{height}')
-    return pygame.display.set_mode(size)
+    width, height = _determine_window_size()
+    return create_window(width, height)
 
 
 def _create_clock():

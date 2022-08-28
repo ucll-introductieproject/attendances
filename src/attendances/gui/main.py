@@ -5,8 +5,7 @@ from pathlib import Path
 from functools import partial
 from attendances.cells import Cell
 from attendances.gui.attviewer import AttendancesViewer
-# from attendances.gui.factories import create_capturer, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
-from attendances.gui.factories import create_frame_viewer
+import attendances.gui.factories as factories
 from attendances.gui.fps import FpsViewer
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
@@ -21,53 +20,30 @@ from attendances.tools.sound import SoundPlayer
 
 
 def _create_sound_player():
-    theme = 'big-sur'
-    quiet = False
-    logging.info(f'Creating sound player with theme {theme}, quiet={quiet}')
-    return SoundPlayer(theme, quiet)
+    return factories.create_sound_player(theme='big-sur', quiet=False)
 
 
 def _create_clock():
-    from attendances.gui.clock import Clock
-    frame_rate = 0
-    logging.info(f'Creating clock with rate {frame_rate}')
-    return Clock(frame_rate)
+    return factories.create_clock(frame_rate=0)
 
 
 def _determine_window_size():
-    def screen_size():
-        info = pygame.display.Info()
-        return (info.current_w, info.current_h)
-
+    # return screen_size()
     return (1920, 1080)
 
 
 def _create_window():
-    width, height = size = _determine_window_size()
-    logging.info(f'Creating window with size {width}x{height}')
-    return pygame.display.set_mode(size)
+    width, height = _determine_window_size()
+    return factories.create_window(width, height)
 
 
 def _create_frame_analyzer():
-    logging.info("Creating frame analyzer")
-    qr_scanner = QRScanner()
-    face_detector = NullFaceDetector()
-    return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
+    return factories.create_frame_analyzer()
 
 
 def _create_capturer():
-    from attendances.tools.capturing import DummyCapturer, VideoCapturer
-
-    def dummy_capturer():
-        logging.info('Creating dummy capturer')
-        return DummyCapturer()
-
-    def camera_capturer():
-        size = (640, 480)
-        logging.info(f'Creating video capturer with size {size}')
-        return VideoCapturer.default_camera(size)
-
-    return camera_capturer()
+    # return create_dummy_capturer()
+    return factories.create_camera_capturer(640, 480)
 
 
 def _create_qr_transformations():
@@ -105,7 +81,6 @@ def create_registration_viewer(*, rectangle, clock, surface, attendances):
 
     # create_single_registration_viewer()
     create_overview_registration_viewer()
-
 
 
 def run(settings):
@@ -152,7 +127,7 @@ def run(settings):
     for person in attendances.people:
         person.present.on_value_changed(sound_player.success)
 
-    frame_viewer = create_frame_viewer(surface, frame_size)
+    frame_viewer = factories.create_frame_viewer(surface, frame_size)
 
     if show_framerate:
         FpsViewer(surface, fps)
