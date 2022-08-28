@@ -15,6 +15,10 @@ class Capturer:
 
 
 class VideoCapturerHandle:
+    pass
+
+
+class LambdaHandle(VideoCapturerHandle):
     def __init__(self, func):
         self.__func = func
 
@@ -30,7 +34,7 @@ class VideoCapturer(Capturer):
 
     def __enter__(self):
         self.__camera.start()
-        return VideoCapturerHandle(self.__capture)
+        return LambdaHandle(self.__capture)
 
     def __exit__(self, exception, value, traceback):
         self.__camera.stop()
@@ -57,7 +61,7 @@ class DummyCapturer(Capturer):
         self.__font = pygame.font.SysFont(None, 64)
 
     def __enter__(self):
-        return VideoCapturerHandle(self.capture)
+        return LambdaHandle(self.capture)
 
     def __exit__(self, exception, value, traceback):
         pass
@@ -81,9 +85,11 @@ class InjectingCapturer(Capturer):
         self.__count = 0
 
     def __enter__(self):
-        return self.__capturer.__enter__()
+        self.__handle = self.__capturer.__enter__()
+        return LambdaHandle(self.capture)
 
     def __exit__(self, exception, value, traceback):
+        self.__handle = None
         return self.__capturer.__exit__(exception, value, traceback)
 
     def inject(self, surface, count=1):
@@ -97,4 +103,4 @@ class InjectingCapturer(Capturer):
             if self.__count == 0:
                 self.__injected = None
         else:
-            self.__capturer.capture(target_surface)
+            self.__handle.capture(target_surface)

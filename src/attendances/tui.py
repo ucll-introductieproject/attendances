@@ -13,6 +13,8 @@ import attendances.settings as settings
 import time
 import json
 
+from attendances.tools.capturing import InjectingCapturer
+
 
 def _create_sound_player():
     return factories.create_sound_player(theme='big-sur', quiet=False)
@@ -20,6 +22,11 @@ def _create_sound_player():
 
 def _create_capturer():
     return factories.create_camera_capturer(*settings.frame_size)
+
+def _create_capturer():
+    # capturer = create_dummy_capturer()
+    capturer = factories.create_camera_capturer(640, 480)
+    return InjectingCapturer(capturer)
 
 
 def _create_frame_analyzer():

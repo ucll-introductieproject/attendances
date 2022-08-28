@@ -20,13 +20,13 @@ quiet = False
 qr_transformations = [
     # 'original',
     # 'grayscale',
-    # 'bw',
-    'bw_mean',
+    'bw',
+    # 'bw_mean',
     # 'bw_gaussian',
 ]
 
 # 0 = no limit
-frame_rate = 0
+frame_rate = 30
 
 show_fps = True
 

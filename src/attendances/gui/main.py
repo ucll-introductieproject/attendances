@@ -15,6 +15,7 @@ from attendances.gui.highlight import Highlighter
 from attendances.registration import FileRegistration
 from attendances.data import load_data
 import attendances.settings as settings
+from attendances.tools.capturing import InjectingCapturer
 
 
 def _create_sound_player():
@@ -35,8 +36,9 @@ def _create_frame_analyzer():
 
 
 def _create_capturer():
-    # return create_dummy_capturer()
-    return factories.create_camera_capturer(640, 480)
+    capturer = factories.create_dummy_capturer()
+    # capturer = factories.create_camera_capturer(*settings.frame_size)
+    return InjectingCapturer(capturer)
 
 
 def _list_qr_transformations():

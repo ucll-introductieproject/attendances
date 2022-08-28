@@ -12,10 +12,11 @@ import attendances.commands as commands
 from attendances.gui.fps import FpsViewer
 import attendances.gui.factories as factories
 import attendances.settings as settings
+from attendances.tools.capturing import InjectingCapturer
 
 
 def _create_clock():
-    return factories.create_clock(settings.frame_rate)
+    return factories.create_clock(frame_rate=settings.frame_rate)
 
 
 def _create_window():
@@ -28,8 +29,9 @@ def _create_frame_analyzer():
 
 
 def _create_capturer():
-    # return create_dummy_capturer()
-    return factories.create_camera_capturer(*settings.frame_size)
+    capturer = factories.create_dummy_capturer()
+    # capturer = factories.create_camera_capturer(*settings.frame_size)
+    return InjectingCapturer(capturer)
 
 
 def _log_qr_detection(transformer_name, analysis):
