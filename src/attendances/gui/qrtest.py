@@ -4,7 +4,6 @@ import json
 from attendances.cells import Cell
 from attendances.gui.grid import Grid
 from attendances.gui.highlight import Highlighter
-# from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_window
 from attendances.gui.factories import create_frame_viewer
 from attendances.server import Channel, server
 from attendances.pipeline import *
@@ -110,9 +109,14 @@ def test_qr(settings):
         return Grid(rect, size)
 
     pygame.init()
-    frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
+
+    show_framerate = True
+    frame_size = (640, 480)
+    analyze_every_n_frames = 5
+    font_size = 32
+
     channel = Channel()
-    font = pygame.font.SysFont(None, settings['qrtest.font-size'])
+    font = pygame.font.SysFont(None, font_size)
     clock = _create_clock()
     surface = _create_window()
     capturing_surface = pygame.Surface(frame_size)
@@ -122,12 +126,12 @@ def test_qr(settings):
     frame_viewer = create_frame_viewer(surface, frame_size)
     fps = Cell(0)
 
-    if settings['gui.show-fps']:
+    if show_framerate:
         FpsViewer(surface, fps)
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        skipper_node = SkipperNode(settings['qrtest.skip-rate'])
+        skipper_node = SkipperNode(analyze_every_n_frames)
         wrapper_node = ImageWrapper()
         capturing_node.link(skipper_node.perform)
         skipper_node.link(wrapper_node.wrap)
