@@ -1,23 +1,37 @@
-\documentclass{article}
-\usepackage{a4wide}
+\documentclass[a4paper]{article}
+\usepackage[left=1cm,top=1cm,right=1cm,bottom=1cm,nohead,nofoot]{geometry}
 \usepackage{qrcode}
 \usepackage{tikz}
+
+\usetikzlibrary{calc}
 
 \pagestyle{empty}
 \setlength{\parindent}{0cm}
 
+\newcommand{\badgewidth}{6}
+\newcommand{\badgeheight}{8}
+\newcommand{\qrsize}{4.5}
+
 \newcommand{\badge}[1]{
-    \begin{tikzpicture}
-        \draw[thin,gray] (0,0) rectangle ++(5,7);
-        \node at (2.5,4) { \qrcode[height=5cm]{#1} };
-        \node[anchor=south east,font=\Huge\ttfamily] at (5,0) {#1};
-    \end{tikzpicture}
+    \draw[thin,gray] (0,0) rectangle ++(\badgewidth,\badgeheight);
+    \node at ($ (\badgewidth / 2, \badgeheight / 2) $) { \qrcode[height=\qrsize cm]{#1} };
+    \node[anchor=south east,font=\Huge\ttfamily] at (\badgewidth,0) {#1};
 }
 
 \begin{document}
 
-\foreach \x in {1,...,30} {
-    \badge{\x}
+\foreach \i in {1,10,...,19} {
+    \begin{center}
+        \begin{tikzpicture}
+            \foreach[evaluate={\j*\badgewidth} as \dx] \j in {0,1,2} {
+                \foreach[evaluate={\k*\badgeheight} as \dy,evaluate={int(\i+\j+(2-\k)*3)} as \index] \k in {0,1,2} {
+                    \begin{scope}[xshift=\dx cm,yshift=\dy cm]
+                        \badge{\index}
+                    \end{scope}
+                }
+            }
+        \end{tikzpicture}
+    \end{center}
 }
 
 \end{document}
