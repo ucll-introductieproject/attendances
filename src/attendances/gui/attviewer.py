@@ -12,7 +12,7 @@ from operator import attrgetter
 
 
 class AttendanceSlotViewer:
-    def __init__(self, /, surface, rectangle, person, font):
+    def __init__(self, *, surface, rectangle, person, font):
         assert isinstance(rectangle, pygame.Rect)
         assert isinstance(person, Person)
         assert isinstance(font, pygame.font.Font)
@@ -74,7 +74,7 @@ class AttendanceSlotViewer:
 
 
 class EmptySlotViewer:
-    def __init__(self, /, surface, rectangle):
+    def __init__(self, *, surface, rectangle):
         self.__surface = surface
         self.__rectangle = rectangle
 
@@ -87,7 +87,7 @@ class EmptySlotViewer:
 
 
 class AttendancesViewer:
-    def __init__(self, /, surface, attendances, rectangle, ncolumns, font):
+    def __init__(self, *, surface, attendances, rectangle, ncolumns, font):
         self.__surface = surface
         self.__people = sorted(attendances.people, key=attrgetter('name'))
         self.__ncolumns = ncolumns

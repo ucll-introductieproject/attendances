@@ -42,6 +42,7 @@ def _create_capturer():
 def _list_qr_transformations():
     return settings.qr_transformations
 
+
 def create_registration_viewer(*, rectangle, clock, surface, attendances):
     def create_single_registration_viewer():
         def observe_person(person):
@@ -99,8 +100,7 @@ def run():
     sound_player = _create_sound_player()
     video_capturer = _create_capturer()
     frame_analyzer = _create_frame_analyzer()
-    names = load_data()
-    attendances = Attendances(names)
+    attendances = Attendances(load_data())
     create_registrations()
     create_registration_viewer(
         rectangle=compute_registration_viewer_rectangle(),

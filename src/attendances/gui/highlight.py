@@ -6,7 +6,7 @@ import pygame
 
 
 class Highlighter:
-    def __init__(self, /, surface, rectangle, label, font):
+    def __init__(self, *, surface, rectangle, label, font):
         assert isinstance(surface, pygame.Surface)
         assert isinstance(rectangle, pygame.Rect)
         assert isinstance(label, CellBase)

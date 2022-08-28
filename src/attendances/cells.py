@@ -12,7 +12,7 @@ class CellBase:
     def refresh(self):
         self._notify_observers()
 
-    def derive(self, func, /, lazy=False):
+    def derive(self, func, *, lazy=False):
         return (LazyDerived if lazy else StrictDerived)(self, func)
 
     def synchronize(self, target, func):

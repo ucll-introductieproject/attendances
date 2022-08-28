@@ -4,7 +4,7 @@ from attendances.cells import Cell
 
 
 class IntAnimation(Animation):
-    def __init__(self, /, target, start, end, duration):
+    def __init__(self, *, target, start, end, duration):
         self.__target = target
         self.__float_cell = Cell(0)
         self.__float_cell.synchronize(self.__target, lambda f: round(f))

@@ -7,7 +7,7 @@ import json
 
 
 class Context:
-    def __init__(self, /, capturer, attendances):
+    def __init__(self, *, capturer, attendances):
         self.capturer = capturer
         self.attendances = attendances
 

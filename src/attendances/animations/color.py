@@ -5,7 +5,7 @@ from pygame import Color
 
 
 class ColorAnimation(Animation):
-    def __init__(self, /, target, start, end, duration):
+    def __init__(self, *, target, start, end, duration):
         assert isinstance(target, CellBase)
         assert isinstance(start, Color)
         assert isinstance(end, Color)
