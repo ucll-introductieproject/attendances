@@ -4,6 +4,7 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import logging
 import click
 import attendances.commands as commands
+import attendances.data as data
 
 
 @click.group()
@@ -85,6 +86,25 @@ def generate_qr(data, path, width, height, box_size, border_size):
     pygame.image.save(surface, path)
 
 cli.add_command(generate_qr)
+
+
+@click.group()
+def students():
+    """
+    Manipulate student data
+    """
+    pass
+
+cli.add_command(students)
+
+
+@click.command(name="list")
+def list_students():
+    names = data.load_data()
+    for i, name in enumerate(names):
+        print(f'{str(i + 1).rjust(3)} {name}')
+
+students.add_command(list_students)
 
 
 for command_type in commands.enumerate_commands():

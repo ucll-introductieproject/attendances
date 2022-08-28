@@ -1,2 +1,6 @@
+import attendances.settings as settings
+
+
 def load_data():
-    return [ "the leftovers", "breaking bad" ]
+    with open(settings.students_file) as file:
+        return [line.strip() for line in file]
