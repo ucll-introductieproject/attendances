@@ -14,23 +14,19 @@ import attendances.commands as commands
 from attendances.gui.highlight import Highlighter
 from attendances.registration import FileRegistration
 from attendances.data import load_data
+import attendances.settings as settings
 
 
 def _create_sound_player():
-    return factories.create_sound_player(theme='big-sur', quiet=False)
+    return factories.create_sound_player(theme=settings.sound_theme, quiet=settings.quiet)
 
 
 def _create_clock():
-    return factories.create_clock(frame_rate=0)
-
-
-def _determine_window_size():
-    # return screen_size()
-    return (1920, 1080)
+    return factories.create_clock(frame_rate=settings.frame_rate)
 
 
 def _create_window():
-    width, height = _determine_window_size()
+    width, height = settings.window_size
     return factories.create_window(width, height)
 
 
@@ -43,15 +39,8 @@ def _create_capturer():
     return factories.create_camera_capturer(640, 480)
 
 
-def _create_qr_transformations():
-    return [
-        # 'original',
-        # 'grayscale',
-        # 'bw',
-        'bw_mean',
-        # 'bw_gaussian',
-    ]
-
+def _list_qr_transformations():
+    return settings.qr_transformations
 
 def create_registration_viewer(*, rectangle, clock, surface, attendances):
     def create_single_registration_viewer():
@@ -98,9 +87,9 @@ def run():
     pygame.init()
 
     show_framerate = True
-    frame_width, frame_height = frame_size = (640, 480)
+    frame_width, frame_height = frame_size = settings.frame_size
     analyze_every_n_frames = 5
-    attendances_file = Path('attendances.txt')
+    attendances_file = Path(settings.registration_file)
 
     channel = Channel()
     clock = _create_clock()
@@ -134,7 +123,7 @@ def run():
         capturing_node = CapturingNode(handle, capturing_surface)
         skipper_node = SkipperNode(analyze_every_n_frames)
         wrapping_node = ImageWrapper()
-        analyzing_node = AnalyzerNode(_create_qr_transformations(), frame_analyzer)
+        analyzing_node = AnalyzerNode(_list_qr_transformations(), frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
         capturing_node.link(skipper_node.perform)

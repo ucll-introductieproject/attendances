@@ -9,11 +9,9 @@ from attendances.pipeline import *
 import attendances.commands as commands
 import attendances.gui.factories as factories
 from attendances.data import load_data
+import attendances.settings as settings
 import time
 import json
-
-
-_frame_size = (640, 480)
 
 
 def _create_sound_player():
@@ -21,7 +19,7 @@ def _create_sound_player():
 
 
 def _create_capturer():
-    return factories.create_camera_capturer(*_frame_size)
+    return factories.create_camera_capturer(*settings.frame_size)
 
 
 def _create_frame_analyzer():
@@ -48,8 +46,8 @@ def run():
     def show_analysis_results(results):
         print(results)
 
-    attendances_file = Path('attendances.txt')
-    surface = pygame.Surface(_frame_size)
+    attendances_file = Path(settings.registration_file)
+    surface = pygame.Surface(settings.frame_size)
     sound_player = _create_sound_player()
     video_capturer = _create_capturer()
     frame_analyzer = _create_frame_analyzer()

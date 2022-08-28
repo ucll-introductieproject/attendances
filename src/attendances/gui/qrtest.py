@@ -11,23 +11,15 @@ from functools import partial
 import attendances.commands as commands
 from attendances.gui.fps import FpsViewer
 import attendances.gui.factories as factories
-
-
-def _create_sound_player():
-    return factories.create_sound_player(theme='big-sur', quiet=False)
+import attendances.settings as settings
 
 
 def _create_clock():
-    return factories.create_clock(frame_rate=0)
-
-
-def _determine_window_size():
-    # return screen_size()
-    return (1920, 1080)
+    return factories.create_clock(settings.frame_rate)
 
 
 def _create_window():
-    width, height = _determine_window_size()
+    width, height = settings.window_size
     return factories.create_window(width, height)
 
 
@@ -37,7 +29,7 @@ def _create_frame_analyzer():
 
 def _create_capturer():
     # return create_dummy_capturer()
-    return factories.create_camera_capturer(640, 480)
+    return factories.create_camera_capturer(*settings.frame_size)
 
 
 def _log_qr_detection(transformer_name, analysis):
