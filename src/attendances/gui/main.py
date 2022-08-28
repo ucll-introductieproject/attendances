@@ -66,14 +66,14 @@ def run(cfg):
 
     channel = Channel()
     frame_width, frame_height = frame_size = settings.capturing.frame_size
-    clock = create_clock(cfg.subtree('gui'))
+    clock = settings.create_clock()
     surface = create_window()
     window_width, window_height = settings.gui.window_size
     capturing_surface = pygame.Surface(frame_size)
-    sound_player = create_sound_player(cfg.subtree('sound'))
-    video_capturer = create_capturer(cfg.subtree('video-capturing'))
+    sound_player = settings.create_sound_player()
+    video_capturer = settings.create_capturer()
     frame_analyzer = create_frame_analyzer(cfg)
-    names = [ "the leftovers", "breaking bad" ]
+    names = [ "the leftovers", "breaking bad"  ]
     attendances = Attendances(names)
     create_registrations()
     context = commands.Context(attendances=attendances, capturer=video_capturer)
@@ -86,12 +86,12 @@ def run(cfg):
     frame_viewer = create_frame_viewer(surface, frame_size)
     # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
-    if cfg['gui.show-fps']:
+    if settings.gui.show_framerate:
         FpsViewer(surface, fps)
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        skipper_node = SkipperNode(cfg['gui.skip-rate'])
+        skipper_node = SkipperNode(settings.gui.analyze_every_n_frames)
         wrapping_node = ImageWrapper()
         analyzing_node = AnalyzerNode(cfg['qr.transformations'], frame_analyzer)
         registering_node = RegisteringNode(attendances)

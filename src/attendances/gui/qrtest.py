@@ -67,7 +67,7 @@ def test_qr(settings):
     channel = Channel()
     font = pygame.font.SysFont(None, settings['qrtest.font-size'])
     clock = create_clock(settings.subtree('qrtest'))
-    surface = create_window(settings.subtree('gui.window'))
+    surface = create_window()
     capturing_surface = pygame.Surface(frame_size)
     video_capturer = create_capturer(settings.subtree('video-capturing'))
     frame_analyzer = create_frame_analyzer(settings)

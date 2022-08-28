@@ -152,6 +152,7 @@ class GuiSettings:
     def __init__(self):
         self.show_framerate = True
         self.window_size = (1920, 1080)
+        self.analyze_every_n_frames = 5
 
     def __fullscreen(self):
         import pygame
@@ -164,6 +165,34 @@ class CapturingSettings:
         self.frame_size = (640, 480)
         self.frame_rate = 30
 
+
+def create_sound_player():
+    from attendances.tools.sound import SoundPlayer
+    theme = 'big-sur'
+    quiet = False
+    return SoundPlayer(theme, quiet)
+
+
+def create_capturer():
+    from attendances.tools.capturing import DummyCapturer, VideoCapturer
+
+    def dummy_capturer():
+        logging.info('Creating dummy capturer')
+        return DummyCapturer()
+
+    def camera_capturer():
+        size = (640, 480)
+        logging.info(f'Creating video capturer with size {size}')
+        return VideoCapturer.default_camera(size)
+
+    return camera_capturer()
+
+
+def create_clock():
+    from attendances.gui.clock import Clock
+    frame_rate = 0
+    logging.info(f'Creating clock with rate {frame_rate}')
+    return Clock(frame_rate)
 
 gui = GuiSettings()
 capturing = CapturingSettings()
