@@ -5,16 +5,66 @@ from pathlib import Path
 from functools import partial
 from attendances.cells import Cell
 from attendances.gui.attviewer import AttendancesViewer
-from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
+# from attendances.gui.factories import create_capturer, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
+from attendances.gui.factories import create_frame_viewer
 from attendances.gui.fps import FpsViewer
 from attendances.imaging.transformations import get_transformation_by_id
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
+from attendances.tools.analyzing import FrameAnalyzer
 from attendances.pipeline import *
 import attendances.commands as commands
 from attendances.gui.highlight import Highlighter
 from attendances.registration import FileRegistration
-import attendances.settings as settings
+from attendances.tools.face import NullFaceDetector
+from attendances.tools.qr import QRScanner
+from attendances.tools.sound import SoundPlayer
+
+
+def _create_sound_player():
+    theme = 'big-sur'
+    quiet = False
+    logging.info(f'Creating sound player with theme {theme}, quiet={quiet}')
+    return SoundPlayer(theme, quiet)
+
+
+def create_clock():
+    from attendances.gui.clock import Clock
+    frame_rate = 0
+    logging.info(f'Creating clock with rate {frame_rate}')
+    return Clock(frame_rate)
+
+
+def _create_window():
+    def screen_size():
+        info = pygame.display.Info()
+        return (info.current_w, info.current_h)
+
+    width, height = size = (1920, 1080)
+    logging.info(f'Creating window with size {width}x{height}')
+    return pygame.display.set_mode(size)
+
+
+def _create_frame_analyzer():
+    logging.info("Creating frame analyzer")
+    qr_scanner = QRScanner()
+    face_detector = NullFaceDetector()
+    return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
+
+
+def _create_capturer():
+    from attendances.tools.capturing import DummyCapturer, VideoCapturer
+
+    def dummy_capturer():
+        logging.info('Creating dummy capturer')
+        return DummyCapturer()
+
+    def camera_capturer():
+        size = (640, 480)
+        logging.info(f'Creating video capturer with size {size}')
+        return VideoCapturer.default_camera(size)
+
+    return camera_capturer()
 
 
 def run(cfg):
@@ -34,9 +84,10 @@ def run(cfg):
             observe_person(person)
 
     def create_overview_registration_viewer():
+        ncolumns = 24
+        font_size = 16
         rect = compute_registration_viewer_rectangle()
-        ncolumns = cfg['gui.attendances.ncolumns']
-        font = pygame.font.SysFont(None, 16)
+        font = pygame.font.SysFont(None, font_size)
         viewer = AttendancesViewer(surface=surface, attendances=attendances, rectangle=rect, ncolumns=ncolumns, font=font)
         viewer.render()
         clock.on_tick(viewer.tick)
@@ -64,16 +115,19 @@ def run(cfg):
 
     pygame.init()
 
+    show_framerate = True
+    frame_width, frame_height = frame_size = (640, 480)
+    analyze_every_n_frames = 5
+
     channel = Channel()
-    frame_width, frame_height = frame_size = settings.capturing.frame_size
-    clock = settings.create_clock()
-    surface = create_window()
-    window_width, window_height = settings.gui.window_size
+    clock = create_clock()
+    surface = _create_window()
+    window_width, window_height = surface.get_size()
     capturing_surface = pygame.Surface(frame_size)
-    sound_player = settings.create_sound_player()
-    video_capturer = settings.create_capturer()
-    frame_analyzer = create_frame_analyzer(cfg)
-    names = [ "the leftovers", "breaking bad"  ]
+    sound_player = _create_sound_player()
+    video_capturer = _create_capturer()
+    frame_analyzer = _create_frame_analyzer()
+    names = [ "the leftovers", "breaking bad" ]
     attendances = Attendances(names)
     create_registrations()
     context = commands.Context(attendances=attendances, capturer=video_capturer)
@@ -84,14 +138,13 @@ def run(cfg):
         person.present.on_value_changed(sound_player.success)
 
     frame_viewer = create_frame_viewer(surface, frame_size)
-    # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
-    if settings.gui.show_framerate:
+    if show_framerate:
         FpsViewer(surface, fps)
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        skipper_node = SkipperNode(settings.gui.analyze_every_n_frames)
+        skipper_node = SkipperNode(analyze_every_n_frames)
         wrapping_node = ImageWrapper()
         analyzing_node = AnalyzerNode(cfg['qr.transformations'], frame_analyzer)
         registering_node = RegisteringNode(attendances)
@@ -103,7 +156,6 @@ def run(cfg):
         analyzing_node.link(registering_node.update_attendances)
         analyzing_node.link(frame_viewer.new_analysis)
 
-        # clock.on_tick(attendances_viewer.tick)
         clock.on_tick(frame_viewer.tick)
         clock.on_tick(lambda _: capturing_node.capture())
         clock.on_tick(analyzing_node.tick)
