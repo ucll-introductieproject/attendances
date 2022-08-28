@@ -1,5 +1,6 @@
 attendances.txt
 data/
+*.pdf
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,latex
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode,latex
