@@ -75,7 +75,7 @@ def _create_transformation_chain(*, source_node, transformation, frame_analyzer,
     highlighter.render()
 
 
-def test_qr(settings):
+def test_qr():
     def determine_grid_rect():
         frame_width, frame_height = frame_size
         window_width, window_height = surface.get_size()
@@ -153,7 +153,7 @@ def test_qr(settings):
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    response = command_object.execute(context, settings)
+                    response = command_object.execute(context)
                     channel.respond_to_server(response)
                 except:
                     channel.respond_to_server('exception thrown')

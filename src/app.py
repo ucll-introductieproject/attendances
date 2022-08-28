@@ -1,16 +1,9 @@
 from os import environ
-from unicodedata import name
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import logging
 import click
-import json
 import attendances.commands as commands
-from attendances.settings import load_settings, default_settings
-from pathlib import Path
-
-
-SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
 
 
 @click.group()
