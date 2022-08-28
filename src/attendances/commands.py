@@ -37,7 +37,7 @@ class ListPeopleCommand(Command):
             click.command(name='list-people')
         )
 
-    def execute(self, context, settings):
+    def execute(self, context):
         return "\n".join(context.attendances.names)
 
 
@@ -50,7 +50,7 @@ class RegisterAttendanceCommand(Command):
             click.argument('name', type=str)
         )
 
-    def execute(self, context, settings):
+    def execute(self, context):
         if self.name in context.attendances.names:
             context.attendances.register(self.name)
             return 'Success'
@@ -68,7 +68,7 @@ class InjectFrameCommand(Command):
             click.option('-n', '--count', type=int, default=10)
         )
 
-    def execute(self, context, settings):
+    def execute(self, context):
         logging.debug('Checking if video capturer supports injection')
         if hasattr(context.capturer, 'inject'):
             logging.debug('Video capturer does indeed support injection')
@@ -91,12 +91,12 @@ class InjectFrameCommand(Command):
             click.option('-n', '--count', type=int, default=10)
         )
 
-    def execute(self, context, settings):
+    def execute(self, context):
         logging.debug('Checking if video capturer supports injection')
         if hasattr(context.capturer, 'inject'):
             logging.debug('Video capturer does indeed support injection')
             logging.debug(f'Generating QR code')
-            size = settings.size('video-capturing')
+            size = (640, 480)
             surface = generate_qr_code(self.data, size)
             logging.debug(f'Injecting image')
             context.capturer.inject(surface, self.count)

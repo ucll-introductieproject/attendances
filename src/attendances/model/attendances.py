@@ -1,6 +1,6 @@
 from attendances.cells import Cell, ReadonlyWrapper
 from attendances.model.person import Person
-import json
+import logging
 
 
 class Attendances:
@@ -30,4 +30,7 @@ class Attendances:
         assert name in self.__people
         cell, person = self.__people[name]
         if not cell.value:
+            logging.info(f'Registering {name}')
             cell.value = True
+        else:
+            logging.info(f'{name} is already registered')

@@ -13,6 +13,7 @@ from attendances.pipeline import *
 import attendances.commands as commands
 from attendances.gui.highlight import Highlighter
 from attendances.registration import FileRegistration
+from attendances.data import load_data
 
 
 def _create_sound_player():
@@ -79,7 +80,7 @@ def create_registration_viewer(*, rectangle, clock, surface, attendances):
     create_overview_registration_viewer()
 
 
-def run(settings):
+def run():
     def compute_registration_viewer_rectangle():
         return pygame.Rect(
             0,
@@ -109,7 +110,7 @@ def run(settings):
     sound_player = _create_sound_player()
     video_capturer = _create_capturer()
     frame_analyzer = _create_frame_analyzer()
-    names = [ "the leftovers", "breaking bad" ]
+    names = load_data()
     attendances = Attendances(names)
     create_registrations()
     create_registration_viewer(
@@ -155,7 +156,7 @@ def run(settings):
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    response = command_object.execute(context, settings)
+                    response = command_object.execute(context)
                     channel.respond_to_server(response)
                 except:
                     channel.respond_to_server('exception thrown')

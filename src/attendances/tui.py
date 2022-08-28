@@ -1,53 +1,62 @@
 import logging
+from pathlib import Path
 import pygame
+from functools import partial
+from attendances.registration import FileRegistration
 from attendances.server import Channel, server
 from attendances.model.attendances import Attendances
-from attendances.tools.analyzing import FrameAnalyzer
-from attendances.tools.capturing import DummyCapturer, VideoCapturer
-from attendances.tools.face import NullFaceDetector
-from attendances.tools.qr import QRScanner
-from attendances.tools.sound import SoundPlayer
 from attendances.pipeline import *
+import attendances.commands as commands
+import attendances.gui.factories as factories
+from attendances.data import load_data
 import time
 import json
-import attendances.commands as commands
 
 
-def _create_capturer(settings):
-    if settings['dummy']:
-        logging.info('Creating dummy capturer')
-        return DummyCapturer()
-    else:
-        size = (settings['width'], settings['height'])
-        logging.info(f'Creating video capturer with size {size}')
-        return VideoCapturer.default_camera(size)
+_frame_size = (640, 480)
 
 
-def _create_frame_analyzer(settings):
-    logging.info("Creating frame analyzer")
-    qr_scanner = QRScanner()
-    face_detector = NullFaceDetector()
-    return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
+def _create_sound_player():
+    return factories.create_sound_player(theme='big-sur', quiet=False)
 
 
-def _create_sound_player(settings):
-    logging.info('Creating sound player')
-    return SoundPlayer(settings['theme'], quiet=settings['quiet'])
+def _create_capturer():
+    return factories.create_camera_capturer(*_frame_size)
 
 
-def run(settings):
+def _create_frame_analyzer():
+    return factories.create_frame_analyzer()
+
+
+def _create_qr_transformations():
+    return [
+        # 'original',
+        # 'grayscale',
+        # 'bw',
+        'bw_mean',
+        # 'bw_gaussian',
+    ]
+
+
+def run():
+    def create_registrations():
+        logging.info(f'Appending registrations to {attendances_file}')
+        registration = FileRegistration(attendances_file)
+        for person in attendances.people:
+            person.present.on_value_changed(partial(registration.register, person))
+
     def show_analysis_results(results):
         print(results)
 
-    surface_size = (settings['video-capturing.width'], settings['video-capturing.height'])
-    surface = pygame.Surface(surface_size)
-    sound_player = _create_sound_player(settings.subtree('sound'))
-    video_capturer = _create_capturer(settings.subtree('video-capturing'))
-    frame_analyzer = _create_frame_analyzer(settings.subtree('frame-analyzing'))
-    names = [str(k).rjust(5, '0') for k in range(0, 98)]
+    attendances_file = Path('attendances.txt')
+    surface = pygame.Surface(_frame_size)
+    sound_player = _create_sound_player()
+    video_capturer = _create_capturer()
+    frame_analyzer = _create_frame_analyzer()
     pause_duration = 0.2
-    attendances = Attendances(names)
+    attendances = Attendances(load_data())
     channel = Channel()
+    create_registrations()
     context = commands.Context(attendances=attendances, capturer=video_capturer)
 
     for person in attendances.people:
@@ -58,7 +67,7 @@ def run(settings):
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, surface)
         wrapper_node = ImageWrapper()
-        analyzing_node = AnalyzerNode(settings['qr.transformations'], frame_analyzer)
+        analyzing_node = AnalyzerNode(_create_qr_transformations(), frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
         capturing_node.link(wrapper_node.wrap)
@@ -73,7 +82,7 @@ def run(settings):
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    response = command_object.execute(context, settings)
+                    response = command_object.execute(context)
                     channel.respond_to_server(response)
                 except:
                     channel.respond_to_server('exception thrown')

@@ -15,97 +15,45 @@ SETTINGS_PATH = Path.home().joinpath('absentees.config.json')
 
 @click.group()
 @click.option('-v', '--verbose', help='Verbose', is_flag=True)
-@click.option('-q', '--quiet', help='Quiet', is_flag=True)
-@click.option('--default', help='Use default settings', is_flag=True)
-@click.pass_context
-def cli(ctx, verbose, quiet, default):
+def cli(verbose):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         logging.info('Turning on verbose mode')
     else:
         logging.basicConfig(level=logging.INFO)
 
-    ctx.ensure_object(dict)
-
-    settings = default_settings() if default else load_settings(SETTINGS_PATH)
-
-    if quiet:
-        settings['sound.quiet'] = True
-
-    ctx.obj['settings'] = settings
-
-
 
 @click.command()
-@click.pass_context
-def tui(ctx):
+def tui():
     """
     Simple text based UI
     """
     import attendances.tui as tui
-    settings = ctx.obj['settings']
-    tui.run(settings)
+    tui.run()
 
 cli.add_command(tui)
 
 
 @click.command()
-@click.pass_context
-def gui(ctx):
+def gui():
     """
     Run GUI
     """
     import attendances.gui as gui
-    settings = ctx.obj['settings']
-    gui.run(settings)
+    gui.run()
 
 cli.add_command(gui)
 
 
 @click.command()
-@click.pass_context
-def qrtest(ctx):
+def qrtest():
     """
     Test QR code detection with different transformations
     """
     import attendances.gui as gui
-    settings = ctx.obj['settings']
-    gui.test_qr(settings)
+    gui.test_qr()
 
 cli.add_command(qrtest)
-
-
-@click.group()
-def config():
-    """
-    Configure attendances tool
-    """
-    pass
-
-cli.add_command(config)
-
-
-@click.command('show')
-@click.pass_context
-def config_show(ctx):
-    settings = ctx.obj['settings']
-    print(json.dumps(settings.data, indent=4, sort_keys=True))
-
-config.add_command(config_show)
-
-
-@click.command('path')
-def config_path():
-    print(SETTINGS_PATH)
-
-config.add_command(config_path)
-
-
-@click.command('delete')
-def config_delete():
-    SETTINGS_PATH.unlink()
-
-config.add_command(config_delete)
 
 
 @click.command()
