@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 
+
 class FileRegistration:
     def __init__(self, path):
         assert isinstance(path, Path)
