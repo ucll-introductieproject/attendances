@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{a4wide}
+\usepackage{qrcode}
+\usepackage{tikz}
+
+\pagestyle{empty}
+\setlength{\parindent}{0cm}
+
+\newcommand{\badge}[1]{
+    \begin{tikzpicture}
+        \draw[thin,gray] (0,0) rectangle ++(5,7);
+        \node at (2.5,4) { \qrcode[height=5cm]{#1} };
+        \node[anchor=south east,font=\Huge\ttfamily] at (5,0) {#1};
+    \end{tikzpicture}
+}
+
+\begin{document}
+
+\foreach \x in {1,...,30} {
+    \badge{\x}
+}
+
+\end{document}
