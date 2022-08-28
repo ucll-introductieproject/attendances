@@ -9,14 +9,10 @@ import attendances.gui.factories as factories
 from attendances.gui.fps import FpsViewer
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
-from attendances.tools.analyzing import FrameAnalyzer
 from attendances.pipeline import *
 import attendances.commands as commands
 from attendances.gui.highlight import Highlighter
 from attendances.registration import FileRegistration
-from attendances.tools.face import NullFaceDetector
-from attendances.tools.qr import QRScanner
-from attendances.tools.sound import SoundPlayer
 
 
 def _create_sound_player():
@@ -93,7 +89,7 @@ def run(settings):
         )
 
     def create_registrations():
-        registration = FileRegistration(Path('registrations.txt'))
+        registration = FileRegistration(attendances_file)
         for person in attendances.people:
             person.present.on_value_changed(partial(registration.register, person))
 
@@ -103,6 +99,7 @@ def run(settings):
     show_framerate = True
     frame_width, frame_height = frame_size = (640, 480)
     analyze_every_n_frames = 5
+    attendances_file = Path('attendances.txt')
 
     channel = Channel()
     clock = _create_clock()

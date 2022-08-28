@@ -10,9 +10,15 @@ from attendances.pipeline import *
 from functools import partial
 import attendances.commands as commands
 from attendances.gui.fps import FpsViewer
-from attendances.tools.analyzing import FrameAnalyzer
-from attendances.tools.face import NullFaceDetector
-from attendances.tools.qr import QRScanner
+import attendances.gui.factories as factories
+
+
+def _create_sound_player():
+    return factories.create_sound_player(theme='big-sur', quiet=False)
+
+
+def _create_clock():
+    return factories.create_clock(frame_rate=0)
 
 
 def _determine_window_size():
@@ -22,36 +28,16 @@ def _determine_window_size():
 
 def _create_window():
     width, height = _determine_window_size()
-    return create_window(width, height)
-
-
-def _create_clock():
-    from attendances.gui.clock import Clock
-    frame_rate = 0
-    logging.info(f'Creating clock with rate {frame_rate}')
-    return Clock(frame_rate)
-
-
-def _create_capturer():
-    from attendances.tools.capturing import DummyCapturer, VideoCapturer
-
-    def dummy_capturer():
-        logging.info('Creating dummy capturer')
-        return DummyCapturer()
-
-    def camera_capturer():
-        size = (640, 480)
-        logging.info(f'Creating video capturer with size {size}')
-        return VideoCapturer.default_camera(size)
-
-    return camera_capturer()
+    return factories.create_window(width, height)
 
 
 def _create_frame_analyzer():
-    logging.info("Creating frame analyzer")
-    qr_scanner = QRScanner()
-    face_detector = NullFaceDetector()
-    return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
+    return factories.create_frame_analyzer()
+
+
+def _create_capturer():
+    # return create_dummy_capturer()
+    return factories.create_camera_capturer(640, 480)
 
 
 def _log_qr_detection(transformer_name, analysis):

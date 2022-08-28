@@ -27,12 +27,17 @@ def generate_qr_code(message, size, box_size=10, border=4):
     logging.debug('Converting image to surface')
     image_surface = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
 
+    if size == (None, None):
+        return image_surface
+
     logging.debug('Centering QR code')
-    result = pygame.Surface(size)
+    centered_image = pygame.Surface(size)
     result_width, result_height = size
     qr_width, qr_height = image_surface.get_size()
+    if result_width is None: result_width = qr_width
+    if result_height is None: result_height = qr_height
     x = (result_width - qr_width) / 2
     y = (result_height - qr_height) / 2
-    result.blit(image_surface, (x, y))
+    centered_image.blit(image_surface, (x, y))
 
-    return result
+    return centered_image

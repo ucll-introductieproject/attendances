@@ -1,4 +1,5 @@
 from os import environ
+from unicodedata import name
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 import logging
@@ -127,21 +128,19 @@ cli.add_command(cmd)
 
 
 @click.command(name='generate-qr')
-@click.argument('message', type=str)
+@click.argument('data', type=str)
 @click.argument('path', type=str)
-@click.pass_context
-def generate_qr(ctx, message, path):
+@click.option('-w', '--width', type=int)
+@click.option('-h', '--height', type=int)
+@click.option('-B', '--box-size', 'box_size', type=int, default=15)
+@click.option('-b', '--border-size', 'border_size', type=int, default=0)
+def generate_qr(data, path, width, height, box_size, border_size):
     """
     Generates a QR code and write its to file
     """
     from attendances.tools.qr import generate_qr_code
     import pygame
-    settings = ctx.obj['settings']
-    width = settings['video-capturing.width']
-    height = settings['video-capturing.height']
-    box_size = settings['qr.generation.box-size']
-    border = settings['qr.generation.border']
-    surface = generate_qr_code(message, (width, height), box_size=box_size, border=border)
+    surface = generate_qr_code(data, (width, height), box_size=box_size, border=border_size)
     pygame.image.save(surface, path)
 
 cli.add_command(generate_qr)
