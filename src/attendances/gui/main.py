@@ -8,7 +8,6 @@ from attendances.gui.attviewer import AttendancesViewer
 # from attendances.gui.factories import create_capturer, create_frame_analyzer, create_frame_viewer, create_sound_player, create_window
 from attendances.gui.factories import create_frame_viewer
 from attendances.gui.fps import FpsViewer
-from attendances.imaging.transformations import get_transformation_by_id
 from attendances.model.attendances import Attendances
 from attendances.server import Channel, server
 from attendances.tools.analyzing import FrameAnalyzer
@@ -28,19 +27,23 @@ def _create_sound_player():
     return SoundPlayer(theme, quiet)
 
 
-def create_clock():
+def _create_clock():
     from attendances.gui.clock import Clock
     frame_rate = 0
     logging.info(f'Creating clock with rate {frame_rate}')
     return Clock(frame_rate)
 
 
-def _create_window():
+def _determine_window_size():
     def screen_size():
         info = pygame.display.Info()
         return (info.current_w, info.current_h)
 
-    width, height = size = (1920, 1080)
+    return (1920, 1080)
+
+
+def _create_window():
+    width, height = size = _determine_window_size()
     logging.info(f'Creating window with size {width}x{height}')
     return pygame.display.set_mode(size)
 
@@ -67,17 +70,26 @@ def _create_capturer():
     return camera_capturer()
 
 
-def run(cfg):
+def _create_qr_transformations():
+    return [
+        # 'original',
+        # 'grayscale',
+        # 'bw',
+        'bw_mean',
+        # 'bw_gaussian',
+    ]
+
+
+def create_registration_viewer(*, rectangle, clock, surface, attendances):
     def create_single_registration_viewer():
         def observe_person(person):
             def update_label():
                 label.value = person.name
             person.present.on_value_changed(update_label)
 
-        rect = compute_registration_viewer_rectangle()
         label = Cell('')
         font = pygame.font.SysFont(None, 64)
-        highlighter = Highlighter(surface=surface, rectangle=rect, label=label, font=font)
+        highlighter = Highlighter(surface=surface, rectangle=rectangle, label=label, font=font)
         highlighter.render()
         clock.on_tick(highlighter.tick)
         for person in attendances.people:
@@ -86,19 +98,17 @@ def run(cfg):
     def create_overview_registration_viewer():
         ncolumns = 24
         font_size = 16
-        rect = compute_registration_viewer_rectangle()
         font = pygame.font.SysFont(None, font_size)
-        viewer = AttendancesViewer(surface=surface, attendances=attendances, rectangle=rect, ncolumns=ncolumns, font=font)
+        viewer = AttendancesViewer(surface=surface, attendances=attendances, rectangle=rectangle, ncolumns=ncolumns, font=font)
         viewer.render()
         clock.on_tick(viewer.tick)
 
-    def create_registration_viewer():
-        match cfg['gui.attendances.mode']:
-            case 'single':
-                create_single_registration_viewer()
-            case 'overview':
-                create_overview_registration_viewer()
+    # create_single_registration_viewer()
+    create_overview_registration_viewer()
 
+
+
+def run(settings):
     def compute_registration_viewer_rectangle():
         return pygame.Rect(
             0,
@@ -120,7 +130,7 @@ def run(cfg):
     analyze_every_n_frames = 5
 
     channel = Channel()
-    clock = create_clock()
+    clock = _create_clock()
     surface = _create_window()
     window_width, window_height = surface.get_size()
     capturing_surface = pygame.Surface(frame_size)
@@ -130,8 +140,13 @@ def run(cfg):
     names = [ "the leftovers", "breaking bad" ]
     attendances = Attendances(names)
     create_registrations()
+    create_registration_viewer(
+        rectangle=compute_registration_viewer_rectangle(),
+        clock=clock,
+        surface=surface,
+        attendances=attendances
+    )
     context = commands.Context(attendances=attendances, capturer=video_capturer)
-    create_registration_viewer()
     fps = Cell(0)
 
     for person in attendances.people:
@@ -146,7 +161,7 @@ def run(cfg):
         capturing_node = CapturingNode(handle, capturing_surface)
         skipper_node = SkipperNode(analyze_every_n_frames)
         wrapping_node = ImageWrapper()
-        analyzing_node = AnalyzerNode(cfg['qr.transformations'], frame_analyzer)
+        analyzing_node = AnalyzerNode(_create_qr_transformations(), frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
         capturing_node.link(skipper_node.perform)
@@ -168,7 +183,7 @@ def run(cfg):
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    response = command_object.execute(context, cfg)
+                    response = command_object.execute(context, settings)
                     channel.respond_to_server(response)
                 except:
                     channel.respond_to_server('exception thrown')

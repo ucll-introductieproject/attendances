@@ -4,12 +4,59 @@ import json
 from attendances.cells import Cell
 from attendances.gui.grid import Grid
 from attendances.gui.highlight import Highlighter
-from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_window
+# from attendances.gui.factories import create_capturer, create_clock, create_frame_analyzer, create_frame_viewer, create_window
+from attendances.gui.factories import create_frame_viewer
 from attendances.server import Channel, server
 from attendances.pipeline import *
 from functools import partial
 import attendances.commands as commands
 from attendances.gui.fps import FpsViewer
+from attendances.tools.analyzing import FrameAnalyzer
+from attendances.tools.face import NullFaceDetector
+from attendances.tools.qr import QRScanner
+
+
+def _determine_window_size():
+    def screen_size():
+        info = pygame.display.Info()
+        return (info.current_w, info.current_h)
+
+    return (1920, 1080)
+
+
+def _create_window():
+    width, height = size = _determine_window_size()
+    logging.info(f'Creating window with size {width}x{height}')
+    return pygame.display.set_mode(size)
+
+
+def _create_clock():
+    from attendances.gui.clock import Clock
+    frame_rate = 0
+    logging.info(f'Creating clock with rate {frame_rate}')
+    return Clock(frame_rate)
+
+
+def _create_capturer():
+    from attendances.tools.capturing import DummyCapturer, VideoCapturer
+
+    def dummy_capturer():
+        logging.info('Creating dummy capturer')
+        return DummyCapturer()
+
+    def camera_capturer():
+        size = (640, 480)
+        logging.info(f'Creating video capturer with size {size}')
+        return VideoCapturer.default_camera(size)
+
+    return camera_capturer()
+
+
+def _create_frame_analyzer():
+    logging.info("Creating frame analyzer")
+    qr_scanner = QRScanner()
+    face_detector = NullFaceDetector()
+    return FrameAnalyzer(qr_scanner=qr_scanner, face_detector=face_detector)
 
 
 def _log_qr_detection(transformer_name, analysis):
@@ -66,11 +113,11 @@ def test_qr(settings):
     frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
     channel = Channel()
     font = pygame.font.SysFont(None, settings['qrtest.font-size'])
-    clock = create_clock(settings.subtree('qrtest'))
-    surface = create_window()
+    clock = _create_clock()
+    surface = _create_window()
     capturing_surface = pygame.Surface(frame_size)
-    video_capturer = create_capturer(settings.subtree('video-capturing'))
-    frame_analyzer = create_frame_analyzer(settings)
+    video_capturer = _create_capturer()
+    frame_analyzer = _create_frame_analyzer()
     context = commands.Context(attendances=None, capturer=video_capturer)
     frame_viewer = create_frame_viewer(surface, frame_size)
     fps = Cell(0)
