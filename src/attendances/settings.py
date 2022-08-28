@@ -22,3 +22,7 @@ qr_transformations = [
 ]
 
 frame_rate = 0
+
+show_fps = True
+
+analyze_every_n_frames = 5

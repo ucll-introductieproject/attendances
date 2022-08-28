@@ -86,9 +86,9 @@ def run():
 
     pygame.init()
 
-    show_framerate = True
+    show_framerate = settings.show_fps
     frame_width, frame_height = frame_size = settings.frame_size
-    analyze_every_n_frames = 5
+    analyze_every_n_frames = settings.analyze_every_n_frames
     attendances_file = Path(settings.registration_file)
 
     channel = Channel()

@@ -84,9 +84,9 @@ def test_qr():
 
     pygame.init()
 
-    show_framerate = True
-    frame_size = (640, 480)
-    analyze_every_n_frames = 5
+    show_framerate = settings.show_fps
+    frame_size = settings.frame_size
+    analyze_every_n_frames = settings.analyze_every_n_frames
     font_size = 32
 
     channel = Channel()
