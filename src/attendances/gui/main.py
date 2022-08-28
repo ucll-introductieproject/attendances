@@ -14,9 +14,10 @@ from attendances.pipeline import *
 import attendances.commands as commands
 from attendances.gui.highlight import Highlighter
 from attendances.registration import FileRegistration
+import attendances.settings as settings
 
 
-def run(settings):
+def run(cfg):
     def create_single_registration_viewer():
         def observe_person(person):
             def update_label():
@@ -34,14 +35,14 @@ def run(settings):
 
     def create_overview_registration_viewer():
         rect = compute_registration_viewer_rectangle()
-        ncolumns = settings['gui.attendances.ncolumns']
+        ncolumns = cfg['gui.attendances.ncolumns']
         font = pygame.font.SysFont(None, 16)
         viewer = AttendancesViewer(surface=surface, attendances=attendances, rectangle=rect, ncolumns=ncolumns, font=font)
         viewer.render()
         clock.on_tick(viewer.tick)
 
     def create_registration_viewer():
-        match settings['gui.attendances.mode']:
+        match cfg['gui.attendances.mode']:
             case 'single':
                 create_single_registration_viewer()
             case 'overview':
@@ -58,20 +59,20 @@ def run(settings):
     def create_registrations():
         registration = FileRegistration(Path('registrations.txt'))
         for person in attendances.people:
-            person.present.on_value_changed(partial(registration.register, person.name))
+            person.present.on_value_changed(partial(registration.register, person))
 
 
     pygame.init()
 
     channel = Channel()
-    frame_width, frame_height = frame_size = (settings['video-capturing.width'], settings['video-capturing.height'])
-    clock = create_clock(settings.subtree('gui'))
-    surface = create_window(settings.subtree('gui.window'))
-    window_width, window_height = surface.get_size()
+    frame_width, frame_height = frame_size = settings.capturing.frame_size
+    clock = create_clock(cfg.subtree('gui'))
+    surface = create_window()
+    window_width, window_height = settings.gui.window_size
     capturing_surface = pygame.Surface(frame_size)
-    sound_player = create_sound_player(settings.subtree('sound'))
-    video_capturer = create_capturer(settings.subtree('video-capturing'))
-    frame_analyzer = create_frame_analyzer(settings)
+    sound_player = create_sound_player(cfg.subtree('sound'))
+    video_capturer = create_capturer(cfg.subtree('video-capturing'))
+    frame_analyzer = create_frame_analyzer(cfg)
     names = [ "the leftovers", "breaking bad" ]
     attendances = Attendances(names)
     create_registrations()
@@ -85,14 +86,14 @@ def run(settings):
     frame_viewer = create_frame_viewer(surface, frame_size)
     # attendances_viewer = _create_attendances_viewer(settings.subtree('gui.attendances'), model, surface.get_size())
 
-    if settings['gui.show-fps']:
+    if cfg['gui.show-fps']:
         FpsViewer(surface, fps)
 
     with server(channel), video_capturer as handle:
         capturing_node = CapturingNode(handle, capturing_surface)
-        skipper_node = SkipperNode(settings['gui.skip-rate'])
+        skipper_node = SkipperNode(cfg['gui.skip-rate'])
         wrapping_node = ImageWrapper()
-        analyzing_node = AnalyzerNode(settings['qr.transformations'], frame_analyzer)
+        analyzing_node = AnalyzerNode(cfg['qr.transformations'], frame_analyzer)
         registering_node = RegisteringNode(attendances)
 
         capturing_node.link(skipper_node.perform)
@@ -115,7 +116,7 @@ def run(settings):
                     logging.debug(f'Received {request}')
                     command_class = commands.find_command_with_name(request['command'])
                     command_object = command_class(**request['args'])
-                    response = command_object.execute(context, settings)
+                    response = command_object.execute(context, cfg)
                     channel.respond_to_server(response)
                 except:
                     channel.respond_to_server('exception thrown')

@@ -146,3 +146,24 @@ def load_settings(path):
 
 def default_settings():
     return _create_settings_from_data(DefaultSettingsData)
+
+
+class GuiSettings:
+    def __init__(self):
+        self.show_framerate = True
+        self.window_size = (1920, 1080)
+
+    def __fullscreen(self):
+        import pygame
+        info = pygame.display.Info()
+        return (info.current_w, info.current_h)
+
+
+class CapturingSettings:
+    def __init__(self):
+        self.frame_size = (640, 480)
+        self.frame_rate = 30
+
+
+gui = GuiSettings()
+capturing = CapturingSettings()

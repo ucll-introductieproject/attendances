@@ -14,17 +14,8 @@ from attendances.tools.capturing import DummyCapturer, VideoCapturer
 from attendances.tools.face import NullFaceDetector
 from attendances.tools.qr import QRScanner
 from attendances.tools.sound import SoundPlayer
+import attendances.settings as settings
 
-
-
-def _get_window_size(settings):
-    info = pygame.display.Info()
-    window_width, window_height = settings['width'], settings['height']
-    if window_width == 0:
-        window_width = info.current_w
-    if window_height == 0:
-        window_height = info.current_h
-    return window_width, window_height
 
 
 def create_capturer(settings):
@@ -50,10 +41,10 @@ def create_clock(settings):
     return Clock(rate)
 
 
-def create_window(settings):
-    width, height = _get_window_size(settings)
+def create_window():
+    width, height = size = settings.gui.window_size
     logging.info(f'Creating window with size {width}x{height}')
-    return pygame.display.set_mode((width, height))
+    return pygame.display.set_mode(size)
 
 
 def create_sound_player(settings):
