@@ -5,8 +5,10 @@ def screen_size():
 
 
 registration_file = r'G:\repos\ucll\introproject\absentees\data\attendances.txt'
+# registration_file = r'C:\repos\ucll\introductieproject\attendances\data\attendances.txt'
 
 students_file = r'G:\repos\ucll\introproject\absentees\data\students.txt'
+# students_file = r'C:\repos\ucll\introductieproject\attendances\data\students.txt'
 
 frame_size = (640, 480)
 
