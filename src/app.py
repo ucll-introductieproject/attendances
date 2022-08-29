@@ -107,6 +107,36 @@ def list_students():
 students.add_command(list_students)
 
 
+@click.group()
+def excel():
+    """
+    Export to Excel sheet
+    """
+    pass
+
+cli.add_command(excel)
+
+
+@click.command(name="init")
+@click.argument('filename')
+def init_excel(filename):
+    """
+    Initialize new Excel sheet
+    """
+    from openpyxl import Workbook
+    workbook = Workbook()
+    sheet = workbook.active
+    names = data.load_data()
+    sheet['A1'] = 'id'
+    sheet['B1'] = 'name'
+    for id, name in enumerate(names):
+        sheet[f'A{id+2}'] = id
+        sheet[f'B{id+2}'] = name
+    workbook.save(filename)
+
+excel.add_command(init_excel)
+
+
 for command_type in commands.enumerate_commands():
     create_command = getattr(command_type, 'create_cli_command')
     command = create_command()
