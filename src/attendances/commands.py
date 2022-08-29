@@ -38,7 +38,7 @@ class ListPeopleCommand(Command):
         )
 
     def execute(self, context):
-        return "\n".join(context.attendances.names)
+        return "\n".join(f'{str(index).rjust(3)} {person.name}' for index, person in enumerate(context.attendances.people))
 
 
 class RegisterAttendanceCommand(Command):
