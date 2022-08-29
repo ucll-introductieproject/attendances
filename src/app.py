@@ -102,7 +102,7 @@ cli.add_command(students)
 def list_students():
     names = data.load_data()
     for i, name in enumerate(names):
-        print(f'{str(i + 1).rjust(3)} {name}')
+        print(f'{str(i).rjust(3)} {name}')
 
 students.add_command(list_students)
 
