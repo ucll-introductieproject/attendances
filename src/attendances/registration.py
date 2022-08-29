@@ -8,7 +8,8 @@ class FileRegistration:
         self.__path = path
 
     def register(self, person):
+        symbol = "-+"[person.present.value]
         time_string = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-        string = f'{time_string} {person.name}'
+        string = f'{symbol} {time_string} {person.name}'
         with self.__path.open('a') as file:
             print(string, file=file)

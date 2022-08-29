@@ -68,8 +68,8 @@ def create_registration_viewer(*, rectangle, clock, surface, attendances):
         viewer.render()
         clock.on_tick(viewer.tick)
 
-    create_single_registration_viewer()
-    # create_overview_registration_viewer()
+    # create_single_registration_viewer()
+    create_overview_registration_viewer()
 
 
 def run():

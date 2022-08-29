@@ -24,3 +24,6 @@ class Person:
 
     def register_attendance(self):
         self.__present.value = True
+
+    def unregister_attendance(self):
+        self.__present.value = False

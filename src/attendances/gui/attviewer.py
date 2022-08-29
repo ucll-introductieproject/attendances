@@ -36,7 +36,7 @@ class AttendanceSlotViewer:
         def remove_animation():
             self.__background_animation = None
 
-        if self.__person.present.value == True:
+        if self.__person.present.value:
             self.__background_animation = SequenceAnimation(
                 ColorAnimation(
                     target=self.__background,
@@ -47,7 +47,7 @@ class AttendanceSlotViewer:
                 DiracAnimation(remove_animation)
             )
         else:
-            self.__background = self.__absent_background_color
+            self.__background.value = self.__absent_background_color
             self.__background_animation = None
         self.render()
 

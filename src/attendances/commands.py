@@ -80,6 +80,44 @@ class RegisterAttendanceCommand(Command):
                 return f'Error! No match found!'
 
 
+class UnregisterAttendanceCommand(Command):
+    @classmethod
+    def create_cli_command(c):
+        return _create_default_command_function(
+            c.__name__,
+            click.command(name='unregister'),
+            click.argument('id', type=str)
+        )
+
+    def execute(self, context):
+        id = self.id
+        attendances = context.attendances
+        if re.fullmatch(r'\d+', id):
+            logging.info(f'Unregistering {id} as id')
+            id = int(id)
+            if attendances.person_exists(id):
+                attendances.unregister(id)
+                return f'Successfully unregistered {attendances.people[id].name}'
+            else:
+                return f'No one found with id={id}'
+        else:
+            logging.info(f'Unregistering {id} as name')
+            regex = id
+            people_with_name = attendances.find_people_by_name(regex)
+            if len(people_with_name) == 1:
+                person = people_with_name[0]
+                if not person.present.value:
+                    return f'{person.name} cannot be unregistered: they were never registered previously'
+                else:
+                    person.unregister_attendance()
+                    return f'Successfully unregistered {person.name}'
+            elif len(people_with_name) > 1:
+                names = "\n".join(person.name for person in people_with_name)
+                return f'Error! Multiple matches found!\n{names}'
+            else:
+                return f'Error! No match found!'
+
+
 class InjectFrameCommand(Command):
     @classmethod
     def create_cli_command(c):
