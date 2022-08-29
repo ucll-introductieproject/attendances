@@ -12,6 +12,7 @@ click = "*"
 pygame = "*"
 pytest = "*"
 qrcode = {extras = ["pil"], version = "*"}
+openpyxl = "*"
 
 [dev-packages]
 
