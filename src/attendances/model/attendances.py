@@ -1,47 +1,38 @@
 from attendances.cells import Cell, ReadonlyWrapper
 from attendances.model.person import Person
 import logging
+import re
 
-
-class _Entry:
-    def __init__(self, name):
-        self.__cell = Cell(False)
-        self.__person = Person(name, ReadonlyWrapper(self.__cell))
-
-    @property
-    def person(self):
-        return self.__person
-
-    @property
-    def cell(self):
-        return self.__cell
 
 
 class Attendances:
     def __init__(self, names):
-        self.__entries = [_Entry(name) for name in names]
+        self.__people = [Person(id=index, name=name) for index, name in enumerate(names)]
 
     def __getitem__(self, id):
-        return self.__entries[id].person
+        return self.__people[id]
 
     @property
     def names(self):
-        return [entry.person.name for entry in self.__entries]
+        return [person.name for person in self.__people]
 
     @property
     def people(self):
-        return [entry.person for entry in self.__entries]
+        return self.__people
 
     def person_exists(self, id):
         assert isinstance(id, int)
-        return 0 <= id < len(self.__entries)
+        return 0 <= id < len(self.__people)
 
     def register(self, id):
         assert isinstance(id, int)
-        assert 0 <= id < len(self.__entries)
-        entry = self.__entries[id]
-        if not entry.cell.value:
-            logging.info(f'Registering {id} ({entry.person.name})')
-            entry.cell.value = True
+        assert 0 <= id < len(self.__people)
+        person = self.__people[id]
+        if not person.present.value:
+            logging.info(f'Registering {id} ({person.name})')
+            person.register_attendance()
         else:
-            logging.info(f'{id} ({entry.person.name}) is already registered')
+            logging.info(f'{id} ({person.name}) is already registered')
+
+    def find_people_by_name(self, regex):
+        return [person for person in self.__people if re.search(regex, person.name)]

@@ -1,12 +1,18 @@
-from attendances.cells import CellBase
+from attendances.cells import Cell, ReadonlyWrapper
 
 
 class Person:
-    def __init__(self, name, cell):
+    def __init__(self, *, id, name):
+        assert isinstance(id, int)
         assert isinstance(name, str)
-        assert isinstance(cell, CellBase)
+        self.__id = id
         self.__name = name
-        self.__present = cell
+        self.__present = Cell(False)
+        self.__wrapper = ReadonlyWrapper(self.__present)
+
+    @property
+    def id(self):
+        return self.__id
 
     @property
     def name(self):
@@ -14,4 +20,7 @@ class Person:
 
     @property
     def present(self):
-        return self.__present
+        return self.__wrapper
+
+    def register_attendance(self):
+        self.__present.value = True

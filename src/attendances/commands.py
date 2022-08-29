@@ -4,6 +4,7 @@ import pygame
 import logging
 import click
 import json
+import re
 
 
 class Context:
@@ -47,15 +48,36 @@ class RegisterAttendanceCommand(Command):
         return _create_default_command_function(
             c.__name__,
             click.command(name='register'),
-            click.argument('name', type=str)
+            click.argument('id', type=str)
         )
 
     def execute(self, context):
-        if self.name in context.attendances.names:
-            context.attendances.register(self.name)
-            return 'Success'
+        id = self.id
+        attendances = context.attendances
+        if re.fullmatch(r'\d+', id):
+            logging.info(f'Registering {id} as id')
+            id = int(id)
+            if attendances.person_exists(id):
+                attendances.register(id)
+                return f'Successfully registered {attendances.people[id].name}'
+            else:
+                return f'No one found with id={id}'
         else:
-            return f'{self.name} unknown'
+            logging.info(f'Registering {id} as name')
+            regex = id
+            people_with_name = attendances.find_people_by_name(regex)
+            if len(people_with_name) == 1:
+                person = people_with_name[0]
+                if person.present.value:
+                    return f'{person.name} is already registered'
+                else:
+                    person.register_attendance()
+                    return f'Successfully registered {person.name}'
+            elif len(people_with_name) > 1:
+                names = "\n".join(person.name for person in people_with_name)
+                return f'Error! Multiple matches found!\n{names}'
+            else:
+                return f'Error! No match found!'
 
 
 class InjectFrameCommand(Command):
