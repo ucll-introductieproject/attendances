@@ -7,10 +7,12 @@ import re
 
 class Attendances:
     def __init__(self, names):
-        self.__people = [Person(id=index, name=name) for index, name in enumerate(names)]
+        self.__people = [Person(id=index + 1, name=name) for index, name in enumerate(names)]
 
     def __getitem__(self, id):
-        return self.__people[id]
+        index = id - 1
+        person = self.__people[index]
+        assert person.id == id
 
     @property
     def names(self):
@@ -22,12 +24,15 @@ class Attendances:
 
     def person_exists(self, id):
         assert isinstance(id, int)
-        return 0 <= id < len(self.__people)
+        index = id - 1
+        return 0 <= index < len(self.__people)
 
     def register(self, id):
         assert isinstance(id, int)
-        assert 0 <= id < len(self.__people)
-        person = self.__people[id]
+        index = id - 1
+        assert 0 <= index < len(self.__people)
+        person = self.__people[index]
+        assert person.id == id
         if not person.present.value:
             logging.info(f'Registering {id} ({person.name})')
             person.register_attendance()

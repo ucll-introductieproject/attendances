@@ -1,3 +1,4 @@
+from operator import attrgetter
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
@@ -100,9 +101,9 @@ cli.add_command(students)
 
 @click.command(name="list")
 def list_students():
-    names = data.load_data()
-    for i, name in enumerate(names):
-        print(f'{str(i).rjust(3)} {name}')
+    attendances = data.load_attendances()
+    for person in attendances.people:
+        print(f'{str(person.id).rjust(3)} {person.name}')
 
 students.add_command(list_students)
 
@@ -126,12 +127,12 @@ def init_excel(filename):
     from openpyxl import Workbook
     workbook = Workbook()
     sheet = workbook.active
-    names = data.load_data()
+    attendances = data.load_attendances()
     sheet['A1'] = 'id'
     sheet['B1'] = 'name'
-    for id, name in enumerate(names):
-        sheet[f'A{id+2}'] = id
-        sheet[f'B{id+2}'] = name
+    for person in sorted(attendances.people, key=attrgetter('id')):
+        sheet[f'A{id+2}'] = person.id
+        sheet[f'B{id+2}'] = person.name
     workbook.save(filename)
 
 excel.add_command(init_excel)
