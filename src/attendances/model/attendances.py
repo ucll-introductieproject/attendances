@@ -1,4 +1,3 @@
-from attendances.cells import Cell, ReadonlyWrapper
 from attendances.model.person import Person
 import logging
 import re
