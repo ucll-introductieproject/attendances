@@ -39,7 +39,13 @@ class ListPeopleCommand(Command):
         )
 
     def execute(self, context):
-        return "\n".join(f'{str(person.id).rjust(3)} {person.name}' for person in context.attendances.people)
+        return "\n".join(self.__format_person(person) for person in context.attendances.people)
+
+    def __format_person(self, person):
+        id = str(person.id).rjust(3)
+        name = person.name
+        status = '+' if person.present.value else '-'
+        return f'{status} {id} {name}'
 
 
 class RegisterAttendanceCommand(Command):
