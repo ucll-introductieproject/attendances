@@ -11,7 +11,7 @@ from functools import partial
 import attendances.commands as commands
 from attendances.gui.fps import FpsViewer
 import attendances.gui.factories as factories
-import attendances.settings as settings
+from attendances.settings import settings
 from attendances.tools.capturing import InjectingCapturer
 
 

@@ -1,4 +1,4 @@
-import attendances.settings as settings
+from attendances.settings import settings
 from attendances.model.attendances import Attendances
 
 

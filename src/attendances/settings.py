@@ -1,37 +1,93 @@
-def screen_size():
-    import pygame
-    info = pygame.display.Info()
-    return (info.current_w, info.current_h)
+import os.path
+import json
+import sys
 
 
-registration_file = r'G:\repos\ucll\introproject\absentees\data\attendances.txt'
-# registration_file = r'C:\repos\ucll\introductieproject\attendances\data\attendances.txt'
+class _Settings:
+    @property
+    def __screen_size():
+        import pygame
+        info = pygame.display.Info()
+        return (info.current_w, info.current_h)
 
-students_file = r'G:\repos\ucll\introproject\absentees\data\students.txt'
-# students_file = r'C:\repos\ucll\introductieproject\attendances\data\students.txt'
+    @property
+    def config_file_path(self):
+        return os.path.expanduser("~/attendances.config.json")
 
-frame_size = (640, 480)
+    @property
+    def config_file_contents(self):
+        if os.path.exists(self.config_file_path):
+            with open(self.config_file_path) as file:
+                return json.load(file)
+        else:
+            print("No config file found for this user!")
+            print(f"Expected to find it at {self.config_file_path}")
+            print('Use the "config create" command to create the file')
+            sys.exit(-1)
 
-# Can also be set equal to screen_size() for fullscreen mode
-window_size = (1920, 1080)
+    def create_config_file(self, data_path):
+        with open(self.config_file_path, 'w') as file:
+            data = {'data': os.path.abspath(data_path)}
+            json.dump(data, file)
 
-sound_theme = 'big-sur'
+    @property
+    def data_directory(self):
+        return self.config_file_contents['data']
+        # return r'G:\repos\ucll\introproject\absentees\data'
+        # return r'C:\repos\ucll\introductieproject\attendances\data'
 
-quiet = False
+    @property
+    def registration_file(self):
+        return os.path.join(self.data_directory, 'attendances.txt')
 
-qr_transformations = [
-    # 'original',
-    # 'grayscale',
-    'bw',
-    # 'bw_mean',
-    # 'bw_gaussian',
-]
+    @property
+    def students_file(self):
+        return os.path.join(self.data_directory, 'students.txt')
 
-# 0 = no limit
-frame_rate = 30
+    @property
+    def frame_size(self):
+        return (640, 480)
 
-show_fps = True
+    @property
+    def window_size(self):
+        # return self.__screen_size()  # Full screen mode
+        return (1920, 1080)
 
-# Lower = more responsive
-# Higher = less computationally expensive
-analyze_every_n_frames = 5
+    @property
+    def sound_theme(self):
+        return 'big-sur'
+
+    @property
+    def quiet(self):
+        return False
+
+    @property
+    def qr_transformations(self):
+        return [
+            # 'original',
+            # 'grayscale',
+            'bw',
+            # 'bw_mean',
+            # 'bw_gaussian',
+        ]
+
+    @property
+    def frame_rate(self):
+        # 0 = no limit
+        return 30
+
+    @property
+    def show_fps(self):
+        return True
+
+    @property
+    def analyze_every_n_frames(self):
+        # Lower = more responsive
+        # Higher = less computationally expensive
+        return 5
+
+    @property
+    def attendances_grid_column_count(self):
+        return 12
+
+settings = _Settings()

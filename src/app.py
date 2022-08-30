@@ -6,6 +6,7 @@ import logging
 import click
 import attendances.commands as commands
 import attendances.data as data
+from attendances.settings import settings
 
 
 @click.group()
@@ -106,6 +107,31 @@ def list_students():
         print(f'{str(person.id).rjust(3)} {person.name}')
 
 students.add_command(list_students)
+
+
+@click.group()
+def config():
+    """
+    Configuration
+    """
+    pass
+
+cli.add_command(config)
+
+
+@click.command(name="create")
+@click.argument("data")
+def create_config(data):
+    settings.create_config_file(data)
+
+config.add_command(create_config)
+
+
+@click.command(name="show")
+def show_config():
+    print(settings.config_file_contents)
+
+config.add_command(show_config)
 
 
 @click.group()

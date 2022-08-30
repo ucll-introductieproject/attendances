@@ -9,7 +9,7 @@ from attendances.pipeline import *
 import attendances.commands as commands
 import attendances.gui.factories as factories
 from attendances.data import load_data
-import attendances.settings as settings
+from attendances.settings import settings
 import time
 import json
 

@@ -14,8 +14,7 @@ from attendances.tools.capturing import DummyCapturer, VideoCapturer
 from attendances.tools.face import NullFaceDetector
 from attendances.tools.qr import QRScanner
 from attendances.tools.sound import SoundPlayer
-import attendances.settings as settings
-
+from attendances.settings import settings
 
 
 def create_window(width, height):

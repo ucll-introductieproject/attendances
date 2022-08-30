@@ -14,7 +14,7 @@ import attendances.commands as commands
 from attendances.gui.highlight import Highlighter
 from attendances.registration import FileRegistration
 from attendances.data import load_data
-import attendances.settings as settings
+from attendances.settings import settings
 from attendances.tools.capturing import InjectingCapturer
 
 
@@ -61,7 +61,7 @@ def create_registration_viewer(*, rectangle, clock, surface, attendances):
             observe_person(person)
 
     def create_overview_registration_viewer():
-        ncolumns = 24
+        ncolumns = settings.attendances_grid_column_count
         font_size = 16
         font = pygame.font.SysFont(None, font_size)
         viewer = AttendancesViewer(surface=surface, attendances=attendances, rectangle=rectangle, ncolumns=ncolumns, font=font)
