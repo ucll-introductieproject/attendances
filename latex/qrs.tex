@@ -8,24 +8,24 @@
 \pagestyle{empty}
 \setlength{\parindent}{0cm}
 
-\newcommand{\tilewidth}{70mm}
-\newcommand{\tileheight}{67.7mm}
-\newcommand{\badgewidth}{6}
-\newcommand{\badgeheight}{8}
+\newcommand{\tilewidth}{70}
+\newcommand{\tileheight}{67.7}
 \newcommand{\qrsize}{4.5}
 
-\newcommand{\badge}[2]{
-    \draw[thin,gray] #1 rectangle ++(\tilewidth,\tileheight);
-    % \node at ($ #1 + (\badgewidth / 2, \badgeheight / 2) $) { \qrcode[height=\qrsize cm]{#2} };
-    % \node[anchor=south east,font=\Huge\ttfamily] at (\badgewidth,0) {#2};
+\newcommand{\badge}[1]{
+    \draw[thin,gray] (0, 0) rectangle ++(\tilewidth mm,\tileheight mm);
+    \node at ($ (0,0) ! 0.5 ! (\tilewidth mm, \tileheight mm) + (0,5mm) $) { \qrcode[height=\qrsize cm]{#1} };
+    \node[anchor=south,font=\Huge\ttfamily,scale=1.5,transform shape] at (\tilewidth mm / 2,2mm) {#1};
 }
 
 \begin{document}
 
 \begin{tikzpicture}[remember picture,overlay]
-    \foreach \j in {1,2,3,4} {
-        \foreach \i in {0,1,2} {
-            \badge{(\i * \tilewidth,-\j * \tileheight)}{1}
+    \foreach[evaluate={-(\j+1) * \tileheight} as \y] \j in {0,1,2,3} {
+        \foreach[evaluate={\i * \tilewidth} as \x,evaluate={int(\j*3+\i)} as \badgenumber] \i in {0,1,2} {
+            \begin{scope}[xshift=\x mm,yshift=\y mm]
+                \badge{\badgenumber}
+            \end{scope}
         }
     }
 \end{tikzpicture}
