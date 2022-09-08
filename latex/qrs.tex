@@ -1,37 +1,49 @@
 \documentclass[a4paper]{article}
-\usepackage[left=1cm,top=1cm,right=1cm,bottom=1cm,nohead,nofoot]{geometry}
-\usepackage{qrcode}
 \usepackage{tikz}
+\usepackage[left=0cm,top=12mm,right=0cm,bottom=12mm,nohead,nofoot]{geometry}
+\usepackage{qrcode}
 
 \usetikzlibrary{calc}
 
 \pagestyle{empty}
 \setlength{\parindent}{0cm}
 
+\newcommand{\tilewidth}{70mm}
+\newcommand{\tileheight}{67.7mm}
 \newcommand{\badgewidth}{6}
 \newcommand{\badgeheight}{8}
 \newcommand{\qrsize}{4.5}
 
-\newcommand{\badge}[1]{
-    \draw[thin,gray] (0,0) rectangle ++(\badgewidth,\badgeheight);
-    \node at ($ (\badgewidth / 2, \badgeheight / 2) $) { \qrcode[height=\qrsize cm]{#1} };
-    \node[anchor=south east,font=\Huge\ttfamily] at (\badgewidth,0) {#1};
+\newcommand{\badge}[2]{
+    \draw[thin,gray] #1 rectangle ++(\tilewidth,\tileheight);
+    % \node at ($ #1 + (\badgewidth / 2, \badgeheight / 2) $) { \qrcode[height=\qrsize cm]{#2} };
+    % \node[anchor=south east,font=\Huge\ttfamily] at (\badgewidth,0) {#2};
 }
 
 \begin{document}
 
-\foreach \i in {1,10,...,19} {
-    \begin{center}
-        \begin{tikzpicture}
-            \foreach[evaluate={\j*\badgewidth} as \dx] \j in {0,1,2} {
-                \foreach[evaluate={\k*\badgeheight} as \dy,evaluate={int(\i+\j+(2-\k)*3)} as \index] \k in {0,1,2} {
-                    \begin{scope}[xshift=\dx cm,yshift=\dy cm]
-                        \badge{\index}
-                    \end{scope}
-                }
-            }
-        \end{tikzpicture}
-    \end{center}
-}
+\begin{tikzpicture}[remember picture,overlay]
+    \foreach \j in {1,2,3,4} {
+        \foreach \i in {0,1,2} {
+            \badge{(\i * \tilewidth,-\j * \tileheight)}{1}
+        }
+    }
+\end{tikzpicture}
+
+% \foreach \i in {1,10,...,19} {
+%     \begin{center}
+%         \begin{tikzpicture}
+%             \foreach[evaluate={\j*\badgewidth} as \dx] \j in {0,1,2} {
+%                 \foreach[evaluate={\k*\badgeheight} as \dy,evaluate={int(\i+\j+(2-\k)*3)} as \index] \k in {0,1,2} {
+%                     \begin{scope}[xshift=\dx cm,yshift=\dy cm]
+%                         \badge{\index}
+%                     \end{scope}
+%                 }
+%             }
+%         \end{tikzpicture}
+%     \end{center}
+% }
+
+
 
 \end{document}
