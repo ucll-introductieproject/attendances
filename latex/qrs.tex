@@ -1,6 +1,6 @@
 \documentclass[a4paper]{article}
 \usepackage{tikz}
-\usepackage[left=0cm,top=12mm,right=0cm,bottom=12mm,nohead,nofoot]{geometry}
+\usepackage[left=0cm,top=9mm,right=0cm,bottom=12mm,nohead,nofoot]{geometry}
 \usepackage{qrcode}
 
 \usetikzlibrary{calc}
@@ -20,15 +20,18 @@
 
 \begin{document}
 
-\begin{tikzpicture}[remember picture,overlay]
-    \foreach[evaluate={-(\j+1) * \tileheight} as \y] \j in {0,1,2,3} {
-        \foreach[evaluate={\i * \tilewidth} as \x,evaluate={int(\j*3+\i)} as \badgenumber] \i in {0,1,2} {
-            \begin{scope}[xshift=\x mm,yshift=\y mm]
-                \badge{\badgenumber}
-            \end{scope}
+\foreach \badgeoffset in {0,12,...,36} {
+    \begin{tikzpicture}[remember picture,overlay]
+        \foreach[evaluate={-(\j+1) * \tileheight} as \y] \j in {0,1,2,3} {
+            \foreach[evaluate={\i * \tilewidth} as \x,evaluate={int(\j*3+\i + \badgeoffset)} as \badgenumber] \i in {0,1,2} {
+                \begin{scope}[xshift=\x mm,yshift=\y mm]
+                    \badge{\badgenumber}
+                \end{scope}
+            }
         }
-    }
-\end{tikzpicture}
+    \end{tikzpicture}
+    \clearpage
+}
 
 % \foreach \i in {1,10,...,19} {
 %     \begin{center}
