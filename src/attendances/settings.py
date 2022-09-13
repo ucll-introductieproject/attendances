@@ -11,6 +11,16 @@ class _Settings:
         return (1920, 1080)
 
     @property
+    def qr_transformations(self):
+        return [
+            # 'original',
+            # 'grayscale',
+            'bw',
+            # 'bw_mean',
+            # 'bw_gaussian',
+        ]
+
+    @property
     def __screen_size(self):
         import pygame
         info = pygame.display.Info()
@@ -62,16 +72,6 @@ class _Settings:
     @property
     def quiet(self):
         return False
-
-    @property
-    def qr_transformations(self):
-        return [
-            # 'original',
-            # 'grayscale',
-            'bw',
-            # 'bw_mean',
-            # 'bw_gaussian',
-        ]
 
     @property
     def frame_rate(self):
