@@ -6,7 +6,7 @@ import sys
 
 class _Settings:
     @property
-    def __screen_size():
+    def __screen_size(self):
         import pygame
         info = pygame.display.Info()
         return (info.current_w, info.current_h)
@@ -52,7 +52,7 @@ class _Settings:
 
     @property
     def window_size(self):
-        # return self.__screen_size()  # Full screen mode
+        # return self.__screen_size  # Full screen mode
         return (1920, 1080)
 
     @property
