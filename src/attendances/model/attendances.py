@@ -38,5 +38,17 @@ class Attendances:
         else:
             logging.info(f'{id} ({person.name}) is already registered')
 
+    def unregister(self, id):
+        assert isinstance(id, int)
+        index = id - 1
+        assert 0 <= index < len(self.__people)
+        person = self.__people[index]
+        assert person.id == id
+        if person.present.value:
+            logging.info(f'Unregistering {id} ({person.name})')
+            person.unregister_attendance()
+        else:
+            logging.info(f'{id} ({person.name}) is cannot be unregistered as they were not registered')
+
     def find_people_by_name(self, regex):
         return [person for person in self.__people if re.search(regex, person.name)]

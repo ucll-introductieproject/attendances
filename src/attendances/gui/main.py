@@ -19,8 +19,8 @@ from attendances.tools.capturing import InjectingCapturer
 
 
 def _create_capturer():
-    # capturer = factories.create_dummy_capturer()
-    capturer = factories.create_camera_capturer(*settings.frame_size)
+    capturer = factories.create_dummy_capturer()
+    # capturer = factories.create_camera_capturer(*settings.frame_size)
     return InjectingCapturer(capturer)
 
 
