@@ -18,6 +18,12 @@ from attendances.settings import settings
 from attendances.tools.capturing import InjectingCapturer
 
 
+def _create_capturer():
+    # capturer = factories.create_dummy_capturer()
+    capturer = factories.create_camera_capturer(*settings.frame_size)
+    return InjectingCapturer(capturer)
+
+
 def _create_sound_player():
     return factories.create_sound_player(theme=settings.sound_theme, quiet=settings.quiet)
 
@@ -33,12 +39,6 @@ def _create_window():
 
 def _create_frame_analyzer():
     return factories.create_frame_analyzer()
-
-
-def _create_capturer():
-    # capturer = factories.create_dummy_capturer()
-    capturer = factories.create_camera_capturer(*settings.frame_size)
-    return InjectingCapturer(capturer)
 
 
 def _list_qr_transformations():
