@@ -52,8 +52,8 @@ class _Settings:
 
     @property
     def window_size(self):
-        # return self.__screen_size  # Full screen mode
-        return (1920, 1080)
+        return self.__screen_size  # Full screen mode
+        # return (1920, 1080)
 
     @property
     def sound_theme(self):
