@@ -120,9 +120,9 @@ cli.add_command(config)
 
 
 @click.command(name="create")
-@click.argument("data")
-def create_config(data):
-    settings.create_config_file(data)
+@click.argument("data-directory")
+def create_config(data_directory):
+    settings.create_config_file(data_directory)
 
 config.add_command(create_config)
 

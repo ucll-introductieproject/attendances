@@ -1,3 +1,4 @@
+import logging
 import os.path
 import json
 import sys
@@ -26,8 +27,11 @@ class _Settings:
             sys.exit(-1)
 
     def create_config_file(self, data_path):
+        logging.info(f'Creating {self.config_file_path}')
         with open(self.config_file_path, 'w') as file:
-            data = {'data': os.path.abspath(data_path)}
+            absolute_data_path = os.path.abspath(data_path)
+            logging.info(f'Setting data path to {absolute_data_path}')
+            data = {'data': absolute_data_path}
             json.dump(data, file)
 
     @property
