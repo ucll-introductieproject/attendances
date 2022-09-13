@@ -37,8 +37,6 @@ class _Settings:
     @property
     def data_directory(self):
         return self.config_file_contents['data']
-        # return r'G:\repos\ucll\introproject\absentees\data'
-        # return r'C:\repos\ucll\introductieproject\attendances\data'
 
     @property
     def registration_file(self):
